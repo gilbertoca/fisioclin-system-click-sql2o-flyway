@@ -15,7 +15,7 @@ public class Sessao implements Serializable {
     private String observacoesRecepcao;
 
     private Cliente cliente;
-    private Profissional professional;
+    private Profissional profissional;
     private Modalidade modalidade;
 
     public Sessao() {}
@@ -36,8 +36,8 @@ public class Sessao implements Serializable {
     public void setObservacoesRecepcao(String observacoesRecepcao) { this.observacoesRecepcao = observacoesRecepcao; }
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
-    public Profissional getProfissional() { return professional; }
-    public void setProfissional(Profissional professional) { this.professional = professional; }
+    public Profissional getProfissional() { return profissional; }
+    public void setProfissional(Profissional profissional) { this.profissional = profissional; }
     public Modalidade getModalidade() { return modalidade; }
     public void setModalidade(Modalidade modalidade) { this.modalidade = modalidade; }
 }

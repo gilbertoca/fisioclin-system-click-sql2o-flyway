@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CliniFisio - Sistema Integrado</title>
+    <link rel="stylesheet" href="$context/css/pure-min.css">
+</head>
+<body>
+
+    <div class="pure-menu pure-menu-horizontal menu-topo">
+        <a href="$context/sessao.htm" class="pure-menu-heading">CliniFisio</a>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item"><a href="$context/sessao.htm" class="pure-menu-link">📅 Agenda</a></li>
+            <li class="pure-menu-item"><a href="$context/faturamento.htm" class="pure-menu-link">💰 Financeiro</a></li>
+        </ul>
+    </div>
+
+    <div class="conteudo-principal">
+        <!-- O Click injeta a sub-tela correta aqui de forma automática -->
+        #parse($path) 
+    </div>
+
+</body>
+</html>

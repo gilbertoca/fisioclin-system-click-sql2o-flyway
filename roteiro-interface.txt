@@ -1,0 +1,177 @@
+Essa é a melhor escolha para darmos vida ao projeto! No ecossistema do Apache Click Framework, as interfaces são puramente orientadas a componentes em Java, onde cada página estende a classe Page e gerencia seus próprios elementos (como Form, TextField, Select e Submit) vinculados a eventos, renderizados na view através de templates leves do Apache Velocity (.htm).
+Para o atendente agendar uma Avaliação Inicial, precisamos desenhar uma página de formulário que capture o cliente (ator), o profissional, a modalidade e a data/hora, persistindo essa transação diretamente através do nosso FisioRepository baseado no modelo rico com o Sql2o.
+Abaixo está a implementação da infraestrutura web do Apache Click, a classe de controle Java e o template de exibição.
+------------------------------
+## 1. Configuração do Descritor Web (click.xml)
+Este arquivo gerencia as rotas da aplicação. O Apache Click faz o mapeamento automático por convenção: se uma página se chama agendar-avaliacao.htm, ele procurará uma classe chamada AgendarAvaliacao.
+Crie este arquivo exatamente em: src/main/webapp/WEB-INF/click.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE click-app PUBLIC "-//Apache Software Foundation//DTD Click Application 2.3//EN"
+"http://apache.org">
+
+<click-app>
+    <!-- Define o pacote raiz onde o framework buscará as páginas Java -->
+    <pages package="org.apache.click.showcase.fisio.page"/>
+
+    <!-- Configuração de modo amigável para desenvolvimento (recarrega alterações sem reiniciar) -->
+    <mode value="development"/>
+</click-app>
+
+------------------------------
+## 2. A Classe de Controle da Página (AgendarAvaliacao.java)
+Esta classe gerencia o formulário de agendamento e carrega os componentes dinâmicos do banco de dados (comboboxes de profissionais e clientes) usando o nosso repositório.
+Crie este arquivo em: src/main/java/org/apache/click/showcase/fisio/page/AgendarAvaliacao.java
+
+package org.apache.click.showcase.fisio.page;
+import org.apache.click.Page;import org.apache.click.control.*;import org.apache.click.extras.control.DateField;import org.apache.click.showcase.fisio.model.Sessao;import org.apache.click.showcase.fisio.repository.FisioRepository;
+import java.time.LocalDateTime;import java.time.ZoneId;import java.util.Date;
+public class AgendarAvaliacao extends Page {
+
+    private static final long serialVersionUID = 1L;
+
+    // Componentes Visuais do Apache Click
+    protected Form form = new Form("formAgendamento");
+    protected Select selectCliente = new Select("idCliente", "Cliente:", true);
+    protected Select selectProfissional = new Select("idProfissional", "Fisioterapeuta:", true);
+    protected Select selectModalidade = new Select("idModalidade", "Modalidade Inicial:", true);
+    protected DateField campoData = new DateField("dataSessao", "Data da Avaliação:", true);
+    protected Select selectHorario = new Select("horarioSessao", "Horário:", true);
+    protected Submit botaoSalvar = new Submit("salvar", "Confirmar Agendamento", this, "onSalvarClick");
+
+    // Dependência de Infraestrutura (Injetada ou instanciada pelo ciclo do Click)
+    private FisioRepository fisioRepository;
+
+    public AgendarAvaliacao() {
+        // Inicializa o layout básico do formulário
+        form.add(selectCliente);
+        form.add(selectProfissional);
+        form.add(selectModalidade);
+        form.add(campoData);
+        form.add(selectHorario);
+        form.add(botaoSalvar);
+
+        addControl(form);
+    }
+
+    /**
+     * Ciclo de Vida do Click: Executado na inicialização da página antes da renderização.
+     * Excelente ponto para povoar os combos com dados reais do banco.
+     */
+    @Override
+    public void onInit() {
+        super.onInit();
+
+        // Simulação de carga (Em produção, ler do FisioRepository instanciado no seu container)
+        selectCliente.add(new Option("", "-- Selecione o Paciente --"));
+        selectCliente.add(new Option("1", "Carlos Eduardo Santos"));
+        selectCliente.add(new Option("2", "Mariana Costa Lima"));
+
+        selectProfissional.add(new Option("", "-- Selecione o Profissional --"));
+        selectProfissional.add(new Option("1", "Dr. Marcos Vinícius"));
+        selectProfissional.add(new Option("2", "Dra. Amanda Rodrigues"));
+
+        selectModalidade.add(new Option("", "-- Escolha o Serviço --"));
+        selectModalidade.add(new Option("1", "Fisioterapia Ortopédica"));
+        selectModalidade.add(new Option("2", "Pilates Clínico"));
+        selectModalidade.add(new Option("3", "RPG"));
+
+        // Popula horários de atendimento clínico padrão
+        selectHorario.add(new Option("08:00", "08:00 hrs"));
+        selectHorario.add(new Option("09:00", "09:00 hrs"));
+        selectHorario.add(new Option("14:00", "14:00 hrs"));
+
+        // Define o formato padrão brasileiro para o seletor de calendário extra
+        campoData.setFormatPattern("dd/MM/yyyy");
+    }
+
+    /**
+     * O Event-Handler disparado pelo botão Submit do Apache Click
+     */
+    public boolean onSalvarClick() {
+        if (form.isValid()) {
+            // 1. Extrai os IDs selecionados nos componentes visuais
+            Integer idCli = Integer.valueOf(selectCliente.getValue());
+            Integer idProf = Integer.valueOf(selectProfissional.getValue());
+            Integer idMod = Integer.valueOf(selectModalidade.getValue());
+
+            // 2. Monta o LocalDateTime convertendo o Date do componente para Java 17
+            Date dataSelecionada = campoData.getDate();
+            String[] horaMinuto = selectHorario.getValue().split(":");
+            int hora = Integer.parseInt(horaMinuto[0]);
+            int minuto = Integer.parseInt(horaMinuto[1]);
+
+            LocalDateTime dataHoraInicio = dataSelecionada.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atTime(hora, minuto);
+
+            // 3. Constrói o modelo rico de transação em conformidade com as regras de negócio
+            Sessao novaAvaliacao = new Sessao();
+            novaAvaliacao.set_id_cliente_fk(idCli); // Atribui via nosso interceptor flat
+            novaAvaliacao.set_id_profissional_fk(idProf);
+            novaAvaliacao.set_id_modalidade_fk(idMod);
+            novaAvaliacao.setDataHoraInicio(dataHoraInicio);
+            novaAvaliacao.setDataHoraFim(dataHoraInicio.plusMinutes(50)); // Duração padrão
+            novaAvaliacao.setTipoSessao("AVALIACAO_INICIAL"); // Garante a semântica da regra de negócio
+            novaAvaliacao.setTipoPagamento("PARTICULAR"); // Padrão avulso
+            novaAvaliacao.setStatusSessao("AGENDADA");
+            novaAvaliacao.setObservacoesRecepcao("Avaliação capturada pelo formulário web.");
+
+            // 4. Salva no banco de dados via repositório
+            if (fisioRepository != null) {
+                fisioRepository.salvarSessao(novaAvaliacao);
+            }
+
+            // Redireciona de volta para a grade de agenda diária após o sucesso
+            setRedirect("grade-agenda.htm");
+            return false;
+        }
+        return true;
+    }
+}
+
+------------------------------
+## 3. O Template de Exibição HTML (agendar-avaliacao.htm)
+O Apache Click injeta os componentes definidos no Java diretamente na view utilizando tags Velocity simples. O comando $formAgendamento renderiza automaticamente toda a tag HTML do formulário, incluindo rótulos, inputs e mensagens de validação de erro.
+Crie este arquivo em: src/main/webapp/agendar-avaliacao.htm
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>CliniFisio - Agendamento de Avaliação Inicial</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 40px; }
+        .container { max-width: 600px; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        /* Estilização padrão para os componentes automáticos do Click */
+        .formAgendamento table { width: 100%; }
+        .formAgendamento td { padding: 10px; vertical-align: middle; }
+        .formAgendamento label { font-weight: bold; color: #34495e; }
+        .formAgendamento select, .formAgendamento input[type="text"] { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }
+        .formAgendamento input[type="submit"] { background-color: #2ecc71; color: white; border: none; padding: 12px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; width: 100%; font-weight: bold; }
+        .formAgendamento input[type="submit"]:hover { background-color: #27ae60; }
+        .error { color: #e74c3c; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Novo Agendamento: Avaliação Inicial</h2>
+        <p>Preencha os campos abaixo para reservar o horário de triagem física do cliente.</p>
+
+        <!-- Renderiza o componente Form do Apache Click de forma limpa -->
+        $formAgendamento
+    </div>
+
+</body>
+</html>
+
+Com a estrutura da primeira tela de agendamento desenhada no Apache Click, para onde vamos seguir no fluxo?
+
+* Quer construir a página da Grade da Agenda (GradeAgenda.java) contendo o componente Table para listar os horários que o atendente vê após o redirecionamento?
+* Deseja integrar o FisioRepository como uma propriedade autowired ou gerenciada na inicialização do Click?
+* Prefere desenhar a tela onde o profissional preenche as anotações do prontuário técnico?
+
+
