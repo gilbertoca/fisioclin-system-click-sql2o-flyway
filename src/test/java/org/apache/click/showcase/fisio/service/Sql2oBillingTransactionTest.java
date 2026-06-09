@@ -49,7 +49,7 @@ public class Sql2oBillingTransactionTest {
             for (int i = 0; i < 2; i++) {
                 Sessao s = new Sessao();
                 Integer idSessao = conn.createQuery(
-                        "INSERT INTO sessao (id_cliente, id_profissional, id_modalidade, data_hora_inicio, data_hora_fim, tipo_sessao, tipo_pagamento, status_sessao) " +
+                        "INSERT INTO sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, tipo_sessao, tipo_pagamento, status_sessao) " +
                         "VALUES (:idCli, :idProf, :idMod, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'TRATAMENTO_ROTINA', 'PARTICULAR', 'REALIZADA')", true)
                         .addParameter("idCli", idClienteTeste)
                         .addParameter("idProf", idProf)
@@ -85,13 +85,13 @@ public class Sql2oBillingTransactionTest {
             assertEquals(new BigDecimal("200.00"), totalFaturadoNoBanco);
 
             // 2. Verifica se os 2 itens de faturamento foram devidamente atrelados
-            Long totalItensVinculados = conn.createQuery("SELECT COUNT(*) FROM faturamento_item WHERE id_faturamento = :id")
+            Long totalItensVinculados = conn.createQuery("SELECT COUNT(*) FROM faturamento_item WHERE faturamento_id = :id")
                     .addParameter("id", idFaturamentoGerado)
                     .executeScalar(Long.class);
             assertEquals(Long.valueOf(2), totalItensVinculados);
 
             // 3. Verifica se o fluxo de caixa dividiu corretamente os valores das parcelas (200 / 2 = 100 cada)
-            List<BigDecimal> valoresParcelas = conn.createQuery("SELECT valor_parcela FROM recebimento_parcela WHERE id_faturamento = :id ORDER BY numero_parcela")
+            List<BigDecimal> valoresParcelas = conn.createQuery("SELECT valor_parcela FROM recebimento_parcela WHERE faturamento_id = :id ORDER BY numero_parcela")
                     .addParameter("id", idFaturamentoGerado)
                     .executeAndFetch(BigDecimal.class);
 

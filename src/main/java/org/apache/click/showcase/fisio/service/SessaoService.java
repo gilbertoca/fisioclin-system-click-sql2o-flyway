@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class SessaoService {
+
     private final Sql2o sql2o;
     private final QueryLoader queryLoader;
 
@@ -23,7 +24,9 @@ public class SessaoService {
     // RICH RELATIONSHIP LOOKUP HELPERS FOR MULTI-ENTITY VIEW BINDING
     // ============================================================================
     public Cliente getClienteById(Integer id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(queryLoader.get("cliente.get")).addParameter("id", id).executeAndFetchFirst(Cliente.class);
         }
@@ -36,7 +39,9 @@ public class SessaoService {
     }
 
     public Profissional getProfissionalById(Integer id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(queryLoader.get("profissional.get")).addParameter("id", id).executeAndFetchFirst(Profissional.class);
         }
@@ -49,7 +54,9 @@ public class SessaoService {
     }
 
     public Modalidade getModalidadeById(Integer id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(queryLoader.get("modalidade.get")).addParameter("id", id).executeAndFetchFirst(Modalidade.class);
         }
@@ -65,7 +72,9 @@ public class SessaoService {
     // CORE APPOINTMENT TRANSACTION CRUD & STATE GUARD VALS
     // ============================================================================
     public Sessao get(Integer id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(queryLoader.get("sessao.get")).addParameter("id", id).executeAndFetchFirst(Sessao.class);
         }
@@ -79,17 +88,16 @@ public class SessaoService {
 
     public void create(Sessao sessao) {
         try (Connection conn = sql2o.open()) {
-            // Guard conditions validating underlying rich model graph dependencies
-            if (sessao.getCliente() == null || conn.createQuery(queryLoader.get("cliente.existe")).addParameter("id", sessao.getCliente().getId()).executeScalar(Long.class) == 0) {
-                throw new IllegalArgumentException("Operation aborted: Target Client record does not exist.");
+            // 1. Guard validations reusing our clean internal lookup methods
+            if (sessao.getCliente() == null || getClienteById(sessao.getCliente().getId()) == null) {
+                throw new IllegalArgumentException("Operação cancelada: O cliente informado não existe.");
             }
-            if (sessao.getProfissional() == null || conn.createQuery(queryLoader.get("profissional.existe")).addParameter("id", sessao.getProfissional().getId()).executeScalar(Long.class) == 0) {
-                throw new IllegalArgumentException("Operation aborted: Target profissional record does not exist.");
+            if (sessao.getProfissional() == null || getProfissionalById(sessao.getProfissional().getId()) == null) {
+                throw new IllegalArgumentException("Operação cancelada: O Profissional informado não existe.");
             }
-            if (sessao.getModalidade() == null || conn.createQuery(queryLoader.get("modalidade.existe")).addParameter("id", sessao.getModalidade().getId()).executeScalar(Long.class) == 0) {
-                throw new IllegalArgumentException("Operation aborted: Target Service Modalidade record does not exist.");
+            if (sessao.getModalidade() == null || getModalidadeById(sessao.getModalidade().getId()) == null) {
+                throw new IllegalArgumentException("Operação cancelada: A Modalidade informado não existe.");
             }
-
             // Concurrency boundary validation: prevents overlapping slots
             Long conflicts = conn.createQuery(queryLoader.get("sessao.verificarConflitoHorario"))
                     .addParameter("idProfissional", sessao.getProfissional().getId())
@@ -98,7 +106,7 @@ public class SessaoService {
                     .executeScalar(Long.class);
 
             if (conflicts > 0) {
-                throw new IllegalStateException("The selected profissional already has an active appointment during this timeframe.");
+                throw new IllegalStateException("O profissional já possui atendimento neste horário.");
             }
 
             conn.createQuery(queryLoader.get("sessao.insert")).bind(sessao).executeUpdate();

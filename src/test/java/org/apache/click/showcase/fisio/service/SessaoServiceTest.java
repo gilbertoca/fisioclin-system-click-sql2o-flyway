@@ -6,37 +6,37 @@ import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Modalidade;
 import org.apache.click.showcase.fisio.model.Profissional;
 import org.apache.click.showcase.fisio.model.Sessao;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.sql2o.Connection;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.AfterClass;
 
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 public class SessaoServiceTest {
 
-    private DataSourceManager dsManager;
-    private SessaoService sessaoService;
+    private static DataSourceManager dsManager;
+    private static SessaoService sessaoService;
 
     // IDs de referência persistidos no cenário base
-    private Integer idCliente;
-    private Integer idProfissional;
-    private Integer idModalidade;
+    private static Integer idCliente;
+    private static Integer idProfissional;
+    private static Integer idModalidade;
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         // Inicializa banco em memória compatível com Postgres
         String jdbcUrl = "jdbc:h2:mem:fisio_sessao_service_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
-        this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
+        dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
         
         QueryLoader queryLoader = new QueryLoader("queries.properties");
         
         // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
-        this.sessaoService = new SessaoService(dsManager.getSql2o(), queryLoader);
+        sessaoService = new SessaoService(dsManager.getSql2o(), queryLoader);
 
         seedCenarioOperacionalBase();
     }
@@ -44,22 +44,22 @@ public class SessaoServiceTest {
     /**
      * Alimenta o banco com os Atores e Contextos obrigatórios para as FKs.
      */
-    private void seedCenarioOperacionalBase() {
+    private static void seedCenarioOperacionalBase() {
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
             
             // 1. Cadastra Cliente Ator
-            this.idCliente = conn.createQuery(
+            idCliente = conn.createQuery(
                     "INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
                     "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Cadastra Profissional Ator
-            this.idProfissional = conn.createQuery(
+            idProfissional = conn.createQuery(
                     "INSERT INTO profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. Marcos Vinícius', 'CREFITO-999-F', '868882211')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 3. Cadastra Modalidade Descrição
-            this.idModalidade = conn.createQuery(
+            idModalidade = conn.createQuery(
                     "INSERT INTO modalidade (nome, valor_base) VALUES ('RPG (Reeducação Postural)', 130.00)", true)
                     .executeUpdate().getKey(Integer.class);
 
@@ -70,7 +70,7 @@ public class SessaoServiceTest {
     @Test
     public void deveAgendarComSucessoERecuperarGrafoRicoDoBanco() {
         // Define um horário fixo livre de oscilações de milissegundos (Hoje às 14:00)
-        LocalDateTime horarioDesejado = LocalDate.now().atTime(14, 0);
+        LocalDateTime horarioDesejado = LocalDate.of(1993, 9, 22).atTime(14, 0);
 
         // Instancia os modelos ricos de domínio com seus respectivos IDs
         Cliente cliente = new Cliente(); cliente.setId(idCliente);
@@ -93,8 +93,8 @@ public class SessaoServiceTest {
         sessaoService.create(sessao);
 
         // 2. Recupera a grade diária para validação
-        List<Sessao> agenda = sessaoService.listarAgendaDoDia(LocalDate.now());
-
+        List<Sessao> agenda = sessaoService.listarAgendaDoDia(LocalDate.of(1993, 9, 22));
+        System.out.println(agenda);
         // 3. Asserts de Integridade
         assertEquals(1, agenda.size());
         Sessao sGravada = agenda.get(0);
@@ -114,7 +114,7 @@ public class SessaoServiceTest {
 
     @Test
     public void deveBloquearAgendamentoSeHouverConflitoDeHorarioDoTerapeuta() {
-        LocalDateTime horarioBase = LocalDate.now().atTime(16, 0);
+        LocalDateTime horarioBase = LocalDate.of(1993, 9, 23).atTime(16, 0);
 
         Cliente c = new Cliente(); c.setId(idCliente);
         Profissional p = new Profissional(); p.setId(idProfissional);
@@ -174,10 +174,10 @@ public class SessaoServiceTest {
         }
     }
 
-    @After
-    public void tearDown() {
-        if (this.dsManager != null) {
-            this.dsManager.close();
+    @AfterClass
+    public static void tearDown() {
+        if (dsManager != null) {
+            dsManager.close();
         }
     }
 }

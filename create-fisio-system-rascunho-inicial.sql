@@ -1,25 +1,25 @@
 -- 1. Cadastro de Convênios
 CREATE TABLE convenio (
-    id_convenio SERIAL PRIMARY KEY,
+    convenio_id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cnpj VARCHAR(14) UNIQUE
 );
 
 -- 2. Cadastro Unificado de Clientes/Pacientes
 CREATE TABLE cliente (
-    id_cliente SERIAL PRIMARY KEY,
+    cliente_id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cpf VARCHAR(11) UNIQUE NOT NULL,
     data_nascimento DATE NOT NULL,
     telefone VARCHAR(15) NOT NULL,
-    id_convenio INT REFERENCES convenio(id_convenio),
+    convenio_id INT REFERENCES convenio(convenio_id),
     numero_carteirinha VARCHAR(50),
     status_clinico VARCHAR(20) DEFAULT 'ATIVO' CHECK (status_clinico IN ('ATIVO', 'INATIVO'))
 );
 
 -- 3. Cadastro de Fisioterapeutas / Terapeutas
 CREATE TABLE profissional (
-    id_profissional SERIAL PRIMARY KEY,
+    profissional_id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     crefito_ou_registro VARCHAR(20) UNIQUE NOT NULL, -- Suporta CREFITO ou registros de massoterapeutas
     telefone VARCHAR(15) NOT NULL
@@ -27,7 +27,7 @@ CREATE TABLE profissional (
 
 -- 4. Tabela Única de Modalidades / Serviços
 CREATE TABLE modalidade (
-    id_modalidade SERIAL PRIMARY KEY,
+    modalidade_id SERIAL PRIMARY KEY,
     nome VARCHAR(50) NOT NULL, -- 'Fisioterapia', 'Pilates', 'RPG', 'Massagem', 'Liberação'
     duracao_minutos INT NOT NULL DEFAULT 50,
     valor_base DECIMAL(10,2) NOT NULL
@@ -35,10 +35,10 @@ CREATE TABLE modalidade (
 
 -- 5. Central Única de Sessões (Agenda e Atendimento)
 CREATE TABLE sessao (
-    id_sessao SERIAL PRIMARY KEY,
-    id_cliente INT NOT NULL REFERENCES cliente(id_cliente),
-    id_profissional INT NOT NULL REFERENCES profissional(id_profissional),
-    id_modalidade INT NOT NULL REFERENCES modalidade(id_modalidade),
+    sessao_id SERIAL PRIMARY KEY,
+    cliente_id INT NOT NULL REFERENCES cliente(cliente_id),
+    profissional_id INT NOT NULL REFERENCES profissional(profissional_id),
+    modalidade_id INT NOT NULL REFERENCES modalidade(modalidade_id),
 
     data_hora_inicio TIMESTAMP NOT NULL,
     data_hora_fim TIMESTAMP NOT NULL,
@@ -58,8 +58,8 @@ CREATE TABLE sessao (
 
 -- 6. Prontuário / Evolução / Registro Clínico da Sessão
 CREATE TABLE prontuario_sessao (
-    id_prontuario SERIAL PRIMARY KEY,
-    id_sessao INT UNIQUE NOT NULL REFERENCES sessao(id_sessao) ON DELETE CASCADE,
+    prontuario_id SERIAL PRIMARY KEY,
+    sessao_id INT UNIQUE NOT NULL REFERENCES sessao(sessao_id) ON DELETE CASCADE,
     data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     -- Notas clínicas flexíveis que servem tanto para Avaliação quanto para Evolução diária
@@ -72,7 +72,7 @@ CREATE TABLE prontuario_sessao (
 -- Adicione esta tabela para controlar a situação financeira de cada sessão
 CREATE TABLE pagamento_sessao (
     id_pagamento SERIAL PRIMARY KEY,
-    id_sessao INT UNIQUE NOT NULL REFERENCES sessao(id_sessao) ON DELETE CASCADE,
+    sessao_id INT UNIQUE NOT NULL REFERENCES sessao(sessao_id) ON DELETE CASCADE,
     valor_pago DECIMAL(10,2) NOT NULL,
     situacao_financeira VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
         CHECK (situacao_financeira IN ('PENDENTE', 'PAGO', 'REEMBOLSADO', 'ISENTO')),
@@ -82,12 +82,12 @@ CREATE TABLE pagamento_sessao (
 
 -- 1. Cabeçalho do Faturamento (A "Fatura" ou "Conta" do Cliente/Convênio)
 CREATE TABLE faturamento (
-    id_faturamento SERIAL PRIMARY KEY,
-    id_cliente INT NOT NULL REFERENCES cliente(id_cliente),
+    faturamento_id SERIAL PRIMARY KEY,
+    cliente_id INT NOT NULL REFERENCES cliente(cliente_id),
 
     -- Identifica se a fatura é para o próprio Paciente ou se será cobrada do Convênio
     tipo_faturamento VARCHAR(20) NOT NULL CHECK (tipo_faturamento IN ('PARTICULAR', 'CONVENIO')),
-    id_convenio INT, -- Preenchido apenas se tipo_faturamento = 'CONVENIO'
+    convenio_id INT, -- Preenchido apenas se tipo_faturamento = 'CONVENIO'
 
     valor_total_faturado DECIMAL(10,2) NOT NULL,
     data_emissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -98,16 +98,16 @@ CREATE TABLE faturamento (
 
 -- 2. Itens do Faturamento (Vincula as sessões que estão sendo cobradas nesta fatura)
 CREATE TABLE faturamento_item (
-    id_faturamento_item SERIAL PRIMARY KEY,
-    id_faturamento INT NOT NULL REFERENCES faturamento(id_faturamento) ON DELETE CASCADE,
-    id_sessao INT UNIQUE NOT NULL REFERENCES sessao(id_sessao), -- Garante que uma sessão só seja faturada uma vez
+    faturamento_id_item SERIAL PRIMARY KEY,
+    faturamento_id INT NOT NULL REFERENCES faturamento(faturamento_id) ON DELETE CASCADE,
+    sessao_id INT UNIQUE NOT NULL REFERENCES sessao(sessao_id), -- Garante que uma sessão só seja faturada uma vez
     valor_item DECIMAL(10,2) NOT NULL
 );
 
 -- 3. Fluxo de Caixa / Parcelas (Os recebimentos reais associados ao faturamento)
 CREATE TABLE recebimento_parcela (
-    id_parcela SERIAL PRIMARY KEY,
-    id_faturamento INT NOT NULL REFERENCES faturamento(id_faturamento) ON DELETE CASCADE,
+    parcela_id SERIAL PRIMARY KEY,
+    faturamento_id INT NOT NULL REFERENCES faturamento(faturamento_id) ON DELETE CASCADE,
     numero_parcela INT NOT NULL DEFAULT 1,
     valor_parcela DECIMAL(10,2) NOT NULL,
     data_vencimento DATE NOT NULL,

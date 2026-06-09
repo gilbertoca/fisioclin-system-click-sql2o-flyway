@@ -108,9 +108,9 @@ public class AgendarAvaliacao extends Page {
 
             // 3. Constrói o modelo rico de transação em conformidade com as regras de negócio
             Sessao novaAvaliacao = new Sessao();
-            novaAvaliacao.set_id_cliente_fk(idCli); // Atribui via nosso interceptor flat
-            novaAvaliacao.set_id_profissional_fk(idProf);
-            novaAvaliacao.set_id_modalidade_fk(idMod);
+            novaAvaliacao.set_cliente_id_fk(idCli); // Atribui via nosso interceptor flat
+            novaAvaliacao.set_profissional_id_fk(idProf);
+            novaAvaliacao.set_modalidade_id_fk(idMod);
             novaAvaliacao.setDataHoraInicio(dataHoraInicio);
             novaAvaliacao.setDataHoraFim(dataHoraInicio.plusMinutes(50)); // Duração padrão
             novaAvaliacao.setTipoSessao("AVALIACAO_INICIAL"); // Garante a semântica da regra de negócio

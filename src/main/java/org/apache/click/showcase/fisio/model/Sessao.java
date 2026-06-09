@@ -35,9 +35,19 @@ public class Sessao implements Serializable {
     public String getObservacoesRecepcao() { return observacoesRecepcao; }
     public void setObservacoesRecepcao(String observacoesRecepcao) { this.observacoesRecepcao = observacoesRecepcao; }
     public Cliente getCliente() { return cliente; }
+    public Integer getClienteId() { return this.cliente != null ? this.cliente.getId() : null; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
     public Profissional getProfissional() { return profissional; }
+    public Integer getProfissionalId() { return this.profissional != null ? this.profissional.getId() : null; }
     public void setProfissional(Profissional profissional) { this.profissional = profissional; }
     public Modalidade getModalidade() { return modalidade; }
+    public Integer getModalidadeId() { return this.modalidade != null ? this.modalidade.getId() : null; }
     public void setModalidade(Modalidade modalidade) { this.modalidade = modalidade; }
+
+    @Override
+    public String toString() {
+        return "Sessao{" + "id=" + id + ", dataHoraInicio=" + dataHoraInicio + ", dataHoraFim=" + dataHoraFim + ", tipoSessao=" + tipoSessao + ", tipoPagamento=" + tipoPagamento + ", statusSessao=" + statusSessao + ", observacoesRecepcao=" + observacoesRecepcao + ", cliente=" + cliente + ", profissional=" + profissional + ", modalidade=" + modalidade + '}';
+    }
+    
+    
 }

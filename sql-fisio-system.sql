@@ -1,5 +1,5 @@
 SELECT
-    s.id_sessao AS "Código",
+    s.sessao_id AS "Código",
     TO_CHAR(s.data_hora_inicio, 'DD/MM/YYYY HH24:MI') AS "Data/Hora",
     m.nome AS "Modalidade",
     s.tipo_sessao AS "Tipo",
@@ -12,11 +12,11 @@ SELECT
     s.tipo_pagamento AS "Origem",
 
     -- Indicador se o profissional já preencheu o prontuário clínico
-    CASE WHEN pr.id_prontuario IS NOT NULL THEN 'Preenchido' ELSE 'Pendente' END AS "Prontuário"
+    CASE WHEN pr.prontuario_id IS NOT NULL THEN 'Preenchido' ELSE 'Pendente' END AS "Prontuário"
 
 FROM sessao s
-JOIN modalidade m ON s.id_modalidade = m.id_modalidade
-LEFT JOIN pagamento_sessao p ON s.id_sessao = p.id_sessao
-LEFT JOIN prontuario_sessao pr ON s.id_sessao = pr.id_sessao
-WHERE s.id_cliente = 1 -- Filtro dinâmico do Cliente Selecionado na sua tela Click
+JOIN modalidade m ON s.modalidade_id = m.modalidade_id
+LEFT JOIN pagamento_sessao p ON s.sessao_id = p.sessao_id
+LEFT JOIN prontuario_sessao pr ON s.sessao_id = pr.sessao_id
+WHERE s.cliente_id = 1 -- Filtro dinâmico do Cliente Selecionado na sua tela Click
 ORDER BY s.data_hora_inicio DESC;
