@@ -57,6 +57,7 @@ public class SessaoLookupIntegrationTest {
 
         // 2. Verify Therapist Arrays
         List<Profissional> profissionais = sessaoService.getAllProfissionais();
+        System.out.println(profissionais);
         assertNotNull(profissionais);
         assertEquals("Should retrieve exactly 2 therapists", 2, profissionais.size());
         assertEquals("Dra. Jane", profissionais.get(0).getNome()); // Alphabetical sort check

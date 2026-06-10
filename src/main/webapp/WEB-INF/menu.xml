@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<menu>
+    <menu label="📅 Agenda Diária" path="sessao-view.htm"/>
+    <menu label="👥 Pacientes" path="cliente-view.htm"/>
+    <menu label="💰 Financeiro" path="faturamento-view.htm"/>
+</menu>

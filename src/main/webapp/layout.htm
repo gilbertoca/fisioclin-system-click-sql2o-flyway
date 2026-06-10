@@ -4,22 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CliniFisio - Sistema Integrado</title>
-    <link rel="stylesheet" href="$context/css/pure-min.css">
+    
+    <!-- Imports nativos de folha de estilo dos componentes do Click (Essencial para o DateField) -->
+    $cssImports
 </head>
-<body>
+<body style="font-family: sans-serif; padding: 20px;">
 
-    <div class="pure-menu pure-menu-horizontal menu-topo">
-        <a href="$context/sessao.htm" class="pure-menu-heading">CliniFisio</a>
-        <ul class="pure-menu-list">
-            <li class="pure-menu-item"><a href="$context/sessao.htm" class="pure-menu-link">📅 Agenda</a></li>
-            <li class="pure-menu-item"><a href="$context/faturamento.htm" class="pure-menu-link">💰 Financeiro</a></li>
-        </ul>
+    <!-- Renderização Automática e Limpa da Árvore do Menu Configurado -->
+    <div id="navigation-bar" style="margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+        $rootMenu
     </div>
 
-    <div class="conteudo-principal">
-        <!-- O Click injeta a sub-tela correta aqui de forma automática -->
-        #parse($path) 
+    <!-- Container Centralizador das Sub-telas Operacionais -->
+    <div id="main-content">
+        #parse($path)
     </div>
 
+    <!-- Imports de scripts JavaScript necessários para os comportamentos popup dos controles -->
+    $jsImports
 </body>
 </html>

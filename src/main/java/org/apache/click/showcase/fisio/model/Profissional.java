@@ -1,6 +1,7 @@
 package org.apache.click.showcase.fisio.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Profissional implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -20,4 +21,43 @@ public class Profissional implements Serializable {
     public void setCrefitoOuRegistro(String crefitoOuRegistro) { this.crefitoOuRegistro = crefitoOuRegistro; }
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 71 * hash + Objects.hashCode(this.id);
+        hash = 71 * hash + Objects.hashCode(this.nome);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Profissional other = (Profissional) obj;
+        if (!Objects.equals(this.nome, other.nome)) {
+            return false;
+        }
+        return Objects.equals(this.id, other.id);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Profissional{");
+        sb.append("id=").append(id);
+        sb.append(", nome=").append(nome);
+        sb.append(", crefitoOuRegistro=").append(crefitoOuRegistro);
+        sb.append(", telefone=").append(telefone);
+        sb.append('}');
+        return sb.toString();
+    }
+    
 }

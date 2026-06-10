@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Faturamento implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -89,4 +90,56 @@ public class Faturamento implements Serializable {
 
     // Expõe apenas leitura para proteção do encapsulamento da lista
     public List<RecebimentoParcela> getParcelas() { return this.parcelas; }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.id);
+        hash = 31 * hash + Objects.hashCode(this.idCliente);
+        hash = 31 * hash + Objects.hashCode(this.tipoFaturamento);
+        hash = 31 * hash + Objects.hashCode(this.idConvenio);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Faturamento other = (Faturamento) obj;
+        if (!Objects.equals(this.tipoFaturamento, other.tipoFaturamento)) {
+            return false;
+        }
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        if (!Objects.equals(this.idCliente, other.idCliente)) {
+            return false;
+        }
+        return Objects.equals(this.idConvenio, other.idConvenio);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Faturamento{");
+        sb.append("id=").append(id);
+        sb.append(", idCliente=").append(idCliente);
+        sb.append(", tipoFaturamento=").append(tipoFaturamento);
+        sb.append(", idConvenio=").append(idConvenio);
+        sb.append(", valorTotalFaturado=").append(valorTotalFaturado);
+        sb.append(", dataEmissao=").append(dataEmissao);
+        sb.append(", statusFaturamento=").append(statusFaturamento);
+        sb.append(", observacoes=").append(observacoes);
+        sb.append(", parcelas=").append(parcelas);
+        sb.append('}');
+        return sb.toString();
+    }
+    
 }

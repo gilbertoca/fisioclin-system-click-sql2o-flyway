@@ -14,11 +14,11 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class Sql2oBillingTransactionTest {
+public class FaturamentoServiceTest {
 
     private DataSourceManager dsManager;
     private QueryLoader queryLoader;
-    private FisioBillingService billingService;
+    private FaturamentoService faturamentoService;
 
     private Integer idClienteTeste;
     private final List<Sessao> sessoesParaFaturar = new ArrayList<>();
@@ -28,7 +28,7 @@ public class Sql2oBillingTransactionTest {
         String jdbcUrl = "jdbc:h2:mem:fisio_billing_db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
         this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
         this.queryLoader = new QueryLoader("queries.properties");
-        this.billingService = new FisioBillingService(dsManager.getSql2o(), queryLoader);
+        this.faturamentoService = new FaturamentoService(dsManager.getSql2o(), queryLoader);
 
         prepararDadosClinicosDeBase();
     }
@@ -70,7 +70,7 @@ public class Sql2oBillingTransactionTest {
         BigDecimal valorPorSessao = new BigDecimal("100.00");
         int parcelasDesejadas = 2;
 
-        Integer idFaturamentoGerado = billingService.faturarSessoesParticular(
+        Integer idFaturamentoGerado = faturamentoService.faturarSessoesParticular(
                 idClienteTeste, sessoesParaFaturar, valorPorSessao, parcelasDesejadas);
 
         assertNotNull("Deve gerar um ID válido de faturamento", idFaturamentoGerado);

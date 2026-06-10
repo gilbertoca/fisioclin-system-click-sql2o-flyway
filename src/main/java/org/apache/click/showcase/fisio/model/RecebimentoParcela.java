@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class RecebimentoParcela implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -53,4 +54,52 @@ public class RecebimentoParcela implements Serializable {
 
     public Faturamento getFaturamento() { return faturamento; }
     public void setFaturamento(Faturamento faturamento) { this.faturamento = faturamento; }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.id);
+        hash = 37 * hash + Objects.hashCode(this.idFaturamento);
+        hash = 37 * hash + this.numeroParcela;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RecebimentoParcela other = (RecebimentoParcela) obj;
+        if (this.numeroParcela != other.numeroParcela) {
+            return false;
+        }
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return Objects.equals(this.idFaturamento, other.idFaturamento);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("RecebimentoParcela{");
+        sb.append("id=").append(id);
+        sb.append(", idFaturamento=").append(idFaturamento);
+        sb.append(", numeroParcela=").append(numeroParcela);
+        sb.append(", valorParcela=").append(valorParcela);
+        sb.append(", dataVencimento=").append(dataVencimento);
+        sb.append(", statusPagamento=").append(statusPagamento);
+        sb.append(", dataPagamento=").append(dataPagamento);
+        sb.append(", formaPagamento=").append(formaPagamento);
+        sb.append(", faturamento=").append(faturamento);
+        sb.append('}');
+        return sb.toString();
+    }
+    
 }

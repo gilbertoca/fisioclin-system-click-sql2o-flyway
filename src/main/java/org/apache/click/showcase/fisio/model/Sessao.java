@@ -2,6 +2,7 @@ package org.apache.click.showcase.fisio.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime; // Alterado para LocalDateTime (Data e Hora)
+import java.util.Objects;
 
 public class Sessao implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -45,9 +46,51 @@ public class Sessao implements Serializable {
     public void setModalidade(Modalidade modalidade) { this.modalidade = modalidade; }
 
     @Override
-    public String toString() {
-        return "Sessao{" + "id=" + id + ", dataHoraInicio=" + dataHoraInicio + ", dataHoraFim=" + dataHoraFim + ", tipoSessao=" + tipoSessao + ", tipoPagamento=" + tipoPagamento + ", statusSessao=" + statusSessao + ", observacoesRecepcao=" + observacoesRecepcao + ", cliente=" + cliente + ", profissional=" + profissional + ", modalidade=" + modalidade + '}';
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + Objects.hashCode(this.id);
+        hash = 79 * hash + Objects.hashCode(this.dataHoraInicio);
+        hash = 79 * hash + Objects.hashCode(this.tipoSessao);
+        return hash;
     }
-    
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Sessao other = (Sessao) obj;
+        if (!Objects.equals(this.tipoSessao, other.tipoSessao)) {
+            return false;
+        }
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return Objects.equals(this.dataHoraInicio, other.dataHoraInicio);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Sessao{");
+        sb.append("id=").append(id);
+        sb.append(", dataHoraInicio=").append(dataHoraInicio);
+        sb.append(", dataHoraFim=").append(dataHoraFim);
+        sb.append(", tipoSessao=").append(tipoSessao);
+        sb.append(", tipoPagamento=").append(tipoPagamento);
+        sb.append(", statusSessao=").append(statusSessao);
+        sb.append(", observacoesRecepcao=").append(observacoesRecepcao);
+        sb.append(", cliente=").append(cliente);
+        sb.append(", profissional=").append(profissional);
+        sb.append(", modalidade=").append(modalidade);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

@@ -1,0 +1,17 @@
+<h2>Detalhamento de Faturamento Comercial</h2>
+<p style="color: #666; margin-bottom: 20px;">
+    Mapeamento financeiro estruturado de pacotes corporativos, guias de convênios e emissões de faturas.
+</p>
+
+<div>
+    $form
+</div>
+
+<!-- Conditionally display the ledger lines table only when reviewing a saved invoice record -->
+#if($fieldId.value && !$fieldId.value.trim().isEmpty())
+    <div style="margin-top: 40px; border-top: 1px dashed #ccc; padding-top: 20px;">
+        <h3 style="color: #1f8dd6;">Demonstrativo do Contas a Receber (Fluxo de Caixa)</h3>
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">Abaixo estão listadas as parcelas e prazos de liquidação vinculados a este faturamento:</p>
+        $tabelaParcelas
+    </div>
+#end
