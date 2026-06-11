@@ -109,7 +109,7 @@ public class SessaoService {
                 throw new IllegalStateException("O profissional já possui atendimento neste horário.");
             }
 
-            conn.createQuery(queryLoader.get("sessao.insert")).bind(sessao).executeUpdate();
+            conn.createQuery(queryLoader.get("sessao.create")).bind(sessao).executeUpdate();
         }
     }
 

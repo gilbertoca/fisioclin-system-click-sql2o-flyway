@@ -19,7 +19,7 @@ public class Sql2oAgendaDeepGraphTest {
 
     @Before
     public void setUp() {
-        String jdbcUrl = "jdbc:h2:mem:fisio_deep_db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
+        String jdbcUrl = "jdbc:h2:mem:fisio_deep_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
         this.queryLoader = new QueryLoader("queries.properties");
 
@@ -29,13 +29,13 @@ public class Sql2oAgendaDeepGraphTest {
     private void seedCompleteScenario() {
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
             // 1. Inserir Convênio
-            Integer idConv = conn.createQuery("INSERT INTO convenio (nome, cnpj) VALUES (:nome, :cnpj)", true)
+            Integer idConv = conn.createQuery("INSERT INTO fisio.convenio (nome, cnpj) VALUES (:nome, :cnpj)", true)
                     .addParameter("nome", "Amil Saúde")
                     .addParameter("cnpj", "98765432000188")
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Inserir Cliente vinculado ao Convênio
-            Integer idCli = conn.createQuery("INSERT INTO cliente (nome, cpf, data_nascimento, telefone, convenio_id) VALUES (:nome, :cpf, :dataNasc, :tel, :idConv)", true)
+            Integer idCli = conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, convenio_id) VALUES (:nome, :cpf, :dataNasc, :tel, :idConv)", true)
                     .addParameter("nome", "Mariana Costa")
                     .addParameter("cpf", "55566677788")
                     // Ajuste no método seedCompleteScenario() de inserção do cliente:
@@ -45,20 +45,20 @@ public class Sql2oAgendaDeepGraphTest {
                     .executeUpdate().getKey(Integer.class);
 
             // 3. Inserir Profissional
-            Integer idProf = conn.createQuery("INSERT INTO profissional (nome, crefito_ou_registro, telefone) VALUES (:nome, :crefito, :tel)", true)
+            Integer idProf = conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES (:nome, :crefito, :tel)", true)
                     .addParameter("nome", "Dra. Amanda Rodrigues")
                     .addParameter("crefito", "CREFITO-67890-F")
                     .addParameter("tel", "8688888888")
                     .executeUpdate().getKey(Integer.class);
 
             // 4. Inserir Modalidade
-            Integer idMod = conn.createQuery("INSERT INTO modalidade (nome, valor_base) VALUES (:nome, :valor)", true)
+            Integer idMod = conn.createQuery("INSERT INTO fisio.modalidade (nome, valor_base) VALUES (:nome, :valor)", true)
                     .addParameter("nome", "Pilates Clínico")
                     .addParameter("valor", 80.00)
                     .executeUpdate().getKey(Integer.class);
 
             // 5. Agendar Sessão para a data de hoje
-            conn.createQuery("INSERT INTO sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, tipo_sessao, tipo_pagamento, status_sessao) " +
+            conn.createQuery("INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_status) " +
                             "VALUES (:idCli, :idProf, :idMod, :dataHoraInicio, :dataHoraFim, 'TRATAMENTO_ROTINA', 'CONVENIO', 'AGENDADA')")
                     .addParameter("idCli", idCli)
                     .addParameter("idProf", idProf)
@@ -85,8 +85,8 @@ public class Sql2oAgendaDeepGraphTest {
             assertEquals("Deve listar exatamente 1 agendamento", 1, agenda.size());
 
             Sessao s = agenda.get(0);
-            assertEquals("TRATAMENTO_ROTINA", s.getTipoSessao());
-            assertEquals("AGENDADA", s.getStatusSessao());
+            assertEquals("TRATAMENTO_ROTINA", s.getSessaoTipo());
+            assertEquals("AGENDADA", s.getSessaoStatus());
 
             // Validação do Primeiro Nível: Modalidade e Profissional
             assertNotNull("Deveria ter populado a modalidade", s.getModalidade());

@@ -49,7 +49,7 @@ public class RecebimentoParcelaService {
         }
     }
 
-    public List<RecebimentoParcela> getAllLikeStatusPagamento(String pagamentoStatus) {
+    public List<RecebimentoParcela> getAllLikePagamentoStatus(String pagamentoStatus) {
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(queryLoader.get("recebimentoParcela.getAllLikeStatusPagamento"))
                     .addParameter("pagamentoStatus", "%" + pagamentoStatus + "%").executeAndFetch(RecebimentoParcela.class);

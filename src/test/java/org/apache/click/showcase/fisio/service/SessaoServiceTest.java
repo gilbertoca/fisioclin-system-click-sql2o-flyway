@@ -12,6 +12,9 @@ import org.sql2o.Connection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
+import org.apache.click.showcase.fisio.model.enums.SessaoStatus;
+import org.apache.click.showcase.fisio.model.enums.SessaoTipo;
 import org.junit.AfterClass;
 
 import static org.junit.Assert.*;
@@ -30,7 +33,7 @@ public class SessaoServiceTest {
     @BeforeClass
     public static void setUp() {
         // Inicializa banco em memória compatível com Postgres
-        String jdbcUrl = "jdbc:h2:mem:fisio_sessao_service_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
+        String jdbcUrl = "jdbc:h2:mem:fisio_sessao_service_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
         
         QueryLoader queryLoader = new QueryLoader("queries.properties");
@@ -49,18 +52,18 @@ public class SessaoServiceTest {
             
             // 1. Cadastra Cliente Ator
             clienteId = conn.createQuery(
-                    "INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
+                    "INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
                     "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Cadastra Profissional Ator
             idProfissional = conn.createQuery(
-                    "INSERT INTO profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. Marcos Vinícius', 'CREFITO-999-F', '868882211')", true)
+                    "INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. Marcos Vinícius', 'CREFITO-999-F', '868882211')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 3. Cadastra Modalidade Descrição
             idModalidade = conn.createQuery(
-                    "INSERT INTO modalidade (nome, valor_base) VALUES ('RPG (Reeducação Postural)', 130.00)", true)
+                    "INSERT INTO fisio.modalidade (nome, valor_base) VALUES ('RPG (Reeducação Postural)', 130.00)", true)
                     .executeUpdate().getKey(Integer.class);
 
             conn.commit();
@@ -84,9 +87,9 @@ public class SessaoServiceTest {
         sessao.setModalidade(modalidade);
         sessao.setDataHoraInicio(horarioDesejado);
         sessao.setDataHoraFim(horarioDesejado.plusMinutes(50));
-        sessao.setTipoSessao("AVALIACAO_INICIAL");
-        sessao.setTipoPagamento("PARTICULAR");
-        sessao.setStatusSessao("AGENDADA");
+        sessao.setSessaoTipo(SessaoTipo.AVALIACAO_INICIAL);
+        sessao.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        sessao.setSessaoStatus(SessaoStatus.AGENDADA);
         sessao.setObservacoesRecepcao("Teste de serviço unificado.");
 
         // 1. Executa a gravação direta pela camada Service
@@ -98,7 +101,7 @@ public class SessaoServiceTest {
         // 3. Asserts de Integridade
         assertEquals(1, agenda.size());
         Sessao sGravada = agenda.get(0);
-        assertEquals("AVALIACAO_INICIAL", sGravada.getTipoSessao());
+        assertEquals(SessaoTipo.AVALIACAO_INICIAL, sGravada.getSessaoTipo());
         assertEquals(horarioDesejado, sGravada.getDataHoraInicio());
 
         // 4. Prova do Mapeamento de Grafo Rico (Múltiplos Níveis via dot-notation)
@@ -125,9 +128,9 @@ public class SessaoServiceTest {
         sessao1.setCliente(c); sessao1.setProfissional(p); sessao1.setModalidade(m);
         sessao1.setDataHoraInicio(horarioBase);
         sessao1.setDataHoraFim(horarioBase.plusMinutes(50));
-        sessao1.setTipoSessao("TRATAMENTO_ROTINA");
-        sessao1.setTipoPagamento("PARTICULAR");
-        sessao1.setStatusSessao("AGENDADA");
+        sessao1.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+        sessao1.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        sessao1.setSessaoStatus(SessaoStatus.AGENDADA);
         sessaoService.create(sessao1);
 
         // Segundo agendamento em conflito para o mesmo profissional (Interseção às 16:30)
@@ -135,9 +138,9 @@ public class SessaoServiceTest {
         sessaoConflitante.setCliente(c); sessaoConflitante.setProfissional(p); sessaoConflitante.setModalidade(m);
         sessaoConflitante.setDataHoraInicio(horarioBase.plusMinutes(30)); 
         sessaoConflitante.setDataHoraFim(horarioBase.plusMinutes(80));
-        sessaoConflitante.setTipoSessao("TRATAMENTO_ROTINA");
-        sessaoConflitante.setTipoPagamento("PARTICULAR");
-        sessaoConflitante.setStatusSessao("AGENDADA");
+        sessaoConflitante.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+        sessaoConflitante.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        sessaoConflitante.setSessaoStatus(SessaoStatus.AGENDADA);
 
         try {
             // A camada service deve interceptar o conflito ativamente
@@ -162,9 +165,9 @@ public class SessaoServiceTest {
         sessaoInvalida.setModalidade(m);
         sessaoInvalida.setDataHoraInicio(LocalDateTime.now());
         sessaoInvalida.setDataHoraFim(LocalDateTime.now().plusMinutes(50));
-        sessaoInvalida.setTipoSessao("TRATAMENTO_ROTINA");
-        sessaoInvalida.setTipoPagamento("PARTICULAR");
-        sessaoInvalida.setStatusSessao("AGENDADA");
+        sessaoInvalida.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+        sessaoInvalida.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        sessaoInvalida.setSessaoStatus(SessaoStatus.AGENDADA);
 
         try {
             sessaoService.create(sessaoInvalida);

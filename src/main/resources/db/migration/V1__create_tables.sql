@@ -48,12 +48,12 @@ CREATE TABLE fisio.sessao (
     modalidade_id INT NOT NULL REFERENCES modalidade(modalidade_id),
     data_hora_inicio TIMESTAMP NOT NULL,
     data_hora_fim TIMESTAMP NOT NULL,
-    tipo_sessao VARCHAR(25) NOT NULL
-        CHECK (tipo_sessao IN ('AVALIACAO_INICIAL', 'TRATAMENTO_ROTINA', 'REAVALIACAO')),
-    tipo_pagamento VARCHAR(20) NOT NULL
-        CHECK (tipo_pagamento IN ('PARTICULAR', 'CONVENIO')),
-    status_sessao VARCHAR(20) NOT NULL DEFAULT 'AGENDADA'
-        CHECK (status_sessao IN ('AGENDADA', 'CONFIRMADA', 'REALIZADA', 'FALTOU', 'CANCELADA')),
+    sessao_tipo VARCHAR(25) NOT NULL
+        CHECK (sessao_tipo IN ('AVALIACAO_INICIAL', 'TRATAMENTO_ROTINA', 'REAVALIACAO')),
+    pagamento_origem VARCHAR(20) NOT NULL
+        CHECK (pagamento_origem IN ('PARTICULAR', 'CONVENIO')),
+    sessao_status VARCHAR(20) NOT NULL DEFAULT 'AGENDADA'
+        CHECK (sessao_status IN ('AGENDADA', 'CONFIRMADA', 'REALIZADA', 'FALTOU', 'CANCELADA')),
     observacoes_recepcao TEXT
 );
 

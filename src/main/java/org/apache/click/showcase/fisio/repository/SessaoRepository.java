@@ -38,7 +38,7 @@ public class SessaoRepository {
     }
 
     public void salvar(Sessao sessao) {
-        String sql = queryLoader.get("sessao.insert");
+        String sql = queryLoader.get("sessao.create");
         try (Connection conn = sql2o.open()) {
             conn.createQuery(sql)
                     .bind(sessao)

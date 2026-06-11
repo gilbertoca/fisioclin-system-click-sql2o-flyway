@@ -25,7 +25,7 @@ public class ClienteServiceTest {
     @BeforeClass
     public static void setUp() {
         // Inicialização do banco em memória isolado para os testes de cliente
-        String jdbcUrl = "jdbc:h2:mem:fisio_cliente_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
+        String jdbcUrl = "jdbc:h2:mem:fisio_cliente_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
         
         QueryLoader queryLoader = new QueryLoader("queries.properties");
@@ -38,7 +38,7 @@ public class ClienteServiceTest {
 
 
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
-            convenioIdUnimed = conn.createQuery("INSERT INTO convenio (nome, cnpj) VALUES ('Unimed Teresina', '12345678000199')", true)
+            convenioIdUnimed = conn.createQuery("INSERT INTO fisio.convenio (nome, cnpj) VALUES ('Unimed Teresina', '12345678000199')", true)
                     .executeUpdate()
                     .getKey(Integer.class);
             conn.commit();
@@ -109,8 +109,8 @@ public class ClienteServiceTest {
     public void deveBuscarClientesFiltandoPeloPadraoLikeNoNome() {
         // Insere 2 clientes distintos para testar a busca textual
         try (Connection conn = dsManager.getSql2o().open()) {
-            conn.createQuery("INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
-            conn.createQuery("INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
         }
 
         // Executa a busca enviando apenas um fragmento do nome ("silva") em letras minúsculas

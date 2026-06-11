@@ -50,8 +50,8 @@ public class SessaoViewPage extends LayoutPage {
         });
         table.addColumn(colMod);
 
-        table.addColumn(new Column("tipoSessao", "Objetivo"));
-        table.addColumn(new Column("statusSessao", "Status"));
+        table.addColumn(new Column("sessaoTipo", "Objetivo"));
+        table.addColumn(new Column("sessaoStatus", "Status"));
 
         // Coluna de Ações Inline nativa
         Column colActions = new Column("acoes", "Ações");

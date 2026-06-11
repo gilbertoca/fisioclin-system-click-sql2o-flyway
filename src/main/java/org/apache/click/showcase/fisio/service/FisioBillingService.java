@@ -9,6 +9,8 @@ import org.sql2o.Sql2o;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.click.showcase.fisio.model.enums.FaturamentoStatus;
+import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
 
 public class FisioBillingService {
 
@@ -30,8 +32,8 @@ public class FisioBillingService {
 
         Faturamento faturaDominio = new Faturamento();
         faturaDominio.setclienteId(clienteId);
-        faturaDominio.setTipoFaturamento("PARTICULAR");
-        faturaDominio.setStatusFaturamento("CONSOLIDADO");
+        faturaDominio.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        faturaDominio.setFaturamentoStatus(FaturamentoStatus.CONSOLIDADO);
         faturaDominio.setObservacoes("Pacote gerado via modelo de domínio SOM rico.");
         faturaDominio.gerarParcelasParticionadas(valorTotalFatura, totalParcelas); // Encapsulamento em ação!
 

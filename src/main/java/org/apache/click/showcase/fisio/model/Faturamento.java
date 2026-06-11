@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.click.showcase.fisio.model.enums.FaturamentoStatus;
+import org.apache.click.showcase.fisio.model.enums.PagamentoMeio;
 import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
+import org.apache.click.showcase.fisio.model.enums.PagamentoStatus;
 
 public class Faturamento implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -60,7 +62,8 @@ public class Faturamento implements Serializable {
             RecebimentoParcela p = new RecebimentoParcela();
             p.setNumeroParcela(i);
             p.setDataVencimento(LocalDate.now().plusMonths(i - 1));
-            p.setStatusPagamento("PENDENTE");
+            p.setPagamentoMeio(PagamentoMeio.DINHEIRO);
+            p.setPagamentoStatus(PagamentoStatus.PENDENTE);
 
             // Ajusta o arredondamento na primeira parcela se houver dízima residual
             if (i == 1) {
@@ -140,7 +143,7 @@ public class Faturamento implements Serializable {
         sb.append(", convenioId=").append(convenioId);
         sb.append(", valorTotalFaturado=").append(valorTotalFaturado);
         sb.append(", dataEmissao=").append(dataEmissao);
-        sb.append(", statusFaturamento=").append(faturamentoStatus);
+        sb.append(", faturamentoStatus=").append(faturamentoStatus);
         sb.append(", observacoes=").append(observacoes);
         sb.append(", parcelas=").append(parcelas);
         sb.append('}');

@@ -11,6 +11,9 @@ import org.apache.click.showcase.fisio.service.SessaoService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
+import org.apache.click.showcase.fisio.model.enums.SessaoStatus;
+import org.apache.click.showcase.fisio.model.enums.SessaoTipo;
 
 public class SessaoEditPage extends LayoutPage {
     private static final long serialVersionUID = 1L;
@@ -23,7 +26,7 @@ public class SessaoEditPage extends LayoutPage {
     protected Select selectModalidade = new Select("modalidadeId", "Modalidade/Serviço:", true);
     protected DateField campoData = new DateField("dataSessao", "Data do Atendimento:", true);
     protected Select selectHorario = new Select("horarioSessao", "Horário:", true);
-    protected Select selectStatus = new Select("statusSessao", "Status:", true);
+    protected Select selectStatus = new Select("sessaoStatus", "Status:", true);
     protected TextField campoObservacoes = new TextField("observacoesRecepcao", "Observações:");
 
     protected Submit botaoSalvar = new Submit("salvar", "Confirmar Agendamento", this, "onSalvarClick");
@@ -93,7 +96,7 @@ public class SessaoEditPage extends LayoutPage {
                 selectCliente.setValue(target.getCliente().getId().toString());
                 selectProfissional.setValue(target.getProfissional().getId().toString());
                 selectModalidade.setValue(target.getModalidade().getId().toString());
-                selectStatus.setValue(target.getStatusSessao());
+                selectStatus.setValue(target.getSessaoStatus().toString());
                 campoObservacoes.setValue(target.getObservacoesRecepcao());
 
                 if (target.getDataHoraInicio() != null) {
@@ -118,10 +121,10 @@ public class SessaoEditPage extends LayoutPage {
                 Sessao s = new Sessao();
                 s.setDataHoraInicio(inicio);
                 s.setDataHoraFim(inicio.plusMinutes(50));
-                s.setStatusSessao(selectStatus.getValue());
+                s.setSessaoStatus(SessaoStatus.valueOf(selectStatus.getValue()));
                 s.setObservacoesRecepcao(campoObservacoes.getValue());
-                s.setTipoPagamento("PARTICULAR");
-                s.setTipoSessao("TRATAMENTO_ROTINA");
+                s.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+                s.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
 
                 Cliente c = new Cliente(); c.setId(Integer.valueOf(selectCliente.getValue())); s.setCliente(c);
                 Profissional p = new Profissional(); p.setId(Integer.valueOf(selectProfissional.getValue())); s.setProfissional(p);

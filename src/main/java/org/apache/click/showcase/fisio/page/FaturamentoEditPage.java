@@ -16,7 +16,7 @@ public class FaturamentoEditPage extends LayoutPage {
     // Core Layout Components
     protected Form form = new Form("form");
     protected Select selectCliente = new Select("clienteId", "Paciente:", true);
-    protected Select selectTipo = new Select("tipoFaturamento", "Origem:", true);
+    protected Select selectPagamentoOrigem = new Select("pagamentoOrigem", "Origem:", true);
     protected TextField campoValor = new TextField("valorTotalFaturado", "Valor do Pacote / Total:", true);
     protected Select selectParcelas = new Select("quantidadeParcelas", "Parcelar em:", true);
     protected TextField campoObservacoes = new TextField("observacoes", "Observações:");
@@ -31,7 +31,7 @@ public class FaturamentoEditPage extends LayoutPage {
     public FaturamentoEditPage() {
         form.add(fieldId);
         form.add(selectCliente);
-        form.add(selectTipo);
+        form.add(selectPagamentoOrigem);
         form.add(campoValor);
         form.add(selectParcelas);
         form.add(campoObservacoes);
@@ -70,9 +70,9 @@ public class FaturamentoEditPage extends LayoutPage {
             selectCliente.add(new Option(c.getId().toString(), c.getNome()));
         }
 
-        selectTipo.getOptionList().clear();
-        selectTipo.add(new Option("PARTICULAR", "Particular (Recibo Direto)"));
-        selectTipo.add(new Option("CONVENIO", "Faturamento p/ Lote de Convênio"));
+        selectPagamentoOrigem.getOptionList().clear();
+        selectPagamentoOrigem.add(new Option("PARTICULAR", "Particular (Recibo Direto)"));
+        selectPagamentoOrigem.add(new Option("CONVENIO", "Faturamento p/ Lote de Convênio"));
 
         selectParcelas.getOptionList().clear();
         selectParcelas.add(new Option("1", "1x à vista"));
@@ -87,13 +87,13 @@ public class FaturamentoEditPage extends LayoutPage {
             if (target != null) {
                 fieldId.setValue(target.getId().toString());
                 selectCliente.setValue(target.getClienteId().toString());
-                selectTipo.setValue(target.getTipoFaturamento());
+                selectPagamentoOrigem.setValue(target.getPagamentoOrigem().toString());
                 campoValor.setValue(target.getValorTotalFaturado().toString());
                 campoObservacoes.setValue(target.getObservacoes());
                 
                 // Read-only locks to protect consolidated historical entries
                 selectCliente.setDisabled(true);
-                selectTipo.setDisabled(true);
+                selectPagamentoOrigem.setDisabled(true);
                 campoValor.setDisabled(true);
                 selectParcelas.setDisabled(true);
                 botaoSalvar.setDisabled(true);
@@ -108,7 +108,7 @@ public class FaturamentoEditPage extends LayoutPage {
         if (form.isValid()) {
             try {
                 Faturamento fatura = new Faturamento();
-                fatura.setTipoFaturamento(selectTipo.getValue());
+                //fatura.setPagamentoOrigem(selectPagamentoOrigem.getValue());
                 fatura.setObservacoes(campoObservacoes.getValue());
                 
                 Cliente c = new Cliente();

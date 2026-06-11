@@ -2011,13 +2011,13 @@
        <column id="COL577" populated="true" UUID="04dcc80b-35ca-400d-912c-ff1a90af203b" autoIncrement="false" name="data_hora_fim" nullable="0" physicalName="data_hora_fim" precision="26" referenceCount="1" scale="6" sourceDataTypeName="TIMESTAMP" type="93" >
         <remarks></remarks>
        </column>
-       <column id="COL578" populated="true" UUID="93c5f4e9-4222-4639-8e15-0da83fc92ae3" autoIncrement="false" name="tipo_sessao" nullable="0" physicalName="tipo_sessao" precision="25" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
+       <column id="COL578" populated="true" UUID="93c5f4e9-4222-4639-8e15-0da83fc92ae3" autoIncrement="false" name="sessao_tipo" nullable="0" physicalName="sessao_tipo" precision="25" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
         <remarks></remarks>
        </column>
-       <column id="COL579" populated="true" UUID="5d0b7f6e-86a7-4488-8988-b0bc8e485278" autoIncrement="false" name="tipo_pagamento" nullable="0" physicalName="tipo_pagamento" precision="20" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
+       <column id="COL579" populated="true" UUID="5d0b7f6e-86a7-4488-8988-b0bc8e485278" autoIncrement="false" name="pagamento_origem" nullable="0" physicalName="pagamento_origem" precision="20" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
         <remarks></remarks>
        </column>
-       <column id="COL580" populated="true" UUID="e51c360c-29ed-4884-84d4-fc26c435666d" autoIncrement="false" defaultValue="&apos;AGENDADA&apos;" name="status_sessao" nullable="0" physicalName="status_sessao" precision="20" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
+       <column id="COL580" populated="true" UUID="e51c360c-29ed-4884-84d4-fc26c435666d" autoIncrement="false" defaultValue="&apos;AGENDADA&apos;" name="sessao_status" nullable="0" physicalName="sessao_status" precision="20" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
         <remarks></remarks>
        </column>
        <column id="COL581" populated="true" UUID="211bd999-9773-4d97-ade7-7322d8c5c941" autoIncrement="false" name="observacoes_recepcao" nullable="1" physicalName="observacoes_recepcao" precision="1000000000" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
@@ -2270,13 +2270,13 @@
     <column id="COL671" populated="true" UUID="0ed0203a-19d6-4e19-8bed-2092a15b2caa" autoIncrement="false" defaultValue="" name="data_hora_fim" nullable="0" physicalName="data_hora_fim" precision="0" referenceCount="1" scale="0" source-column-ref="COL577" sourceDataTypeName="TIMESTAMP" type="93" userDefinedTypeUUID="6497d8de-0e00-40d6-a42e-e2adca83be64" >
      <remarks></remarks>
     </column>
-    <column id="COL672" populated="true" UUID="ee6f3916-7cca-4089-ba47-2fc2095cd1af" autoIncrement="false" defaultValue="" name="tipo_sessao" nullable="0" physicalName="tipo_sessao" precision="25" referenceCount="1" scale="0" source-column-ref="COL578" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
+    <column id="COL672" populated="true" UUID="ee6f3916-7cca-4089-ba47-2fc2095cd1af" autoIncrement="false" defaultValue="" name="sessao_tipo" nullable="0" physicalName="sessao_tipo" precision="25" referenceCount="1" scale="0" source-column-ref="COL578" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL673" populated="true" UUID="40220b3b-4308-4d87-a44b-9c90664fb131" autoIncrement="false" defaultValue="" name="tipo_pagamento" nullable="0" physicalName="tipo_pagamento" precision="20" referenceCount="1" scale="0" source-column-ref="COL579" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
+    <column id="COL673" populated="true" UUID="40220b3b-4308-4d87-a44b-9c90664fb131" autoIncrement="false" defaultValue="" name="pagamento_origem" nullable="0" physicalName="pagamento_origem" precision="20" referenceCount="1" scale="0" source-column-ref="COL579" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL674" populated="true" UUID="b3b246ef-b2dc-4afd-86ee-0151984ae388" autoIncrement="false" defaultValue="&apos;AGENDADA&apos;" name="status_sessao" nullable="0" physicalName="status_sessao" precision="20" referenceCount="1" scale="0" source-column-ref="COL580" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
+    <column id="COL674" populated="true" UUID="b3b246ef-b2dc-4afd-86ee-0151984ae388" autoIncrement="false" defaultValue="&apos;AGENDADA&apos;" name="sessao_status" nullable="0" physicalName="sessao_status" precision="20" referenceCount="1" scale="0" source-column-ref="COL580" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
     <column id="COL675" populated="true" UUID="2202c1dd-68ca-4a5f-b12e-1efcd5a14a1b" autoIncrement="false" defaultValue="" name="observacoes_recepcao" nullable="1" physicalName="observacoes_recepcao" precision="0" referenceCount="1" scale="0" source-column-ref="COL581" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >

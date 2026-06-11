@@ -9,6 +9,8 @@ import java.util.List;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.RecebimentoParcela;
 import org.apache.click.showcase.fisio.model.Sessao;
+import org.apache.click.showcase.fisio.model.enums.FaturamentoStatus;
+import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
 
 public class FaturamentoService {
 
@@ -65,10 +67,10 @@ public class FaturamentoService {
         }
     }
 
-    public List<Faturamento> getAllLikeStatusFaturamento(String statusFaturamento) {
+    public List<Faturamento> getAllLikeFaturamentoStatus(String faturamentoStatus) {
         try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("faturamento.getAllLikeStatusFaturamento"))
-                    .addParameter("statusFaturamento", "%" + statusFaturamento + "%").executeAndFetch(Faturamento.class);
+            return conn.createQuery(queryLoader.get("faturamento.getAllLikeFaturamentoStatus"))
+                    .addParameter("faturamentoStatus", "%" + faturamentoStatus + "%").executeAndFetch(Faturamento.class);
         }
     }
     // ============================================================================
@@ -94,7 +96,7 @@ public class FaturamentoService {
             return java.util.Collections.emptyList();
         }
         String sql = "SELECT parcela_id AS id, faturamento_id AS idFaturamento, numero_parcela AS numeroParcela, "
-                + "valor_parcela AS valorParcela, data_vencimento AS dataVencimento, status_pagamento AS pagamentoStatus "
+                + "valor_parcela AS valorParcela, data_vencimento AS dataVencimento, pagamento_status AS pagamentoStatus "
                 + "FROM recebimento_parcela WHERE faturamento_id = :id ORDER BY numero_parcela ASC";
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(sql).addParameter("id", faturamentoId).executeAndFetch(RecebimentoParcela.class);
@@ -116,8 +118,8 @@ public class FaturamentoService {
         Cliente c = new Cliente();
         c.setId(clienteId);
         faturaDominio.setclienteId(clienteId);
-        faturaDominio.setTipoFaturamento("PARTICULAR");
-        faturaDominio.setStatusFaturamento("CONSOLIDADO");
+        faturaDominio.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        faturaDominio.setFaturamentoStatus(FaturamentoStatus.CONSOLIDADO);
         faturaDominio.setObservacoes("Pacote gerado via modelo de domínio SOM rico.");
         faturaDominio.gerarParcelasParticionadas(valorTotalFatura, totalParcelas);
 

@@ -21,7 +21,7 @@ public class SessaoLookupIntegrationTest {
 
     @Before
     public void setUp() {
-        String jdbcUrl = "jdbc:h2:mem:fisio_lookup_db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
+        String jdbcUrl = "jdbc:h2:mem:fisio_lookup_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
         QueryLoader queryLoader = new QueryLoader("queries.properties");
         this.sessaoService = new SessaoService(dsManager.getSql2o(), queryLoader);
@@ -32,16 +32,16 @@ public class SessaoLookupIntegrationTest {
     private void seedLookupRecords() {
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
             // Seed 2 distinct patients (Actors)
-            conn.createQuery("INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
-            conn.createQuery("INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
 
             // Seed 2 distinct therapists (Actors)
-            conn.createQuery("INSERT INTO profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. John', 'CRE-1', '111')").executeUpdate();
-            conn.createQuery("INSERT INTO profissional (nome, crefito_ou_registro, telefone) VALUES ('Dra. Jane', 'CRE-2', '222')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. John', 'CRE-1', '111')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dra. Jane', 'CRE-2', '222')").executeUpdate();
 
             // Seed 2 distinct modalities (Descriptions)
-            conn.createQuery("INSERT INTO modalidade (nome, valor_base) VALUES ('Fisioterapia Ortopedica', 90.00)").executeUpdate();
-            conn.createQuery("INSERT INTO modalidade (nome, valor_base) VALUES ('Pilates Clinico', 80.00)").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.modalidade (nome, valor_base) VALUES ('Fisioterapia Ortopedica', 90.00)").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.modalidade (nome, valor_base) VALUES ('Pilates Clinico', 80.00)").executeUpdate();
 
             conn.commit();
         }

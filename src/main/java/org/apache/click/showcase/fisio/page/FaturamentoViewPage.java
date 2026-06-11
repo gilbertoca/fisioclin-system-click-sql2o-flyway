@@ -31,7 +31,7 @@ public class FaturamentoViewPage extends LayoutPage {
         Column colCliente = new Column("clienteId", "Paciente");
         table.addColumn(colCliente);
 
-        table.addColumn(new Column("tipoFaturamento", "Tipo"));
+        table.addColumn(new Column("pagamentoOrigem", "Tipo"));
         
         // Column 4: Total Monitored Invoice Currency
         Column colValor = new Column("valorTotalFaturado", "Valor Total");
@@ -41,7 +41,7 @@ public class FaturamentoViewPage extends LayoutPage {
         });
         table.addColumn(colValor);
         
-        table.addColumn(new Column("statusFaturamento", "Situação"));
+        table.addColumn(new Column("faturamentoStatus", "Situação"));
 
         // Column 6: Inline View Action Link routing
         Column colAcoes = new Column("acoes", "Ações");

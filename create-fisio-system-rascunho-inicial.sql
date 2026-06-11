@@ -44,14 +44,14 @@ CREATE TABLE sessao (
     data_hora_fim TIMESTAMP NOT NULL,
 
     -- Define a finalidade do atendimento
-    tipo_sessao VARCHAR(25) NOT NULL
-        CHECK (tipo_sessao IN ('AVALIACAO_INICIAL', 'TRATAMENTO_ROTINA', 'REAVALIACAO')),
+    sessao_tipo VARCHAR(25) NOT NULL
+        CHECK (sessao_tipo IN ('AVALIACAO_INICIAL', 'TRATAMENTO_ROTINA', 'REAVALIACAO')),
 
-    tipo_pagamento VARCHAR(20) NOT NULL
-        CHECK (tipo_pagamento IN ('PARTICULAR', 'CONVENIO')),
+    pagamento_origem VARCHAR(20) NOT NULL
+        CHECK (pagamento_origem IN ('PARTICULAR', 'CONVENIO')),
 
-    status_sessao VARCHAR(20) NOT NULL DEFAULT 'AGENDADA'
-        CHECK (status_sessao IN ('AGENDADA', 'CONFIRMADA', 'REALIZADA', 'FALTOU', 'CANCELADA')),
+    sessao_status VARCHAR(20) NOT NULL DEFAULT 'AGENDADA'
+        CHECK (sessao_status IN ('AGENDADA', 'CONFIRMADA', 'REALIZADA', 'FALTOU', 'CANCELADA')),
 
     observacoes_recepcao TEXT
 );
@@ -77,7 +77,7 @@ CREATE TABLE pagamento_sessao (
     situacao_financeira VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
         CHECK (situacao_financeira IN ('PENDENTE', 'PAGO', 'REEMBOLSADO', 'ISENTO')),
     data_pagamento TIMESTAMP,
-    forma_pagamento VARCHAR(30) CHECK (forma_pagamento IN ('DINHEIRO', 'CARTAO', 'PIX', 'CONVENIO'))
+    pagamento_meio VARCHAR(30) CHECK (pagamento_meio IN ('DINHEIRO', 'CARTAO', 'PIX', 'CONVENIO'))
 );
 
 -- 1. Cabeçalho do Faturamento (A "Fatura" ou "Conta" do Cliente/Convênio)
@@ -86,13 +86,13 @@ CREATE TABLE faturamento (
     cliente_id INT NOT NULL REFERENCES cliente(cliente_id),
 
     -- Identifica se a fatura é para o próprio Paciente ou se será cobrada do Convênio
-    tipo_faturamento VARCHAR(20) NOT NULL CHECK (tipo_faturamento IN ('PARTICULAR', 'CONVENIO')),
-    convenio_id INT, -- Preenchido apenas se tipo_faturamento = 'CONVENIO'
+    pagamento_origem VARCHAR(20) NOT NULL CHECK (pagamento_origem IN ('PARTICULAR', 'CONVENIO')),
+    convenio_id INT, -- Preenchido apenas se pagamento_origem = 'CONVENIO'
 
     valor_total_faturado DECIMAL(10,2) NOT NULL,
     data_emissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status_faturamento VARCHAR(20) NOT NULL DEFAULT 'ABERTO'
-        CHECK (status_faturamento IN ('ABERTO', 'CONSOLIDADO', 'CANCELADO')),
+    faturamento_status VARCHAR(20) NOT NULL DEFAULT 'ABERTO'
+        CHECK (faturamento_status IN ('ABERTO', 'CONSOLIDADO', 'CANCELADO')),
     observacoes TEXT
 );
 
@@ -113,9 +113,9 @@ CREATE TABLE recebimento_parcela (
     data_vencimento DATE NOT NULL,
 
     -- Controle da entrada do dinheiro
-    status_pagamento VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
-        CHECK (status_pagamento IN ('PENDENTE', 'PAGO', 'GLOSADO_CONVENIO', 'ATRASADO')),
+    pagamento_status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
+        CHECK (pagamento_status IN ('PENDENTE', 'PAGO', 'GLOSADO_CONVENIO', 'ATRASADO')),
     data_pagamento TIMESTAMP,
-    forma_pagamento VARCHAR(30)
-        CHECK (forma_pagamento IN ('DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX', 'TRANSFERENCIA', 'FATURA_CONVENIO'))
+    pagamento_meio VARCHAR(30)
+        CHECK (pagamento_meio IN ('DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'PIX', 'TRANSFERENCIA', 'FATURA_CONVENIO'))
 );

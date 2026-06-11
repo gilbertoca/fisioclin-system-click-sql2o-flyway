@@ -45,8 +45,8 @@ public class RecebimentoParcela implements Serializable {
     public LocalDate getDataVencimento() { return dataVencimento; }
     public void setDataVencimento(LocalDate dataVencimento) { this.dataVencimento = dataVencimento; }
 
-    public PagamentoStatus getStatusPagamento() { return pagamentoStatus; }
-    public void setStatusPagamento(PagamentoStatus pagamentoStatus) { this.pagamentoStatus = pagamentoStatus; }
+    public PagamentoStatus getPagamentoStatus() { return pagamentoStatus; }
+    public void setPagamentoStatus(PagamentoStatus pagamentoStatus) { this.pagamentoStatus = pagamentoStatus; }
 
     public LocalDateTime getDataPagamento() { return dataPagamento; }
     public void setDataPagamento(LocalDateTime dataPagamento) { this.dataPagamento = dataPagamento; }
