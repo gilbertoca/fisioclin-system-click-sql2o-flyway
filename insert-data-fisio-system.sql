@@ -52,7 +52,7 @@ INSERT INTO sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio
 -- 6. POPULANDO PRONTUÁRIOS (Evolução Clínica)
 -- ==========================================
 -- Prontuário da Avaliação de RPG do Carlos (sessao_id = 1)
-INSERT INTO prontuario_sessao (sessao_id, queixa_subjetiva, avaliacao_objetiva, conduta_procedimento, plano_orientacoes) VALUES
+INSERT INTO sessao_prontuario (sessao_id, queixa_subjetiva, avaliacao_objetiva, conduta_procedimento, plano_orientacoes) VALUES
 (1,
  'Paciente relata dor lombar contínua (nota 6/10) que piora ao passar muito tempo sentado no escritório.',
  'Evidenciada hipercifose dorsal discreta e encurtamento severo de cadeia posterior.',
@@ -60,7 +60,7 @@ INSERT INTO prontuario_sessao (sessao_id, queixa_subjetiva, avaliacao_objetiva, 
  'Prescritas 10 sessões de RPG. Orientado a realizar pausas ativas no trabalho a cada 2 horas.');
 
 -- Prontuário da Avaliação de Fisioterapia da Ana Beatriz (sessao_id = 4)
-INSERT INTO prontuario_sessao (sessao_id, queixa_subjetiva, avaliacao_objetiva, conduta_procedimento, plano_orientacoes) VALUES
+INSERT INTO sessao_prontuario (sessao_id, queixa_subjetiva, avaliacao_objetiva, conduta_procedimento, plano_orientacoes) VALUES
 (4,
  'Fisgada na lateral do joelho direito ao correr cerca de 5km.',
  'Teste de Ober positivo. Dor à palpação do trato iliotibial.',
@@ -68,7 +68,7 @@ INSERT INTO prontuario_sessao (sessao_id, queixa_subjetiva, avaliacao_objetiva, 
  'Iniciar fisioterapia focada em fortalecimento de quadril e analgesia local. Evitar corridas longas nesta semana.');
 
 -- Prontuário da Liberação Miofascial da Ana Beatriz (sessao_id = 5)
-INSERT INTO prontuario_sessao (sessao_id, queixa_subjetiva, avaliacao_objetiva, conduta_procedimento, plano_orientacoes) VALUES
+INSERT INTO sessao_prontuario (sessao_id, queixa_subjetiva, avaliacao_objetiva, conduta_procedimento, plano_orientacoes) VALUES
 (5,
  'Sensação de peso e fadiga muscular nas pernas.',
  'Presença de bandas tensas palpáveis no músculo gastrocnêmio bilateral.',

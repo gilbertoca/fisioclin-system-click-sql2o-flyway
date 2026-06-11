@@ -28,7 +28,7 @@ public class FaturamentoViewPage extends LayoutPage {
         table.addColumn(colData);
 
         // Column 2: Resolve Client descriptor navigating the rich object graph
-        Column colCliente = new Column("idCliente", "Paciente");
+        Column colCliente = new Column("clienteId", "Paciente");
         table.addColumn(colCliente);
 
         table.addColumn(new Column("tipoFaturamento", "Tipo"));

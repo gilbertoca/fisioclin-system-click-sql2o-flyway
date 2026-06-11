@@ -44,7 +44,7 @@ public class FaturamentoService {
 
             // Grava em cascata as parcelas geradas pelo modelo rico se existirem
             if (!faturamento.getParcelas().isEmpty()) {
-                String sqlParcela = queryLoader.get("billing.insertParcela");
+                String sqlParcela = queryLoader.get("recebimento_parcela.create");
                 for (RecebimentoParcela parcela : faturamento.getParcelas()) {
                     parcela.setIdFaturamento(id);
                     conn.createQuery(sqlParcela).bind(parcela).executeUpdate();
@@ -94,7 +94,7 @@ public class FaturamentoService {
             return java.util.Collections.emptyList();
         }
         String sql = "SELECT parcela_id AS id, faturamento_id AS idFaturamento, numero_parcela AS numeroParcela, "
-                + "valor_parcela AS valorParcela, data_vencimento AS dataVencimento, status_pagamento AS statusPagamento "
+                + "valor_parcela AS valorParcela, data_vencimento AS dataVencimento, status_pagamento AS pagamentoStatus "
                 + "FROM recebimento_parcela WHERE faturamento_id = :id ORDER BY numero_parcela ASC";
         try (Connection conn = sql2o.open()) {
             return conn.createQuery(sql).addParameter("id", faturamentoId).executeAndFetch(RecebimentoParcela.class);
@@ -105,7 +105,7 @@ public class FaturamentoService {
      * Lógica Operacional Transacional: Executa o faturamento de múltiplas
      * sessões em lote único.
      */
-    public Integer faturarSessoesParticular(Integer idCliente, List<Sessao> sessoesAReceber, BigDecimal valorSessao, int totalParcelas) {
+    public Integer faturarSessoesParticular(Integer clienteId, List<Sessao> sessoesAReceber, BigDecimal valorSessao, int totalParcelas) {
         if (sessoesAReceber == null || sessoesAReceber.isEmpty()) {
             throw new IllegalArgumentException("Lote de sessões clínico vazio.");
         }
@@ -114,8 +114,8 @@ public class FaturamentoService {
 
         Faturamento faturaDominio = new Faturamento();
         Cliente c = new Cliente();
-        c.setId(idCliente);
-        faturaDominio.setIdCliente(idCliente);
+        c.setId(clienteId);
+        faturaDominio.setclienteId(clienteId);
         faturaDominio.setTipoFaturamento("PARTICULAR");
         faturaDominio.setStatusFaturamento("CONSOLIDADO");
         faturaDominio.setObservacoes("Pacote gerado via modelo de domínio SOM rico.");
@@ -127,7 +127,7 @@ public class FaturamentoService {
                     .executeUpdate()
                     .getKey(Integer.class);
 
-            String sqlItem = queryLoader.get("billing.insertItem");
+            String sqlItem = queryLoader.get("faturamento_item.create");
             for (Sessao sessao : sessoesAReceber) {
                 conn.createQuery(sqlItem)
                         .addParameter("idFaturamento", idFaturamentoGerado)
@@ -136,7 +136,7 @@ public class FaturamentoService {
                         .executeUpdate();
             }
 
-            String sqlParcela = queryLoader.get("billing.insertParcela");
+            String sqlParcela = queryLoader.get("recebimento_parcela.create");
             for (RecebimentoParcela parcela : faturaDominio.getParcelas()) {
                 parcela.setIdFaturamento(idFaturamentoGerado);
                 conn.createQuery(sqlParcela).bind(parcela).executeUpdate();

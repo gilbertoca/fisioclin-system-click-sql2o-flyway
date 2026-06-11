@@ -57,7 +57,7 @@ CREATE TABLE sessao (
 );
 
 -- 6. Prontuário / Evolução / Registro Clínico da Sessão
-CREATE TABLE prontuario_sessao (
+CREATE TABLE sessao_prontuario (
     prontuario_id SERIAL PRIMARY KEY,
     sessao_id INT UNIQUE NOT NULL REFERENCES sessao(sessao_id) ON DELETE CASCADE,
     data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

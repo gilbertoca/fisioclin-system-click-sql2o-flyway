@@ -20,7 +20,7 @@ public class FisioBillingService {
         this.queryLoader = queryLoader;
     }
 
-    public Integer faturarSessoesParticular(Integer idCliente, List<Sessao> sessoesAReceber, BigDecimal valorSessao, int totalParcelas) {
+    public Integer faturarSessoesParticular(Integer clienteId, List<Sessao> sessoesAReceber, BigDecimal valorSessao, int totalParcelas) {
         if (sessoesAReceber == null || sessoesAReceber.isEmpty()) {
             throw new IllegalArgumentException("Lote de sessões clínico vazio.");
         }
@@ -29,7 +29,7 @@ public class FisioBillingService {
         BigDecimal valorTotalFatura = valorSessao.multiply(BigDecimal.valueOf(sessoesAReceber.size()));
 
         Faturamento faturaDominio = new Faturamento();
-        faturaDominio.setIdCliente(idCliente);
+        faturaDominio.setclienteId(clienteId);
         faturaDominio.setTipoFaturamento("PARTICULAR");
         faturaDominio.setStatusFaturamento("CONSOLIDADO");
         faturaDominio.setObservacoes("Pacote gerado via modelo de domínio SOM rico.");
@@ -45,7 +45,7 @@ public class FisioBillingService {
                     .getKey(Integer.class);
 
             // Salva os Itens Vinculados
-            String sqlItem = queryLoader.get("billing.insertItem");
+            String sqlItem = queryLoader.get("faturamento_item.create");
             for (Sessao sessao : sessoesAReceber) {
                 conn.createQuery(sqlItem)
                         .addParameter("idFaturamento", idFaturamentoGerado)
@@ -55,7 +55,7 @@ public class FisioBillingService {
             }
 
             // Salva as Parcelas extraídas de dentro do Grafo do Objeto Faturamento
-            String sqlParcela = queryLoader.get("billing.insertParcela");
+            String sqlParcela = queryLoader.get("recebimento_parcela.create");
             for (RecebimentoParcela parcela : faturaDominio.getParcelas()) {
 
                 // Amarra o relacionamento bidirecional SOM no grafo antes de salvar

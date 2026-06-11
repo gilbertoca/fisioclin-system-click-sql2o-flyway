@@ -20,7 +20,7 @@ public class FaturamentoServiceTest {
     private QueryLoader queryLoader;
     private FaturamentoService faturamentoService;
 
-    private Integer idClienteTeste;
+    private Integer clienteIdTeste;
     private final List<Sessao> sessoesParaFaturar = new ArrayList<>();
 
     @Before
@@ -36,7 +36,7 @@ public class FaturamentoServiceTest {
     private void prepararDadosClinicosDeBase() {
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
             // 1. Cadastra o Cliente
-            this.idClienteTeste = conn.createQuery(
+            this.clienteIdTeste = conn.createQuery(
                     "INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
                     "VALUES ('Mariana Faturamento', '77788899911', '1995-05-10', '8699992222', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
@@ -51,7 +51,7 @@ public class FaturamentoServiceTest {
                 Integer idSessao = conn.createQuery(
                         "INSERT INTO sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, tipo_sessao, tipo_pagamento, status_sessao) " +
                         "VALUES (:idCli, :idProf, :idMod, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'TRATAMENTO_ROTINA', 'PARTICULAR', 'REALIZADA')", true)
-                        .addParameter("idCli", idClienteTeste)
+                        .addParameter("idCli", clienteIdTeste)
                         .addParameter("idProf", idProf)
                         .addParameter("idMod", idMod)
                         .executeUpdate().getKey(Integer.class);
@@ -71,7 +71,7 @@ public class FaturamentoServiceTest {
         int parcelasDesejadas = 2;
 
         Integer idFaturamentoGerado = faturamentoService.faturarSessoesParticular(
-                idClienteTeste, sessoesParaFaturar, valorPorSessao, parcelasDesejadas);
+                clienteIdTeste, sessoesParaFaturar, valorPorSessao, parcelasDesejadas);
 
         assertNotNull("Deve gerar um ID válido de faturamento", idFaturamentoGerado);
 

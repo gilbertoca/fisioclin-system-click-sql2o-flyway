@@ -8,25 +8,28 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.click.showcase.fisio.model.enums.FaturamentoStatus;
+import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
 
 public class Faturamento implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Integer id;
-    private Integer idCliente;
-    private String tipoFaturamento;
-    private Integer idConvenio;
+    private Integer clienteId;
+    private Integer convenioId;
     private BigDecimal valorTotalFaturado;
     private LocalDateTime dataEmissao;
-    private String statusFaturamento;
+    private PagamentoOrigem pagamentoOrigem;
+    private FaturamentoStatus faturamentoStatus;
     private String observacoes;
 
-    // Relacionamentos SOM Ricos de Composição Interna (Aggregate Elements)
+    private Convenio convenio;
+    private Cliente cliente;
     private final List<RecebimentoParcela> parcelas = new ArrayList<>();
 
     public Faturamento() {
         this.dataEmissao = LocalDateTime.now();
-        this.statusFaturamento = "ABERTO";
+        this.faturamentoStatus = FaturamentoStatus.ABERTO;
         this.valorTotalFaturado = BigDecimal.ZERO;
     }
 
@@ -73,21 +76,24 @@ public class Faturamento implements Serializable {
     // Getters e Setters Padrão
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-    public Integer getIdCliente() { return idCliente; }
-    public void setIdCliente(Integer idCliente) { this.idCliente = idCliente; }
-    public String getTipoFaturamento() { return tipoFaturamento; }
-    public void setTipoFaturamento(String tipoFaturamento) { this.tipoFaturamento = tipoFaturamento; }
-    public Integer getIdConvenio() { return idConvenio; }
-    public void setIdConvenio(Integer idConvenio) { this.idConvenio = idConvenio; }
+    public Integer getClienteId() { return clienteId; }
+    public void setclienteId(Integer clienteId) { this.clienteId = clienteId; }
+    public Integer getConvenioId() { return convenioId; }
+    public void setconvenioId(Integer convenioId) { this.convenioId = convenioId; }
     public BigDecimal getValorTotalFaturado() { return valorTotalFaturado; }
     public void setValorTotalFaturado(BigDecimal valorTotalFaturado) { this.valorTotalFaturado = valorTotalFaturado; }
     public LocalDateTime getDataEmissao() { return dataEmissao; }
     public void setDataEmissao(LocalDateTime dataEmissao) { this.dataEmissao = dataEmissao; }
-    public String getStatusFaturamento() { return statusFaturamento; }
-    public void setStatusFaturamento(String statusFaturamento) { this.statusFaturamento = statusFaturamento; }
+    public PagamentoOrigem getPagamentoOrigem() { return pagamentoOrigem; }
+    public void setPagamentoOrigem(PagamentoOrigem pagamentoOrigem) { this.pagamentoOrigem = pagamentoOrigem; }
+    public FaturamentoStatus getFaturamentoStatus() { return faturamentoStatus; }
+    public void setFaturamentoStatus(FaturamentoStatus faturamentoStatus) { this.faturamentoStatus = faturamentoStatus; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
-
+    public Convenio getConvenio() { return convenio; }
+    public void setConvenio(Convenio convenio) { this.convenio = convenio; }
+    public Cliente getCliente() { return cliente; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
     // Expõe apenas leitura para proteção do encapsulamento da lista
     public List<RecebimentoParcela> getParcelas() { return this.parcelas; }
 
@@ -95,9 +101,9 @@ public class Faturamento implements Serializable {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(this.id);
-        hash = 31 * hash + Objects.hashCode(this.idCliente);
-        hash = 31 * hash + Objects.hashCode(this.tipoFaturamento);
-        hash = 31 * hash + Objects.hashCode(this.idConvenio);
+        hash = 31 * hash + Objects.hashCode(this.clienteId);
+        hash = 31 * hash + Objects.hashCode(this.faturamentoStatus);
+        hash = 31 * hash + Objects.hashCode(this.convenioId);
         return hash;
     }
 
@@ -113,16 +119,16 @@ public class Faturamento implements Serializable {
             return false;
         }
         final Faturamento other = (Faturamento) obj;
-        if (!Objects.equals(this.tipoFaturamento, other.tipoFaturamento)) {
+        if (!Objects.equals(this.faturamentoStatus, other.faturamentoStatus)) {
             return false;
         }
         if (!Objects.equals(this.id, other.id)) {
             return false;
         }
-        if (!Objects.equals(this.idCliente, other.idCliente)) {
+        if (!Objects.equals(this.clienteId, other.clienteId)) {
             return false;
         }
-        return Objects.equals(this.idConvenio, other.idConvenio);
+        return Objects.equals(this.convenioId, other.convenioId);
     }
 
     @Override
@@ -130,12 +136,11 @@ public class Faturamento implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("Faturamento{");
         sb.append("id=").append(id);
-        sb.append(", idCliente=").append(idCliente);
-        sb.append(", tipoFaturamento=").append(tipoFaturamento);
-        sb.append(", idConvenio=").append(idConvenio);
+        sb.append(", clienteId=").append(clienteId);
+        sb.append(", convenioId=").append(convenioId);
         sb.append(", valorTotalFaturado=").append(valorTotalFaturado);
         sb.append(", dataEmissao=").append(dataEmissao);
-        sb.append(", statusFaturamento=").append(statusFaturamento);
+        sb.append(", statusFaturamento=").append(faturamentoStatus);
         sb.append(", observacoes=").append(observacoes);
         sb.append(", parcelas=").append(parcelas);
         sb.append('}');

@@ -1,0 +1,86 @@
+2026-06-11 13:59:09 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "fisio" not found; SQL statement:
+drop table if exists fisio.sessao_prontuario cascade [90079-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:632)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.command.Parser.getSchema(Parser.java:1044)
+	at org.h2.command.Parser.getSchema(Parser.java:1050)
+	at org.h2.command.Parser.parseDrop(Parser.java:2189)
+	at org.h2.command.Parser.parsePrepared(Parser.java:776)
+	at org.h2.command.Parser.parse(Parser.java:689)
+	at org.h2.command.Parser.parse(Parser.java:661)
+	at org.h2.command.Parser.prepareCommand(Parser.java:569)
+	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:631)
+	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:554)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1116)
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:237)
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:223)
+	at workbench.sql.commands.DdlCommand.execute(DdlCommand.java:156)
+	at workbench.sql.StatementRunner.runStatement(StatementRunner.java:605)
+	at workbench.gui.sql.SqlPanel.displayResult(SqlPanel.java:3620)
+	at workbench.gui.sql.SqlPanel.runStatement(SqlPanel.java:2288)
+	at workbench.gui.sql.SqlPanel$18.run(SqlPanel.java:2220)
+2026-06-11 13:59:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "fisio" not found; SQL statement:
+drop table if exists fisio.sessao_prontuario cascade [90079-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:632)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.command.Parser.getSchema(Parser.java:1044)
+	at org.h2.command.Parser.getSchema(Parser.java:1050)
+	at org.h2.command.Parser.parseDrop(Parser.java:2189)
+	at org.h2.command.Parser.parsePrepared(Parser.java:776)
+	at org.h2.command.Parser.parse(Parser.java:689)
+	at org.h2.command.Parser.parse(Parser.java:661)
+	at org.h2.command.Parser.prepareCommand(Parser.java:569)
+	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:631)
+	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:554)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1116)
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:237)
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:223)
+	at workbench.sql.commands.DdlCommand.execute(DdlCommand.java:156)
+	at workbench.sql.StatementRunner.runStatement(StatementRunner.java:605)
+	at workbench.gui.sql.SqlPanel.displayResult(SqlPanel.java:3620)
+	at workbench.gui.sql.SqlPanel.runStatement(SqlPanel.java:2288)
+	at workbench.gui.sql.SqlPanel$18.run(SqlPanel.java:2220)
+2026-06-11 14:13:03 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "unique_index_name" not found; SQL statement:
+select unique_index_name, constraint_name
+from information_schema.table_constraints 
+where constraint_type = 'UNIQUE' 
+  and (table_catalog, table_schema, table_name) = (?,?,?) [42122-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:502)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.ExpressionColumn.getColumnException(ExpressionColumn.java:244)
+	at org.h2.expression.ExpressionColumn.optimizeOther(ExpressionColumn.java:226)
+	at org.h2.expression.ExpressionColumn.optimize(ExpressionColumn.java:213)
+	at org.h2.command.query.Select.optimizeExpressionsAndPreserveAliases(Select.java:1285)
+	at org.h2.command.query.Select.prepareExpressions(Select.java:1167)
+	at org.h2.command.query.Query.prepare(Query.java:218)
+	at org.h2.command.Parser.prepareCommand(Parser.java:575)
+	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:631)
+	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:554)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1116)
+	at org.h2.jdbc.JdbcPreparedStatement.<init>(JdbcPreparedStatement.java:92)
+	at org.h2.jdbc.JdbcConnection.prepareStatement(JdbcConnection.java:288)
+	at workbench.db.h2database.H2UniqueConstraintReader.readUniqueConstraints(H2UniqueConstraintReader.java:78)
+	at workbench.db.JdbcIndexReader.getTableIndexList(JdbcIndexReader.java:889)
+	at workbench.db.JdbcIndexReader.getTableIndexList(JdbcIndexReader.java:804)
+	at workbench.db.TableSourceBuilder.getTableSource(TableSourceBuilder.java:143)
+	at workbench.db.h2database.H2TableSourceBuilder.getTableSource(H2TableSourceBuilder.java:67)
+	at workbench.gui.dbobjects.TableListPanel.retrieveTableSource(TableListPanel.java:1863)
+	at workbench.gui.dbobjects.TableListPanel.retrieveSelectedPanel(TableListPanel.java:2037)
+	at workbench.gui.dbobjects.TableListPanel.retrieveCurrentPanel(TableListPanel.java:2008)
+	at workbench.gui.dbobjects.TableListPanel$12.run(TableListPanel.java:1955)
+2026-06-11 14:13:03 jdbc[4]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select storage_type, \000a       (select [*]value from information_schema.settings where name = 'DEFAULT_TABLE_TYPE') as default_type \000afrom information_schema.tables \000awhere table_name = ? \000aand table_schema = ?"; expected "DISTINCT, ALL, *, INTERSECTS (, NOT, EXISTS, UNIQUE, INTERSECTS"; SQL statement:
+select storage_type, 
+       (select value from information_schema.settings where name = 'DEFAULT_TABLE_TYPE') as default_type 
+from information_schema.tables 
+where table_name = ? 
+and table_schema = ? [42001-214]

@@ -20,7 +20,7 @@ public class ClienteServiceTest {
     private static ClienteService clienteService;
     
     // IDs de planos de saúde criados para o cenário de teste
-    private static Integer idConvenioUnimed;
+    private static Integer convenioIdUnimed;
 
     @BeforeClass
     public static void setUp() {
@@ -38,7 +38,7 @@ public class ClienteServiceTest {
 
 
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
-            idConvenioUnimed = conn.createQuery("INSERT INTO convenio (nome, cnpj) VALUES ('Unimed Teresina', '12345678000199')", true)
+            convenioIdUnimed = conn.createQuery("INSERT INTO convenio (nome, cnpj) VALUES ('Unimed Teresina', '12345678000199')", true)
                     .executeUpdate()
                     .getKey(Integer.class);
             conn.commit();
@@ -51,7 +51,7 @@ public class ClienteServiceTest {
         // 1. TESTE DO OPERAÇÃO: CREATE (Com Convênio atrelado)
         // ------------------------------------------------------------------------
         Convenio planoUnimed = new Convenio();
-        planoUnimed.setId(idConvenioUnimed);
+        planoUnimed.setId(convenioIdUnimed);
 
         Cliente novoCliente = new Cliente();
         novoCliente.setNome("Mariana Costa Lima");
@@ -81,7 +81,7 @@ public class ClienteServiceTest {
 
         // PROVA DO GRAFO ANINHADO: O Sql2o preencheu o convênio interno do cliente de forma transparente
         assertNotNull("O objeto Convenio interno não deveria estar nulo", clientePersistido.getConvenio());
-        assertEquals(idConvenioUnimed, clientePersistido.getConvenio().getId());
+        assertEquals(convenioIdUnimed, clientePersistido.getConvenio().getId());
         assertEquals("Unimed Teresina", clientePersistido.getConvenio().getNome());
 
         // ------------------------------------------------------------------------
@@ -128,7 +128,7 @@ public class ClienteServiceTest {
         assertEquals(1, listaParaCombos.size());
         assertEquals("Unimed Teresina", listaParaCombos.get(0).getNome());
 
-        Convenio buscaIndividual = clienteService.getConvenioById(idConvenioUnimed);
+        Convenio buscaIndividual = clienteService.getConvenioById(convenioIdUnimed);
         assertNotNull(buscaIndividual);
         assertEquals("Unimed Teresina", buscaIndividual.getNome());
     }

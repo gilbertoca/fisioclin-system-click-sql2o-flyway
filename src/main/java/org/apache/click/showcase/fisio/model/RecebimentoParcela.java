@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.apache.click.showcase.fisio.model.enums.PagamentoMeio;
+import org.apache.click.showcase.fisio.model.enums.PagamentoStatus;
 
 public class RecebimentoParcela implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -15,15 +17,15 @@ public class RecebimentoParcela implements Serializable {
     private int numeroParcela;
     private BigDecimal valorParcela;
     private LocalDate dataVencimento;
-    private String statusPagamento;
+    private PagamentoStatus pagamentoStatus;
     private LocalDateTime dataPagamento;
-    private String formaPagamento;
+    private PagamentoMeio pagamentoMeio;
 
     // Relacionamento Transiente para navegação em memória/telas (Apache Click)
     private transient Faturamento faturamento;
 
     public RecebimentoParcela() {
-        this.statusPagamento = "PENDENTE";
+        this.pagamentoStatus = PagamentoStatus.PENDENTE;
         this.numeroParcela = 1;
     }
 
@@ -43,14 +45,14 @@ public class RecebimentoParcela implements Serializable {
     public LocalDate getDataVencimento() { return dataVencimento; }
     public void setDataVencimento(LocalDate dataVencimento) { this.dataVencimento = dataVencimento; }
 
-    public String getStatusPagamento() { return statusPagamento; }
-    public void setStatusPagamento(String statusPagamento) { this.statusPagamento = statusPagamento; }
+    public PagamentoStatus getStatusPagamento() { return pagamentoStatus; }
+    public void setStatusPagamento(PagamentoStatus pagamentoStatus) { this.pagamentoStatus = pagamentoStatus; }
 
     public LocalDateTime getDataPagamento() { return dataPagamento; }
     public void setDataPagamento(LocalDateTime dataPagamento) { this.dataPagamento = dataPagamento; }
 
-    public String getFormaPagamento() { return formaPagamento; }
-    public void setFormaPagamento(String formaPagamento) { this.formaPagamento = formaPagamento; }
+    public PagamentoMeio getPagamentoMeio() { return pagamentoMeio; }
+    public void setPagamentoMeio(PagamentoMeio pagamentoMeio) { this.pagamentoMeio = pagamentoMeio; }
 
     public Faturamento getFaturamento() { return faturamento; }
     public void setFaturamento(Faturamento faturamento) { this.faturamento = faturamento; }
@@ -94,9 +96,9 @@ public class RecebimentoParcela implements Serializable {
         sb.append(", numeroParcela=").append(numeroParcela);
         sb.append(", valorParcela=").append(valorParcela);
         sb.append(", dataVencimento=").append(dataVencimento);
-        sb.append(", statusPagamento=").append(statusPagamento);
+        sb.append(", pagamentoStatus=").append(pagamentoStatus);
         sb.append(", dataPagamento=").append(dataPagamento);
-        sb.append(", formaPagamento=").append(formaPagamento);
+        sb.append(", pagamentoMeio=").append(pagamentoMeio);
         sb.append(", faturamento=").append(faturamento);
         sb.append('}');
         return sb.toString();

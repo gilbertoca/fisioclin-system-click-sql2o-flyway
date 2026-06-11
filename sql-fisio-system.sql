@@ -17,6 +17,6 @@ SELECT
 FROM sessao s
 JOIN modalidade m ON s.modalidade_id = m.modalidade_id
 LEFT JOIN pagamento_sessao p ON s.sessao_id = p.sessao_id
-LEFT JOIN prontuario_sessao pr ON s.sessao_id = pr.sessao_id
+LEFT JOIN sessao_prontuario pr ON s.sessao_id = pr.sessao_id
 WHERE s.cliente_id = 1 -- Filtro dinâmico do Cliente Selecionado na sua tela Click
 ORDER BY s.data_hora_inicio DESC;

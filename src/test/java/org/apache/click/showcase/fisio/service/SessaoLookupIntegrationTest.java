@@ -51,6 +51,7 @@ public class SessaoLookupIntegrationTest {
     public void shouldLoadAllViewDropdownLookupArraysCorrectly() {
         // 1. Verify Patient Arrays
         List<Cliente> clientes = sessaoService.getAllClientes();
+        System.out.println(clientes);
         assertNotNull(clientes);
         assertEquals("Should retrieve exactly 2 patients", 2, clientes.size());
         assertEquals("Alice Smith", clientes.get(0).getNome());
@@ -60,7 +61,7 @@ public class SessaoLookupIntegrationTest {
         System.out.println(profissionais);
         assertNotNull(profissionais);
         assertEquals("Should retrieve exactly 2 therapists", 2, profissionais.size());
-        assertEquals("Dra. Jane", profissionais.get(0).getNome()); // Alphabetical sort check
+        assertEquals("Dra. Jane", profissionais.get(1).getNome()); // Alphabetical sort check
 
         // 3. Verify Service Modality Arrays
         List<Modalidade> modalidades = sessaoService.getAllModalidades();

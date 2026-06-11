@@ -23,7 +23,7 @@ public class SessaoServiceTest {
     private static SessaoService sessaoService;
 
     // IDs de referência persistidos no cenário base
-    private static Integer idCliente;
+    private static Integer clienteId;
     private static Integer idProfissional;
     private static Integer idModalidade;
 
@@ -48,7 +48,7 @@ public class SessaoServiceTest {
         try (Connection conn = dsManager.getSql2o().beginTransaction()) {
             
             // 1. Cadastra Cliente Ator
-            idCliente = conn.createQuery(
+            clienteId = conn.createQuery(
                     "INSERT INTO cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
                     "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
@@ -73,7 +73,7 @@ public class SessaoServiceTest {
         LocalDateTime horarioDesejado = LocalDate.of(1993, 9, 22).atTime(14, 0);
 
         // Instancia os modelos ricos de domínio com seus respectivos IDs
-        Cliente cliente = new Cliente(); cliente.setId(idCliente);
+        Cliente cliente = new Cliente(); cliente.setId(clienteId);
         Profissional profissional = new Profissional(); profissional.setId(idProfissional);
         Modalidade modalidade = new Modalidade(); modalidade.setId(idModalidade);
 
@@ -116,7 +116,7 @@ public class SessaoServiceTest {
     public void deveBloquearAgendamentoSeHouverConflitoDeHorarioDoTerapeuta() {
         LocalDateTime horarioBase = LocalDate.of(1993, 9, 23).atTime(16, 0);
 
-        Cliente c = new Cliente(); c.setId(idCliente);
+        Cliente c = new Cliente(); c.setId(clienteId);
         Profissional p = new Profissional(); p.setId(idProfissional);
         Modalidade m = new Modalidade(); m.setId(idModalidade);
 

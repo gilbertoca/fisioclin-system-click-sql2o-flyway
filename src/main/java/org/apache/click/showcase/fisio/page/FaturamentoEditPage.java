@@ -53,7 +53,7 @@ public class FaturamentoEditPage extends LayoutPage {
         colValPart.setDecorator((row, context) -> "R$ " + ((RecebimentoParcela) row).getValorParcela().toString());
         tabelaParcelas.addColumn(colValPart);
         
-        tabelaParcelas.addColumn(new Column("statusPagamento", "Status Liquidação"));
+        tabelaParcelas.addColumn(new Column("pagamentoStatus", "Status Liquidação"));
         addControl(tabelaParcelas);
     }
 
@@ -86,7 +86,7 @@ public class FaturamentoEditPage extends LayoutPage {
             Faturamento target = faturamentoService.get(Integer.valueOf(idParam));
             if (target != null) {
                 fieldId.setValue(target.getId().toString());
-                selectCliente.setValue(target.getIdCliente().toString());
+                selectCliente.setValue(target.getClienteId().toString());
                 selectTipo.setValue(target.getTipoFaturamento());
                 campoValor.setValue(target.getValorTotalFaturado().toString());
                 campoObservacoes.setValue(target.getObservacoes());
@@ -114,7 +114,7 @@ public class FaturamentoEditPage extends LayoutPage {
                 Cliente c = new Cliente();
                 c.setId(Integer.valueOf(selectCliente.getValue()));
                 
-                fatura.setIdCliente(Integer.valueOf(selectCliente.getValue()));
+                fatura.setclienteId(Integer.valueOf(selectCliente.getValue()));
 
                 BigDecimal montante = new BigDecimal(campoValor.getValue());
                 int parcelas = Integer.parseInt(selectParcelas.getValue());
