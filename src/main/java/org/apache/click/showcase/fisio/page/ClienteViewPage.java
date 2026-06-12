@@ -17,7 +17,7 @@ public class ClienteViewPage extends LayoutPage {
     // Inline Row Action Link
     protected ActionLink linkDelete = new ActionLink("linkDelete", "Excluir", this, "onDeleteClick");
 
-    private ClienteService clienteService;
+    private ClienteService clienteService = new ClienteService();
 
     public ClienteViewPage() {
        

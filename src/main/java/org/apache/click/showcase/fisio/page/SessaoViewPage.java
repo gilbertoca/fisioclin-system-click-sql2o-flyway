@@ -13,15 +13,13 @@ import java.time.format.DateTimeFormatter;
 public class SessaoViewPage extends LayoutPage {
     private static final long serialVersionUID = 1L;
 
-    // Componentes de controle nativos
     protected Table table = new Table("table");
     protected PageLink linkNew = new PageLink("linkNew", "Novo Agendamento", SessaoEditPage.class);
     protected ActionLink linkDelete = new ActionLink("linkDelete", "Excluir", this, "onDeleteClick");
 
-    private SessaoService sessaoService;
+    private final SessaoService sessaoService = new SessaoService();
 
     public SessaoViewPage() {
-        // Vincula as colunas navegando no Grafo Rico SOM/DNC
         Column colHorario = new Column("dataHoraInicio", "Horário");
         colHorario.setDecorator((row, context) -> {
             Sessao s = (Sessao) row;
@@ -53,19 +51,13 @@ public class SessaoViewPage extends LayoutPage {
         table.addColumn(new Column("sessaoTipo", "Objetivo"));
         table.addColumn(new Column("sessaoStatus", "Status"));
 
-        // Coluna de Ações Inline nativa
         Column colActions = new Column("acoes", "Ações");
         colActions.setDecorator((row, context) -> {
             Sessao s = (Sessao) row;
             String idStr = s.getId().toString();
-            
             String editUrl = context.getPagePath(SessaoEditPage.class) + "?id=" + idStr;
-            
             linkDelete.setValue(idStr);
-            String deleteHtml = linkDelete.toString();
-            
-            return "<a href='" + editUrl + "' style='margin-right: 10px;'>Editar</a>" +
-                   "<span onclick=\"return confirm('Deseja cancelar esta sessão?')\">" + deleteHtml + "</span>";
+            return "<a href='" + editUrl + "' style='margin-right: 10px;'>Editar</a>" + linkDelete.toString();
         });
         table.addColumn(colActions);
 
@@ -76,17 +68,15 @@ public class SessaoViewPage extends LayoutPage {
 
     public boolean onDeleteClick() {
         Integer targetId = linkDelete.getValueInteger();
-        if (targetId != null && sessaoService != null) {
+        if (targetId != null) {
             sessaoService.delete(targetId);
         }
-        return true;
+        return true; 
     }
 
     @Override
     public void onRender() {
         super.onRender();
-        if (sessaoService != null) {
-            table.setRowList(sessaoService.listarAgendaDoDia(LocalDate.now()));
-        }
+        table.setRowList(sessaoService.listarAgendaDoDia(LocalDate.now()));
     }
 }

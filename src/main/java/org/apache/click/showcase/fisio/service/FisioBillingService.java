@@ -5,23 +5,17 @@ import org.apache.click.showcase.fisio.model.Faturamento;
 import org.apache.click.showcase.fisio.model.RecebimentoParcela;
 import org.apache.click.showcase.fisio.model.Sessao;
 import org.sql2o.Connection;
-import org.sql2o.Sql2o;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.click.showcase.fisio.infra.DataSourceManager;
 import org.apache.click.showcase.fisio.model.enums.FaturamentoStatus;
 import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
 
 public class FisioBillingService {
 
-    private final Sql2o sql2o;
-    private final QueryLoader queryLoader;
-
-    public FisioBillingService(Sql2o sql2o, QueryLoader queryLoader) {
-        this.sql2o = sql2o;
-        this.queryLoader = queryLoader;
-    }
-
+    public FisioBillingService() { }
+    
     public Integer faturarSessoesParticular(Integer clienteId, List<Sessao> sessoesAReceber, BigDecimal valorSessao, int totalParcelas) {
         if (sessoesAReceber == null || sessoesAReceber.isEmpty()) {
             throw new IllegalArgumentException("Lote de sessões clínico vazio.");
@@ -38,16 +32,16 @@ public class FisioBillingService {
         faturaDominio.gerarParcelasParticionadas(valorTotalFatura, totalParcelas); // Encapsulamento em ação!
 
         // 2. Orquestração da Persistência Atômica no Banco de Dados
-        try (Connection conn = sql2o.beginTransaction()) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
 
             // Salva o Cabeçalho principal
-            Integer idFaturamentoGerado = conn.createQuery(queryLoader.get("billing.insertFaturamento"), true)
+            Integer idFaturamentoGerado = conn.createQuery(QueryLoader.get("billing.insertFaturamento"), true)
                     .bind(faturaDominio)
                     .executeUpdate()
                     .getKey(Integer.class);
 
             // Salva os Itens Vinculados
-            String sqlItem = queryLoader.get("faturamento_item.create");
+            String sqlItem = QueryLoader.get("faturamento_item.create");
             for (Sessao sessao : sessoesAReceber) {
                 conn.createQuery(sqlItem)
                         .addParameter("idFaturamento", idFaturamentoGerado)
@@ -57,7 +51,7 @@ public class FisioBillingService {
             }
 
             // Salva as Parcelas extraídas de dentro do Grafo do Objeto Faturamento
-            String sqlParcela = queryLoader.get("recebimento_parcela.create");
+            String sqlParcela = QueryLoader.get("recebimento_parcela.create");
             for (RecebimentoParcela parcela : faturaDominio.getParcelas()) {
 
                 // Amarra o relacionamento bidirecional SOM no grafo antes de salvar

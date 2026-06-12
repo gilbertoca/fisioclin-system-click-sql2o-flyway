@@ -1,7 +1,6 @@
 package org.apache.click.showcase.fisio.service;
 
 import org.apache.click.showcase.fisio.infra.DataSourceManager;
-import org.apache.click.showcase.fisio.infra.QueryLoader;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Convenio;
 import org.junit.Test;
@@ -16,7 +15,6 @@ import org.junit.BeforeClass;
 
 public class ClienteServiceTest {
 
-    private static DataSourceManager dsManager;
     private static ClienteService clienteService;
     
     // IDs de planos de saúde criados para o cenário de teste
@@ -26,18 +24,16 @@ public class ClienteServiceTest {
     public static void setUp() {
         // Inicialização do banco em memória isolado para os testes de cliente
         String jdbcUrl = "jdbc:h2:mem:fisio_cliente_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
-        dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
-        
-        QueryLoader queryLoader = new QueryLoader("queries.properties");
-        
+        DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
+        DataSourceManager.runMigrations();        
         // Instanciação direta do Serviço Unificado (Sem camadas intermediárias de Repository)
-        clienteService = new ClienteService(dsManager.getSql2o(), queryLoader);
+        clienteService = new ClienteService();
 
     
        //Insere os dados básicos de convênio para testar a associação do grafo rico.
 
 
-        try (Connection conn = dsManager.getSql2o().beginTransaction()) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             convenioIdUnimed = conn.createQuery("INSERT INTO fisio.convenio (nome, cnpj) VALUES ('Unimed Teresina', '12345678000199')", true)
                     .executeUpdate()
                     .getKey(Integer.class);
@@ -108,7 +104,7 @@ public class ClienteServiceTest {
     @Test
     public void deveBuscarClientesFiltandoPeloPadraoLikeNoNome() {
         // Insere 2 clientes distintos para testar a busca textual
-        try (Connection conn = dsManager.getSql2o().open()) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
             conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
             conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
         }
@@ -135,8 +131,6 @@ public class ClienteServiceTest {
 
     @AfterClass
     public static void tearDown() {
-        if (dsManager != null) {
-            dsManager.close();
-        }
+        DataSourceManager.shutdown();
     }
 }

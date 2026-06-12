@@ -6,7 +6,6 @@ import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Convenio;
 import org.apache.click.showcase.fisio.service.ClienteService;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -27,7 +26,7 @@ public class ClienteEditPage extends LayoutPage {
     protected Submit botaoSalvar = new Submit("salvar", "Salvar Registro", this, "onSalvarClick");
     protected PageLink linkCancelar = new PageLink("linkCancelar", "Voltar", ClienteViewPage.class);
 
-    private ClienteService clienteService;
+    private ClienteService clienteService = new ClienteService();
 
     public ClienteEditPage() {
         form.setAttribute("class", "pure-form pure-form-stacked");
@@ -47,8 +46,6 @@ public class ClienteEditPage extends LayoutPage {
     public void onInit() {
         super.onInit();
         campoDataNascimento.setFormatPattern("dd/MM/yyyy");
-
-        if (clienteService == null) return;
 
         // Populate dropdown lookup metrics
         selectConvenio.getOptionList().clear();

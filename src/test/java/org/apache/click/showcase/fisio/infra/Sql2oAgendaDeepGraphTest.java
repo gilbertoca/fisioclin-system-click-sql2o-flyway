@@ -14,20 +14,17 @@ import static org.junit.Assert.*;
 
 public class Sql2oAgendaDeepGraphTest {
 
-    private DataSourceManager dsManager;
-    private QueryLoader queryLoader;
-
     @Before
     public void setUp() {
         String jdbcUrl = "jdbc:h2:mem:fisio_deep_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
-        this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
-        this.queryLoader = new QueryLoader("queries.properties");
+        DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
+        DataSourceManager.runMigrations();
 
         seedCompleteScenario();
     }
 
     private void seedCompleteScenario() {
-        try (Connection conn = dsManager.getSql2o().beginTransaction()) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // 1. Inserir Convênio
             Integer idConv = conn.createQuery("INSERT INTO fisio.convenio (nome, cnpj) VALUES (:nome, :cnpj)", true)
                     .addParameter("nome", "Amil Saúde")
@@ -73,9 +70,9 @@ public class Sql2oAgendaDeepGraphTest {
 
     @Test
     public void deveCarregarGrafoProfundamenteAninhadoUsandoPropertiesExterno() {
-        String sql = queryLoader.get("sessao.findGridAgenda");
+        String sql = QueryLoader.get("sessao.findGridAgenda");
 
-        try (Connection conn = dsManager.getSql2o().open()) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
         List<Sessao> agenda = conn.createQuery(sql)
                 // Passa o valor exato (Hoje às 08:00) para bater com a igualdade do WHERE
                 .addParameter("dataFiltro", LocalDateTime.of(2016, 5, 5, 13, 30))
@@ -108,8 +105,6 @@ public class Sql2oAgendaDeepGraphTest {
 
     @After
     public void tearDown() {
-        if (this.dsManager != null) {
-            this.dsManager.close();
-        }
+        DataSourceManager.shutdown();
     }
 }

@@ -3,5 +3,5 @@
 
     <pages package="org.apache.click.showcase.fisio.page"/>
     
-    <mode value="development"/>
+    <mode value="debug"/>
 </click-app>

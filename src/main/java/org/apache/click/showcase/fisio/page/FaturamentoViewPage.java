@@ -14,7 +14,7 @@ public class FaturamentoViewPage extends LayoutPage {
     protected Table table = new Table("table");
     protected PageLink linkNew = new PageLink("linkNew", "Emitir Novo Faturamento", FaturamentoEditPage.class);
 
-    private FaturamentoService faturamentoService;
+    private FaturamentoService faturamentoService = new FaturamentoService();
 
     public FaturamentoViewPage() {
         this.table.setWidth("100%");

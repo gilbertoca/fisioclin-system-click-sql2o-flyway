@@ -1,25 +1,19 @@
 package org.apache.click.showcase.fisio.service;
 
-import org.apache.click.showcase.fisio.infra.QueryLoader;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Modalidade;
 import org.apache.click.showcase.fisio.model.Profissional;
 import org.apache.click.showcase.fisio.model.Sessao;
-import org.sql2o.Connection;
-import org.sql2o.Sql2o;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.click.showcase.fisio.infra.DataSourceManager;
+import org.apache.click.showcase.fisio.infra.QueryLoader;
+import org.sql2o.Connection;
 
 public class SessaoService {
 
-    private final Sql2o sql2o;
-    private final QueryLoader queryLoader;
-
-    public SessaoService(Sql2o sql2o, QueryLoader queryLoader) {
-        this.sql2o = sql2o;
-        this.queryLoader = queryLoader;
-    }
-
+    public SessaoService() {}
+    
     // ============================================================================
     // RICH RELATIONSHIP LOOKUP HELPERS FOR MULTI-ENTITY VIEW BINDING
     // ============================================================================
@@ -27,14 +21,14 @@ public class SessaoService {
         if (id == null) {
             return null;
         }
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("cliente.get")).addParameter("id", id).executeAndFetchFirst(Cliente.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("cliente.get")).addParameter("id", id).executeAndFetchFirst(Cliente.class);
         }
     }
 
     public List<Cliente> getAllClientes() {
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("cliente.getAll")).executeAndFetch(Cliente.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("cliente.getAll")).executeAndFetch(Cliente.class);
         }
     }
 
@@ -42,14 +36,14 @@ public class SessaoService {
         if (id == null) {
             return null;
         }
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("profissional.get")).addParameter("id", id).executeAndFetchFirst(Profissional.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("profissional.get")).addParameter("id", id).executeAndFetchFirst(Profissional.class);
         }
     }
 
     public List<Profissional> getAllProfissionais() {
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("profissional.getAll")).executeAndFetch(Profissional.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("profissional.getAll")).executeAndFetch(Profissional.class);
         }
     }
 
@@ -57,14 +51,14 @@ public class SessaoService {
         if (id == null) {
             return null;
         }
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("modalidade.get")).addParameter("id", id).executeAndFetchFirst(Modalidade.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("modalidade.get")).addParameter("id", id).executeAndFetchFirst(Modalidade.class);
         }
     }
 
     public List<Modalidade> getAllModalidades() {
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("modalidade.getAll")).executeAndFetch(Modalidade.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("modalidade.getAll")).executeAndFetch(Modalidade.class);
         }
     }
 
@@ -75,19 +69,19 @@ public class SessaoService {
         if (id == null) {
             return null;
         }
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("sessao.get")).addParameter("id", id).executeAndFetchFirst(Sessao.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("sessao.get")).addParameter("id", id).executeAndFetchFirst(Sessao.class);
         }
     }
 
     public List<Sessao> listarAgendaDoDia(LocalDate dataFiltro) {
-        try (Connection conn = sql2o.open()) {
-            return conn.createQuery(queryLoader.get("sessao.findGridAgenda")).addParameter("dataFiltro", dataFiltro).executeAndFetch(Sessao.class);
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("sessao.findGridAgenda")).addParameter("dataFiltro", dataFiltro).executeAndFetch(Sessao.class);
         }
     }
 
     public void create(Sessao sessao) {
-        try (Connection conn = sql2o.open()) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
             // 1. Guard validations reusing our clean internal lookup methods
             if (sessao.getCliente() == null || getClienteById(sessao.getCliente().getId()) == null) {
                 throw new IllegalArgumentException("Operação cancelada: O cliente informado não existe.");
@@ -99,8 +93,8 @@ public class SessaoService {
                 throw new IllegalArgumentException("Operação cancelada: A Modalidade informado não existe.");
             }
             // Concurrency boundary validation: prevents overlapping slots
-            Long conflicts = conn.createQuery(queryLoader.get("sessao.verificarConflitoHorario"))
-                    .addParameter("idProfissional", sessao.getProfissional().getId())
+            Long conflicts = conn.createQuery(QueryLoader.get("sessao.verificarConflitoHorario"))
+                    .addParameter("profissionalId", sessao.getProfissional().getId())
                     .addParameter("dataHoraInicio", sessao.getDataHoraInicio())
                     .addParameter("dataHoraFim", sessao.getDataHoraFim())
                     .executeScalar(Long.class);
@@ -109,19 +103,19 @@ public class SessaoService {
                 throw new IllegalStateException("O profissional já possui atendimento neste horário.");
             }
 
-            conn.createQuery(queryLoader.get("sessao.create")).bind(sessao).executeUpdate();
+            conn.createQuery(QueryLoader.get("sessao.create")).bind(sessao).executeUpdate();
         }
     }
 
     public void update(Sessao sessao) {
-        try (Connection conn = sql2o.open()) {
-            conn.createQuery(queryLoader.get("sessao.update")).bind(sessao).executeUpdate();
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            conn.createQuery(QueryLoader.get("sessao.update")).bind(sessao).executeUpdate();
         }
     }
 
     public void delete(Integer id) {
-        try (Connection conn = sql2o.open()) {
-            conn.createQuery(queryLoader.get("sessao.delete")).addParameter("id", id).executeUpdate();
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            conn.createQuery(QueryLoader.get("sessao.delete")).addParameter("id", id).executeUpdate();
         }
     }
 }

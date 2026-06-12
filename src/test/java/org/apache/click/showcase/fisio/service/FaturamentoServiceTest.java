@@ -1,7 +1,6 @@
 package org.apache.click.showcase.fisio.service;
 
 import org.apache.click.showcase.fisio.infra.DataSourceManager;
-import org.apache.click.showcase.fisio.infra.QueryLoader;
 import org.apache.click.showcase.fisio.model.Sessao;
 import org.junit.After;
 import org.junit.Before;
@@ -17,8 +16,6 @@ import static org.junit.Assert.*;
 
 public class FaturamentoServiceTest {
 
-    private DataSourceManager dsManager;
-    private QueryLoader queryLoader;
     private FaturamentoService faturamentoService;
 
     private Integer clienteIdTeste;
@@ -27,15 +24,15 @@ public class FaturamentoServiceTest {
     @Before
     public void setUp() {
         String jdbcUrl = "jdbc:h2:mem:fisio_billing_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
-        this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
-        this.queryLoader = new QueryLoader("queries.properties");
-        this.faturamentoService = new FaturamentoService(dsManager.getSql2o(), queryLoader);
+        DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
+        DataSourceManager.runMigrations();        
+        faturamentoService = new FaturamentoService();
 
         prepararDadosClinicosDeBase();
     }
 
     private void prepararDadosClinicosDeBase() {
-        try (Connection conn = dsManager.getSql2o().beginTransaction()) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // 1. Cadastra o Cliente
             this.clienteIdTeste = conn.createQuery(
                     "INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
@@ -77,7 +74,7 @@ public class FaturamentoServiceTest {
         assertNotNull("Deve gerar um ID válido de faturamento", idFaturamentoGerado);
 
         // Verificação Física no banco de dados para auditar a consistência da transação ACID
-        try (Connection conn = dsManager.getSql2o().open()) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
 
             // 1. Verifica se o cabeçalho bate com o somatório correto
             BigDecimal totalFaturadoNoBanco = conn.createQuery("SELECT valor_total_faturado FROM fisio.faturamento WHERE faturamento_id = :id")
@@ -104,8 +101,6 @@ public class FaturamentoServiceTest {
 
     @After
     public void tearDown() {
-        if (this.dsManager != null) {
-            this.dsManager.close();
-        }
+        DataSourceManager.shutdown();
     }
 }

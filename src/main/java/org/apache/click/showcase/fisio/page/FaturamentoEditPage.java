@@ -26,7 +26,7 @@ public class FaturamentoEditPage extends LayoutPage {
     // Sub-Installment Grid Component (Rendered only during READ/EDIT mode)
     protected Table tabelaParcelas = new Table("tabelaParcelas");
 
-    private FaturamentoService faturamentoService;
+    private FaturamentoService faturamentoService = new FaturamentoService();
 
     public FaturamentoEditPage() {
         form.add(fieldId);
@@ -60,8 +60,6 @@ public class FaturamentoEditPage extends LayoutPage {
     @Override
     public void onInit() {
         super.onInit();
-
-        if (faturamentoService == null) return;
 
         // Populate independent dropdown data fields
         selectCliente.getOptionList().clear();

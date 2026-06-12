@@ -7,7 +7,8 @@ import org.apache.click.showcase.fisio.model.Modalidade;
 import org.apache.click.showcase.fisio.model.Profissional;
 import org.apache.click.showcase.fisio.model.Sessao;
 import org.apache.click.showcase.fisio.service.SessaoService;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -16,10 +17,12 @@ import org.apache.click.showcase.fisio.model.enums.SessaoStatus;
 import org.apache.click.showcase.fisio.model.enums.SessaoTipo;
 
 public class SessaoEditPage extends LayoutPage {
+
+    private static final Logger logger = LoggerFactory.getLogger(SessaoEditPage.class);
     private static final long serialVersionUID = 1L;
 
     protected HiddenField fieldId = new HiddenField("id", Integer.class);
-    
+
     protected Form form = new Form("form");
     protected Select selectCliente = new Select("clienteId", "Cliente:", true);
     protected Select selectProfissional = new Select("profissionalId", "Fisioterapeuta:", true);
@@ -32,9 +35,10 @@ public class SessaoEditPage extends LayoutPage {
     protected Submit botaoSalvar = new Submit("salvar", "Confirmar Agendamento", this, "onSalvarClick");
     protected PageLink linkCancelar = new PageLink("linkCancelar", "Voltar", SessaoViewPage.class);
 
-    private SessaoService sessaoService;
+    private SessaoService sessaoService = new SessaoService();
 
     public SessaoEditPage() {
+        logger.debug("Executando o construtor");
         form.add(fieldId);
         form.add(selectCliente);
         form.add(selectProfissional);
@@ -51,9 +55,9 @@ public class SessaoEditPage extends LayoutPage {
     @Override
     public void onInit() {
         super.onInit();
+        logger.debug("Executando o onInit");
+        System.out.println("[DEBUG-CLICK] Executando o onInit da SessaoEditPage");
         campoData.setFormatPattern("dd/MM/yyyy");
-
-        if (sessaoService == null) return;
 
         // Carga dinâmica dos seletores via helpers do modelo rico
         selectCliente.getOptionList().clear();
@@ -109,40 +113,45 @@ public class SessaoEditPage extends LayoutPage {
     }
 
     public boolean onSalvarClick() {
+        logger.debug("Executando o onSalvarClick");
+        System.out.println("[DEBUG-CLICK] >>> ENTROU NO MÉTODO onSalvarClick! <<<");
+        System.out.println("[DEBUG-CLICK] O formulário é válido? " + form.isValid());
+
         if (form.isValid()) {
-            try {
-                Date dataSelecionada = campoData.getDate();
-                String[] hm = selectHorario.getValue().split(":");
-                LocalDateTime inicio = dataSelecionada.toInstant()
-                        .atZone(ZoneId.systemDefault()).toLocalDate()
-                        .atTime(Integer.parseInt(hm[0]), Integer.parseInt(hm[1]));
+            Date dataSelecionada = campoData.getDate();
+            String[] hm = selectHorario.getValue().split(":");
+            LocalDateTime inicio = dataSelecionada.toInstant()
+                    .atZone(ZoneId.systemDefault()).toLocalDate()
+                    .atTime(Integer.parseInt(hm[0]), Integer.parseInt(hm[1]));
 
-                // Constrói o Grafo de Objetos Rico
-                Sessao s = new Sessao();
-                s.setDataHoraInicio(inicio);
-                s.setDataHoraFim(inicio.plusMinutes(50));
-                s.setSessaoStatus(SessaoStatus.valueOf(selectStatus.getValue()));
-                s.setObservacoesRecepcao(campoObservacoes.getValue());
-                s.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
-                s.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+            // Constrói o Grafo de Objetos Rico
+            Sessao s = new Sessao();
+            s.setDataHoraInicio(inicio);
+            s.setDataHoraFim(inicio.plusMinutes(50));
+            s.setSessaoStatus(SessaoStatus.valueOf(selectStatus.getValue()));
+            s.setObservacoesRecepcao(campoObservacoes.getValue());
+            s.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+            s.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
 
-                Cliente c = new Cliente(); c.setId(Integer.valueOf(selectCliente.getValue())); s.setCliente(c);
-                Profissional p = new Profissional(); p.setId(Integer.valueOf(selectProfissional.getValue())); s.setProfissional(p);
-                Modalidade m = new Modalidade(); m.setId(Integer.valueOf(selectModalidade.getValue())); s.setModalidade(m);
+            Cliente c = new Cliente();
+            c.setId(Integer.valueOf(selectCliente.getValue()));
+            s.setCliente(c);
+            Profissional p = new Profissional();
+            p.setId(Integer.valueOf(selectProfissional.getValue()));
+            s.setProfissional(p);
+            Modalidade m = new Modalidade();
+            m.setId(Integer.valueOf(selectModalidade.getValue()));
+            s.setModalidade(m);
 
-                String activeId = fieldId.getValue();
-                if (activeId != null && !activeId.trim().isEmpty()) {
-                    s.setId(Integer.valueOf(activeId));
-                    sessaoService.update(s);
-                } else {
-                    sessaoService.create(s);
-                }
-
-                setRedirect(SessaoViewPage.class);
-                return false;
-            } catch (Exception ex) {
-                form.setError("Conflito detectado: " + ex.getMessage());
+            String activeId = fieldId.getValue();
+            if (activeId != null && !activeId.trim().isEmpty()) {
+                s.setId(Integer.valueOf(activeId));
+                sessaoService.update(s);
+            } else {
+                sessaoService.create(s);
             }
+            setRedirect(SessaoViewPage.class);
+            return false;
         }
         return true;
     }

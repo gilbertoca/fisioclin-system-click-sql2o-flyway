@@ -1,7 +1,6 @@
 package org.apache.click.showcase.fisio.service;
 
 import org.apache.click.showcase.fisio.infra.DataSourceManager;
-import org.apache.click.showcase.fisio.infra.QueryLoader;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Modalidade;
 import org.apache.click.showcase.fisio.model.Profissional;
@@ -22,7 +21,6 @@ import org.junit.BeforeClass;
 
 public class SessaoServiceTest {
 
-    private static DataSourceManager dsManager;
     private static SessaoService sessaoService;
 
     // IDs de referência persistidos no cenário base
@@ -34,12 +32,10 @@ public class SessaoServiceTest {
     public static void setUp() {
         // Inicializa banco em memória compatível com Postgres
         String jdbcUrl = "jdbc:h2:mem:fisio_sessao_service_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
-        dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
-        
-        QueryLoader queryLoader = new QueryLoader("queries.properties");
-        
+        DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
+        DataSourceManager.runMigrations();                
         // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
-        sessaoService = new SessaoService(dsManager.getSql2o(), queryLoader);
+        sessaoService = new SessaoService();
 
         seedCenarioOperacionalBase();
     }
@@ -48,7 +44,7 @@ public class SessaoServiceTest {
      * Alimenta o banco com os Atores e Contextos obrigatórios para as FKs.
      */
     private static void seedCenarioOperacionalBase() {
-        try (Connection conn = dsManager.getSql2o().beginTransaction()) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             
             // 1. Cadastra Cliente Ator
             clienteId = conn.createQuery(
@@ -179,8 +175,6 @@ public class SessaoServiceTest {
 
     @AfterClass
     public static void tearDown() {
-        if (dsManager != null) {
-            dsManager.close();
-        }
+        DataSourceManager.shutdown();
     }
 }

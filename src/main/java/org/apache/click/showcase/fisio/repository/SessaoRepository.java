@@ -3,24 +3,18 @@ package org.apache.click.showcase.fisio.repository;
 import org.apache.click.showcase.fisio.infra.QueryLoader;
 import org.apache.click.showcase.fisio.model.Sessao;
 import org.sql2o.Connection;
-import org.sql2o.Sql2o;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.click.showcase.fisio.infra.DataSourceManager;
 
 public class SessaoRepository {
 
-    private final Sql2o sql2o;
-    private final QueryLoader queryLoader;
-
-    public SessaoRepository(Sql2o sql2o, QueryLoader queryLoader) {
-        this.sql2o = sql2o;
-        this.queryLoader = queryLoader;
-    }
-
+    public SessaoRepository() {  }
+    
     public boolean possuiConflitoHorario(Sessao sessao) {
-        String sql = queryLoader.get("sessao.verificarConflitoHorario");
-        try (Connection conn = sql2o.open()) {
+        String sql = QueryLoader.get("sessao.verificarConflitoHorario");
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
             Long conflitos = conn.createQuery(sql)
                     .bind(sessao)
                     .executeScalar(Long.class);
@@ -29,8 +23,8 @@ public class SessaoRepository {
     }
 
     public List<Sessao> buscarGridAgendaDoDia(LocalDate dataFiltro) {
-        String sql = queryLoader.get("sessao.findGridAgenda");
-        try (Connection conn = sql2o.open()) {
+        String sql = QueryLoader.get("sessao.findGridAgenda");
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
             return conn.createQuery(sql)
                     .addParameter("dataFiltro", dataFiltro)
                     .executeAndFetch(Sessao.class);
@@ -38,8 +32,8 @@ public class SessaoRepository {
     }
 
     public void salvar(Sessao sessao) {
-        String sql = queryLoader.get("sessao.create");
-        try (Connection conn = sql2o.open()) {
+        String sql = QueryLoader.get("sessao.create");
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
             conn.createQuery(sql)
                     .bind(sessao)
                     .executeUpdate();

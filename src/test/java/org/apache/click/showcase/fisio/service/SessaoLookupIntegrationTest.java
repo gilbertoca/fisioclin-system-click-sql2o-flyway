@@ -1,7 +1,6 @@
 package org.apache.click.showcase.fisio.service;
 
 import org.apache.click.showcase.fisio.infra.DataSourceManager;
-import org.apache.click.showcase.fisio.infra.QueryLoader;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Modalidade;
 import org.apache.click.showcase.fisio.model.Profissional;
@@ -16,21 +15,20 @@ import static org.junit.Assert.*;
 
 public class SessaoLookupIntegrationTest {
 
-    private DataSourceManager dsManager;
     private SessaoService sessaoService;
 
     @Before
     public void setUp() {
         String jdbcUrl = "jdbc:h2:mem:fisio_lookup_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
-        this.dsManager = new DataSourceManager(jdbcUrl, "sa", "", "org.h2.Driver");
-        QueryLoader queryLoader = new QueryLoader("queries.properties");
-        this.sessaoService = new SessaoService(dsManager.getSql2o(), queryLoader);
+        DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
+        DataSourceManager.runMigrations();        
+        sessaoService = new SessaoService();
 
         seedLookupRecords();
     }
 
     private void seedLookupRecords() {
-        try (Connection conn = dsManager.getSql2o().beginTransaction()) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // Seed 2 distinct patients (Actors)
             conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
             conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
@@ -72,8 +70,6 @@ public class SessaoLookupIntegrationTest {
 
     @After
     public void tearDown() {
-        if (this.dsManager != null) {
-            this.dsManager.close();
-        }
+        DataSourceManager.shutdown();
     }
 }
