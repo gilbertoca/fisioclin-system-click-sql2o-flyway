@@ -2,6 +2,6 @@
 <click-app>
 
     <pages package="org.apache.click.showcase.fisio.page"/>
-    
+    <resource-service  classname="org.apache.click.service.BasicResourceService"/>
     <mode value="debug"/>
 </click-app>

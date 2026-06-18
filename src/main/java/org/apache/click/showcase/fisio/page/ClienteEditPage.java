@@ -64,7 +64,8 @@ public class ClienteEditPage extends LayoutPage {
             Cliente target = clienteService.get(Integer.valueOf(idParam));
             if (target != null) {
                 // Populate flat property layout parameters into form view
-                fieldId.setValue(target.getId().toString());
+                form.copyFrom(target);
+                /*fieldId.setValue(target.getId().toString());
                 campoNome.setValue(target.getNome());
                 campoCpf.setValue(target.getCpf());
                 campoTelefone.setValue(target.getTelefone());
@@ -76,7 +77,7 @@ public class ClienteEditPage extends LayoutPage {
                 }
                 if (target.getConvenio() != null) {
                     selectConvenio.setValue(target.getConvenio().getId().toString());
-                }
+                }*/
             }
         }
     }
