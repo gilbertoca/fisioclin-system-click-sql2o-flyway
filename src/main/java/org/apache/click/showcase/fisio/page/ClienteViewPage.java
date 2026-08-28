@@ -7,24 +7,33 @@ import org.apache.click.control.Table;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.service.ClienteService;
 
-public class ClienteViewPage extends LayoutPage {
+public class ClienteViewPage extends LeiautePage {
+
     private static final long serialVersionUID = 1L;
 
     // Grid Components
     protected Table table = new Table("table");
     protected PageLink linkNew = new PageLink("linkNew", "Cadastrar Paciente", ClienteEditPage.class);
-    
+
     // Inline Row Action Link
     protected ActionLink linkDelete = new ActionLink("linkDelete", "Excluir", this, "onDeleteClick");
 
     private ClienteService clienteService = new ClienteService();
 
     public ClienteViewPage() {
-       
+        linkNew.addStyleClass("button is-primary mb-3");
+
+        table.addStyleClass("table");
+        table.addStyleClass("is-fullwidth");
+        table.addStyleClass("is-striped");
+        table.addStyleClass("is-hoverable");
+        table.setPageSize(10);
+        table.setSortable(true);
+
         table.addColumn(new Column("nome", "Nome"));
         table.addColumn(new Column("cpf", "CPF"));
         table.addColumn(new Column("telefone", "Telefone"));
-        
+
         // Relationship navigation decorator
         Column colConvenio = new Column("convenio", "Convênio");
         colConvenio.setDecorator((row, context) -> {
@@ -39,16 +48,12 @@ public class ClienteViewPage extends LayoutPage {
         colActions.setDecorator((row, context) -> {
             Cliente cliente = (Cliente) row;
             String idStr = cliente.getId().toString();
-            
-            // 1. Generate clean edit hyperlink targeting ClienteEditPage
             String editUrl = context.getPagePath(ClienteEditPage.class) + "?id=" + idStr;
-            
-            // 2. Configure the inline row delete action token parameters
-            linkDelete.setValue(idStr);
-            String deleteHtml = linkDelete.toString();
-            
-            return "<a href='" + editUrl + "' class='pure-button' style='padding: 0.3em 0.8em; margin-right: 0.5em; background: #f39c12; color: #fff;'>Editar</a>" +
-                   "<span onclick=\"return confirm('Deseja realmente excluir este paciente?')\">" + deleteHtml + "</span>";
+            String deleteUrl = linkDelete.getHref() + "&id=" + idStr;
+
+            return "<a class='button is-small is-info mr-1' href='" + editUrl + "'>Editar</a>"
+                    + "<a class='button is-small is-danger' href='" + deleteUrl
+                    + "' onclick=\"return confirm('Excluir este paciente?');\">Excluir</a>";
         });
         table.addColumn(colActions);
 
