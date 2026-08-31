@@ -16,7 +16,7 @@ import org.apache.click.showcase.fisio.model.enums.PagamentoOrigem;
 import org.apache.click.showcase.fisio.model.enums.SessaoStatus;
 import org.apache.click.showcase.fisio.model.enums.SessaoTipo;
 
-public class SessaoEditPage extends LayoutPage {
+public class SessaoEditPage extends BorderPage {
 
     private static final Logger logger = LoggerFactory.getLogger(SessaoEditPage.class);
     private static final long serialVersionUID = 1L;

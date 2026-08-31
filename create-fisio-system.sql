@@ -32,11 +32,11 @@ CREATE TABLE modalidade (
 CREATE TABLE cliente (
     cpf VARCHAR(11) NOT NULL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    data_nascimento DATE NOT NULL,
+    dt_nascimento DATE NOT NULL,
     telefone VARCHAR(15) NOT NULL,
     convenio_id INT REFERENCES convenio(convenio_id) ON DELETE SET NULL,
     numero_carteirinha VARCHAR(50),
-    status_clinico VARCHAR(20) DEFAULT 'ATIVO' CHECK (status_clinico IN ('ATIVO', 'INATIVO'))
+    status VARCHAR(20) DEFAULT 'ATIVO' CHECK (status IN ('ATIVO', 'INATIVO'))
 );
 
 -- Central Única de Sessões (Agenda, Atendimento e Fluxo Operacional)

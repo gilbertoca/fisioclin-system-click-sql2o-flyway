@@ -59,7 +59,7 @@ public class ClienteService {
 
     public List<Cliente> getAllLikeNome(String nome) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            return conn.createQuery(QueryLoader.get("cliente.getAllLikeNome")).addParameter("nome", "%" + nome + "%").executeAndFetch(Cliente.class);
+            return conn.createQuery(QueryLoader.get("cliente.getAllLikeNome")).addParameter("nome", nome).executeAndFetch(Cliente.class);
         }
     }
 }

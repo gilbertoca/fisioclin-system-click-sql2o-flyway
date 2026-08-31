@@ -35,7 +35,7 @@ public class FaturamentoServiceTest {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // 1. Cadastra o Cliente
             this.clienteIdTeste = conn.createQuery(
-                    "INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
+                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) " +
                     "VALUES ('Mariana Faturamento', '77788899911', '1995-05-10', '8699992222', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 

@@ -30,8 +30,8 @@ public class SessaoLookupIntegrationTest {
     private void seedLookupRecords() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // Seed 2 distinct patients (Actors)
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
 
             // Seed 2 distinct therapists (Actors)
             conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. John', 'CRE-1', '111')").executeUpdate();

@@ -10,11 +10,11 @@ CREATE TABLE cliente (
     cliente_id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cpf VARCHAR(11) UNIQUE NOT NULL,
-    data_nascimento DATE NOT NULL,
+    dt_nascimento DATE NOT NULL,
     telefone VARCHAR(15) NOT NULL,
     convenio_id INT REFERENCES convenio(convenio_id),
     numero_carteirinha VARCHAR(50),
-    status_clinico VARCHAR(20) DEFAULT 'ATIVO' CHECK (status_clinico IN ('ATIVO', 'INATIVO'))
+    status VARCHAR(20) DEFAULT 'ATIVO' CHECK (status IN ('ATIVO', 'INATIVO'))
 );
 
 -- 3. Cadastro de Fisioterapeutas / Terapeutas

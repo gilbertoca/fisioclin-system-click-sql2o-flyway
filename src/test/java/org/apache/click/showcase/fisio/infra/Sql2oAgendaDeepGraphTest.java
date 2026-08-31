@@ -32,7 +32,7 @@ public class Sql2oAgendaDeepGraphTest {
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Inserir Cliente vinculado ao Convênio
-            Integer idCli = conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, convenio_id) VALUES (:nome, :cpf, :dataNasc, :tel, :idConv)", true)
+            Integer idCli = conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, convenio_id) VALUES (:nome, :cpf, :dataNasc, :tel, :idConv)", true)
                     .addParameter("nome", "Mariana Costa")
                     .addParameter("cpf", "55566677788")
                     // Ajuste no método seedCompleteScenario() de inserção do cliente:

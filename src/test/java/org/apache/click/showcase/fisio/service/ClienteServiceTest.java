@@ -52,9 +52,9 @@ public class ClienteServiceTest {
         Cliente novoCliente = new Cliente();
         novoCliente.setNome("Mariana Costa Lima");
         novoCliente.setCpf("55566677788");
-        novoCliente.setDataNascimento(LocalDate.of(1993, 9, 22));
+        novoCliente.setDtNascimento(LocalDate.of(1993, 9, 22));
         novoCliente.setTelefone("8699994455");
-        novoCliente.setStatusClinico("ATIVO");
+        novoCliente.setStatus("ATIVO");
         novoCliente.setConvenio(planoUnimed); // Vincula o objeto rico de domínio
 
         clienteService.create(novoCliente);
@@ -73,7 +73,7 @@ public class ClienteServiceTest {
         assertNotNull("O cliente deveria ter sido encontrado", clientePersistido);
         assertEquals("Mariana Costa Lima", clientePersistido.getNome());
         assertEquals("55566677788", clientePersistido.getCpf());
-        assertEquals(LocalDate.of(1993, 9, 22), clientePersistido.getDataNascimento());
+        assertEquals(LocalDate.of(1993, 9, 22), clientePersistido.getDtNascimento());
 
         // PROVA DO GRAFO ANINHADO: O Sql2o preencheu o convênio interno do cliente de forma transparente
         assertNotNull("O objeto Convenio interno não deveria estar nulo", clientePersistido.getConvenio());
@@ -84,13 +84,13 @@ public class ClienteServiceTest {
         // 3. TESTE DA OPERAÇÃO: UPDATE (Modificação de dados básicos)
         // ------------------------------------------------------------------------
         clientePersistido.setNome("Mariana Costa Lima Refatorada");
-        clientePersistido.setStatusClinico("INATIVO");
+        clientePersistido.setStatus("INATIVO");
         
         clienteService.update(clientePersistido);
         
         Cliente clienteModificado = clienteService.get(idGerado);
         assertEquals("Mariana Costa Lima Refatorada", clienteModificado.getNome());
-        assertEquals("INATIVO", clienteModificado.getStatusClinico());
+        assertEquals("INATIVO", clienteModificado.getStatus());
 
         // ------------------------------------------------------------------------
         // 4. TESTE DA OPERAÇÃO: DELETE (Remoção física)
@@ -105,8 +105,8 @@ public class ClienteServiceTest {
     public void deveBuscarClientesFiltandoPeloPadraoLikeNoNome() {
         // Insere 2 clientes distintos para testar a busca textual
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
         }
 
         // Executa a busca enviando apenas um fragmento do nome ("silva") em letras minúsculas

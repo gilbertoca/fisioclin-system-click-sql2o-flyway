@@ -8,7 +8,7 @@ INSERT INTO fisio.convenio (nome, cnpj) VALUES
 -- ==========================================
 -- 2. POPULANDO CLIENTES
 -- ==========================================
-INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, convenio_id, numero_carteirinha, status_clinico) VALUES
+INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, convenio_id, numero_carteirinha, status) VALUES
 ('Carlos Eduardo Santos', '11122233344', '1985-04-12', '(86) 99911-2233', 1, '30240011223344', 'ATIVO'),
 ('Mariana Costa Lima', '55566677788', '1993-09-22', '(86) 98844-5566', NULL, NULL, 'ATIVO'), -- Particular
 ('Ana Beatriz Rocha', '99900011122', '1978-11-05', '(86) 99455-7788', 2, '90128833445500', 'ATIVO');

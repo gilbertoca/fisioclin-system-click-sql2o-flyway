@@ -48,7 +48,7 @@ public class SessaoServiceTest {
             
             // 1. Cadastra Cliente Ator
             clienteId = conn.createQuery(
-                    "INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) " +
+                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) " +
                     "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 

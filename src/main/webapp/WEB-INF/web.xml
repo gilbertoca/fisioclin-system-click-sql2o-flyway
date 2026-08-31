@@ -17,4 +17,7 @@
     <listener>
         <listener-class>org.apache.click.showcase.fisio.infra.ContextListener</listener-class>
     </listener>    
+    <welcome-file-list>
+        <welcome-file>home.htm</welcome-file>
+    </welcome-file-list>    
 </web-app>

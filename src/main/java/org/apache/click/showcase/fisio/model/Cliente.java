@@ -10,9 +10,9 @@ public class Cliente implements Serializable {
     private Integer id;
     private String nome;
     private String cpf;
-    private LocalDate dataNascimento;
+    private LocalDate dtNascimento;
     private String telefone;
-    private String statusClinico;
+    private String status;
     private Convenio convenio;
 
     public Cliente() {}
@@ -23,12 +23,12 @@ public class Cliente implements Serializable {
     public void setNome(String nome) { this.nome = nome; }
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
-    public LocalDate getDataNascimento() { return dataNascimento; }
-    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
+    public LocalDate getDtNascimento() { return dtNascimento; }
+    public void setDtNascimento(LocalDate dtNascimento) { this.dtNascimento = dtNascimento; }
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
-    public String getStatusClinico() { return statusClinico; }
-    public void setStatusClinico(String statusClinico) { this.statusClinico = statusClinico; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public Convenio getConvenio() { return convenio; }
     public void setConvenio(Convenio convenio) { this.convenio = convenio; }
     public Integer getConvenioId() { return this.convenio != null ? this.convenio.getId() : null; }
@@ -70,9 +70,9 @@ public class Cliente implements Serializable {
         sb.append("id=").append(id);
         sb.append(", nome=").append(nome);
         sb.append(", cpf=").append(cpf);
-        sb.append(", dataNascimento=").append(dataNascimento);
+        sb.append(", dtNascimento=").append(dtNascimento);
         sb.append(", telefone=").append(telefone);
-        sb.append(", statusClinico=").append(statusClinico);
+        sb.append(", status=").append(status);
         sb.append(", convenio=").append(convenio);
         sb.append('}');
         return sb.toString();

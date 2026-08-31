@@ -1,6 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<menu>
-    <menu label="📅 Agenda Diária" path="sessao-view.htm"/>
-    <menu label="👥 Pacientes" path="cliente-view.htm"/>
-    <menu label="💰 Financeiro" path="faturamento-view.htm"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<menu name="mainMenu" label="Menu Principal">
+    <menu name="home" label="🏠 Início" path="home.htm"/>
+    <menu name="clientes" label="👥 Clientes" path="/cliente-view.htm"/>
+    <menu name="relatorios" label="📊 Relatórios" path="/relatorios.htm"/>
+    <menu name="config" label="⚙ Configurações">
+        <menu name="usuarios" label="Usuários" path="/usuarios.htm"/>
+        <menu name="permissoes" label="Permissões" path="/permissoes.htm"/>
+    </menu>
 </menu>

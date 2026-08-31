@@ -1,0 +1,16 @@
+#macro( writeMenu $rootMenu )
+    #foreach ($topMenu in $rootMenu.children)
+        #if ($topMenu.children.empty)
+            <a class="item" href="${context}${topMenu.path}">$topMenu.label</a>
+        #else
+            <div class="ui simple dropdown item">
+                $topMenu.label <i class="dropdown icon"></i>
+                <div class="menu">
+                    #foreach ($subMenu in $topMenu.children)
+                        <a class="item" href="${context}${subMenu.path}">$subMenu.label</a>
+                    #end
+                </div>
+            </div>
+        #end
+    #end
+#end

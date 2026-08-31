@@ -10,7 +10,7 @@ import org.apache.click.showcase.fisio.service.SessaoService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class SessaoViewPage extends LayoutPage {
+public class SessaoViewPage extends BorderPage {
     private static final long serialVersionUID = 1L;
 
     protected Table table = new Table("table");

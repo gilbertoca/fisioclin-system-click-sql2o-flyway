@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$title - Click Semantic</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+    
+    ${headElements}
+    
+    <link rel="stylesheet" href="${context}/assets/app.css">
+</head>
+<body style="padding-top: 4.5rem;">  <!-- ← AJUSTE: padding no body em vez de margin no main -->
+    
+    <div class="ui fixed menu">
+        <div class="ui container">
+            <a href="${context}/home.htm" class="header item">
+                <i class="code icon"></i> Click + Semantic UI
+            </a>
+            #if ($rootMenu)
+                #writeMenu($rootMenu)
+            #end
+        </div>
+    </div>
+
+    <div class="ui main container">
+        <h1 class="ui dividing header">$title</h1>
+        #parse(${path})
+    </div>
+
+    <div class="ui inverted vertical footer segment" style="margin-top: 3em; padding: 2em 0;">
+        <div class="ui center aligned container">
+            <p>Apache Click (modernized) + Semantic UI Demo</p>
+        </div>
+    </div>
+
+    ${jsElements}
+    
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+</body>
+</html>

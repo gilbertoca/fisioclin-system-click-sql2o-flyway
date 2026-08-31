@@ -37,7 +37,7 @@ public class SessaoEditPageTest {
 
     private static void seedDatabaseContext() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
-            clienteId = conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, data_nascimento, telefone, status_clinico) VALUES ('Alice Page Test', '999', '1990-01-01', '555', 'ATIVO')", true).executeUpdate().getKey(Integer.class);
+            clienteId = conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Alice Page Test', '999', '1990-01-01', '555', 'ATIVO')", true).executeUpdate().getKey(Integer.class);
             profissionalId = conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. Static Walker', 'CRE-PAGE', '777')", true).executeUpdate().getKey(Integer.class);
             modalidadeId = conn.createQuery("INSERT INTO fisio.modalidade (nome, valor_base) VALUES ('Pilates Functional', 100.00)", true).executeUpdate().getKey(Integer.class);
             conn.commit();

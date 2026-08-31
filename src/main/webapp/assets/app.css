@@ -1,0 +1,189 @@
+/* ============================================
+   Click + Semantic UI - Estilos Customizados
+   ============================================ */
+
+/* === Paginador (override FORÇADO do /click/table.css) === */
+span.pagebanner,
+span.pagebanner-nolinks,
+span.pagelinks,
+span.pagelinks-nobanner {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 !important;
+    padding: 0.75rem 1rem !important;
+    background-color: #f8f9fa !important;
+    border: 1px solid #e0e1e2 !important;
+    border-radius: 0.28571429rem !important;
+    color: #333 !important;
+    font-size: 0.9rem !important;
+    text-align: center;
+}
+
+span.pagebanner,
+span.pagebanner-nolinks {
+    margin-top: 1rem !important;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    color: #666 !important;
+}
+
+span.pagelinks {
+    margin-bottom: 1rem !important;
+    border-top: none !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+span.pagelinks-nobanner {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+span.pagelinks a,
+span.pagelinks-nobanner a {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    margin: 0 0.15rem;
+    text-decoration: none;
+    color: #2185d0;
+    background: transparent;
+    border: 1px solid #2185d0;
+    border-radius: 0.28571429rem;
+    transition: all 0.2s ease;
+}
+
+span.pagelinks a:hover,
+span.pagelinks-nobanner a:hover {
+    background-color: #2185d0;
+    color: #fff;
+    text-decoration: none;
+}
+
+span.pagelinks strong,
+span.pagelinks-nobanner strong {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    margin: 0 0.15rem;
+    background-color: #2185d0;
+    color: #fff;
+    border-radius: 0.28571429rem;
+    font-weight: 600;
+}
+
+img.link {
+    vertical-align: middle;
+    border: none;
+}
+
+/* === Form Layout DIV (Semantic UI) === */
+.click-form {
+    margin-bottom: 1rem;
+}
+
+.form-field-group {
+    margin-bottom: 1rem;
+}
+
+/* Labels estilo Semantic UI */
+.form-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.form-label.error {
+    color: #db2828;
+}
+
+.form-required-marker {
+    color: #db2828;
+    margin-left: 0.25rem;
+}
+
+/* Inputs dentro do form DIV herdam estilos do Semantic UI */
+.click-form input[type="text"],
+.click-form input[type="email"],
+.click-form input[type="password"],
+.click-form input[type="number"],
+.click-form input[type="date"],
+.click-form input[type="url"],
+.click-form input[type="tel"],
+.click-form input[type="search"],
+.click-form select,
+.click-form textarea {
+    min-width: 200px;
+    box-sizing: border-box;
+}
+
+/* Campos grandes expandem */
+.click-form input[name="name"],
+.click-form input[name="email"] {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Campos pequenos ficam compactos */
+.click-form input[name="age"],
+.click-form input[name="holdings"] {
+    width: auto;
+    min-width: 120px;
+}
+
+.form-field-error {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #db2828;
+}
+
+/* Botões de ação lado a lado */
+.form-actions-bar {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.form-actions-bar input[type="submit"],
+.form-actions-bar button {
+    flex: 0 0 auto;
+    min-width: 120px;
+}
+
+.form-errors-container {
+    background-color: #fff6f6;
+    border: 1px solid #db2828;
+    border-radius: 0.28571429rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-error-global {
+    font-weight: 700;
+    color: #db2828;
+    margin-bottom: 0.5rem;
+}
+
+.form-error-item a.error {
+    color: #db2828;
+    text-decoration: underline;
+}
+
+/* === Filtro compacto === */
+form[name="filterForm"] table.fields {
+    width: 100%;
+}
+
+form[name="filterForm"] table.fields td {
+    vertical-align: middle;
+    padding: 0.25rem;
+}
+
+form[name="filterForm"] table.buttons td {
+    padding-top: 0.5rem;
+}

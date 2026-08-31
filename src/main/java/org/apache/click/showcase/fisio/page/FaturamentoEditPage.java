@@ -8,7 +8,7 @@ import org.apache.click.showcase.fisio.service.FaturamentoService;
 
 import java.math.BigDecimal;
 
-public class FaturamentoEditPage extends LayoutPage {
+public class FaturamentoEditPage extends BorderPage {
     private static final long serialVersionUID = 1L;
 
     protected HiddenField fieldId = new HiddenField("id", Integer.class);

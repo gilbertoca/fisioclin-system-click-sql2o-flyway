@@ -1868,7 +1868,7 @@
        <column id="COL529" populated="true" UUID="5a9a1500-af0a-4f51-b73d-a34c9d19ef45" autoIncrement="false" name="nome" nullable="0" physicalName="nome" precision="100" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
         <remarks></remarks>
        </column>
-       <column id="COL530" populated="true" UUID="82a6f5d1-18f9-4f2d-b78c-3c9c647cdfa4" autoIncrement="false" name="data_nascimento" nullable="0" physicalName="data_nascimento" precision="10" referenceCount="1" scale="0" sourceDataTypeName="DATE" type="91" >
+       <column id="COL530" populated="true" UUID="82a6f5d1-18f9-4f2d-b78c-3c9c647cdfa4" autoIncrement="false" name="dt_nascimento" nullable="0" physicalName="dt_nascimento" precision="10" referenceCount="1" scale="0" sourceDataTypeName="DATE" type="91" >
         <remarks></remarks>
        </column>
        <column id="COL531" populated="true" UUID="afc837e2-d8cf-4a78-9730-d9a449682e1c" autoIncrement="false" name="telefone" nullable="0" physicalName="telefone" precision="15" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
@@ -1880,7 +1880,7 @@
        <column id="COL533" populated="true" UUID="b047ed14-27f4-43d9-b619-5adaceb85440" autoIncrement="false" name="numero_carteirinha" nullable="1" physicalName="numero_carteirinha" precision="50" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
         <remarks></remarks>
        </column>
-       <column id="COL534" populated="true" UUID="eba7afaa-0cbd-42af-8a95-7690d3dcdc98" autoIncrement="false" defaultValue="&apos;ATIVO&apos;" name="status_clinico" nullable="1" physicalName="status_clinico" precision="20" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
+       <column id="COL534" populated="true" UUID="eba7afaa-0cbd-42af-8a95-7690d3dcdc98" autoIncrement="false" defaultValue="&apos;ATIVO&apos;" name="status" nullable="1" physicalName="status" precision="20" referenceCount="1" scale="0" sourceDataTypeName="CHARACTER VARYING" type="12" >
         <remarks></remarks>
        </column>
        </folder>
@@ -2127,7 +2127,7 @@
     <column id="COL623" populated="true" UUID="76680b5f-d546-4369-9485-775e2c99e459" autoIncrement="false" defaultValue="" name="nome" nullable="0" physicalName="nome" precision="100" referenceCount="1" scale="0" source-column-ref="COL529" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL624" populated="true" UUID="87a68b8b-8661-4ae6-bbd9-2a6c61df16e3" autoIncrement="false" defaultValue="" name="data_nascimento" nullable="0" physicalName="data_nascimento" precision="0" referenceCount="1" scale="0" source-column-ref="COL530" sourceDataTypeName="DATE" type="91" userDefinedTypeUUID="ee349be3-6af2-46e1-b305-975f5354b009" >
+    <column id="COL624" populated="true" UUID="87a68b8b-8661-4ae6-bbd9-2a6c61df16e3" autoIncrement="false" defaultValue="" name="dt_nascimento" nullable="0" physicalName="dt_nascimento" precision="0" referenceCount="1" scale="0" source-column-ref="COL530" sourceDataTypeName="DATE" type="91" userDefinedTypeUUID="ee349be3-6af2-46e1-b305-975f5354b009" >
      <remarks></remarks>
     </column>
     <column id="COL625" populated="true" UUID="ceef9cc0-b884-4b5a-bf04-e15c6fb8521c" autoIncrement="false" defaultValue="" name="telefone" nullable="0" physicalName="telefone" precision="15" referenceCount="1" scale="0" source-column-ref="COL531" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
@@ -2139,7 +2139,7 @@
     <column id="COL627" populated="true" UUID="aeeb68cc-bd1b-4780-9c64-15b92d147064" autoIncrement="false" defaultValue="" name="numero_carteirinha" nullable="1" physicalName="numero_carteirinha" precision="50" referenceCount="1" scale="0" source-column-ref="COL533" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
-    <column id="COL628" populated="true" UUID="6817451c-b2b8-4dc5-b5db-4c43608862b0" autoIncrement="false" defaultValue="&apos;ATIVO&apos;" name="status_clinico" nullable="1" physicalName="status_clinico" precision="20" referenceCount="1" scale="0" source-column-ref="COL534" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
+    <column id="COL628" populated="true" UUID="6817451c-b2b8-4dc5-b5db-4c43608862b0" autoIncrement="false" defaultValue="&apos;ATIVO&apos;" name="status" nullable="1" physicalName="status" precision="20" referenceCount="1" scale="0" source-column-ref="COL534" sourceDataTypeName="CHARACTER VARYING" type="12" userDefinedTypeUUID="831ac2d4-0e65-47ec-a0b7-62b7f6b8760a" >
      <remarks></remarks>
     </column>
     </folder>

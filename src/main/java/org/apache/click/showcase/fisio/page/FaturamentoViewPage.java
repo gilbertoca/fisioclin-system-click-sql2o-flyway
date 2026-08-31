@@ -8,7 +8,7 @@ import org.apache.click.showcase.fisio.service.FaturamentoService;
 
 import java.time.format.DateTimeFormatter;
 
-public class FaturamentoViewPage extends LayoutPage {
+public class FaturamentoViewPage extends BorderPage {
     private static final long serialVersionUID = 1L;
 
     protected Table table = new Table("table");
