@@ -9,11 +9,14 @@ import org.apache.click.showcase.fisio.infra.QueryLoader;
 
 public class ClienteService {
 
-    public ClienteService() { }
+    public ClienteService() {
+    }
 
     // Relationship Helper Method: Fetches an individual health insurance context
     public Convenio getConvenioById(Integer id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         try (Connection conn = DataSourceManager.getSql2o().open()) {
             return conn.createQuery(QueryLoader.get("convenio.get")).addParameter("id", id).executeAndFetchFirst(Convenio.class);
         }
@@ -27,7 +30,9 @@ public class ClienteService {
     }
 
     public Cliente get(Integer id) {
-        if (id == null) return null;
+        if (id == null) {
+            return null;
+        }
         try (Connection conn = DataSourceManager.getSql2o().open()) {
             return conn.createQuery(QueryLoader.get("cliente.get")).addParameter("id", id).executeAndFetchFirst(Cliente.class);
         }
@@ -41,13 +46,23 @@ public class ClienteService {
 
     public void create(Cliente cliente) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            conn.createQuery(QueryLoader.get("cliente.create")).bind(cliente).executeUpdate();
+            Object generatedId = conn.createQuery(QueryLoader.get("cliente.create"))
+                    .bind(cliente)
+                    .addParameter("convenioId", cliente.getConvenio() != null ? cliente.getConvenio().getId() : null)
+                    .executeUpdate()
+                    .getKey(); // Captura o ID gerado
+            if (generatedId != null) {
+                cliente.setId(((Number) generatedId).intValue()); // Seta no objeto Java
+            }
         }
     }
 
     public void update(Cliente cliente) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            conn.createQuery(QueryLoader.get("cliente.update")).bind(cliente).executeUpdate();
+            conn.createQuery(QueryLoader.get("cliente.update"))
+                    .bind(cliente)
+                    .addParameter("convenioId", cliente.getConvenio() != null ? cliente.getConvenio().getId() : null)
+                    .executeUpdate();
         }
     }
 

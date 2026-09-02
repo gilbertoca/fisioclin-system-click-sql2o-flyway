@@ -16,23 +16,20 @@ import org.junit.BeforeClass;
 public class ClienteServiceTest {
 
     private static ClienteService clienteService;
-    
+
     // IDs de planos de saúde criados para o cenário de teste
     private static Integer convenioIdUnimed;
 
     @BeforeClass
     public static void setUp() {
         // Inicialização do banco em memória isolado para os testes de cliente
-        String jdbcUrl = "jdbc:h2:mem:fisio_cliente_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
+        String jdbcUrl = "jdbc:h2:mem:fisio_cliente_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE;TRACE_LEVEL_SYSTEM_OUT=2";
         DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
-        DataSourceManager.runMigrations();        
+        DataSourceManager.runMigrations();
         // Instanciação direta do Serviço Unificado (Sem camadas intermediárias de Repository)
         clienteService = new ClienteService();
 
-    
-       //Insere os dados básicos de convênio para testar a associação do grafo rico.
-
-
+        //Insere os dados básicos de convênio para testar a associação do grafo rico.
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             convenioIdUnimed = conn.createQuery("INSERT INTO fisio.convenio (nome, cnpj) VALUES ('Unimed Teresina', '12345678000199')", true)
                     .executeUpdate()
@@ -59,6 +56,9 @@ public class ClienteServiceTest {
 
         clienteService.create(novoCliente);
 
+        // ADICIONE ESSA LINHA PARA TESTAR:
+        assertNotNull("O ID do objeto novoCliente deveria estar preenchido", novoCliente.getId());
+
         // ------------------------------------------------------------------------
         // 2. TESTE DA OPERAÇÃO: GETALL & GET (Verifica mapeamento dot-notation)
         // ------------------------------------------------------------------------
@@ -68,8 +68,11 @@ public class ClienteServiceTest {
 
         // Captura o ID gerado pelo banco para fazer a busca direta
         Integer idGerado = todosClientes.get(0).getId();
-        
+
         Cliente clientePersistido = clienteService.get(idGerado);
+
+        System.out.println("O objeto Convenio interno não deveria estar nulo: " + clientePersistido);
+
         assertNotNull("O cliente deveria ter sido encontrado", clientePersistido);
         assertEquals("Mariana Costa Lima", clientePersistido.getNome());
         assertEquals("55566677788", clientePersistido.getCpf());
@@ -77,6 +80,7 @@ public class ClienteServiceTest {
 
         // PROVA DO GRAFO ANINHADO: O Sql2o preencheu o convênio interno do cliente de forma transparente
         assertNotNull("O objeto Convenio interno não deveria estar nulo", clientePersistido.getConvenio());
+        System.out.println("O objeto Convenio interno não deveria estar nulo: " + clientePersistido.getConvenio());
         assertEquals(convenioIdUnimed, clientePersistido.getConvenio().getId());
         assertEquals("Unimed Teresina", clientePersistido.getConvenio().getNome());
 
@@ -85,9 +89,9 @@ public class ClienteServiceTest {
         // ------------------------------------------------------------------------
         clientePersistido.setNome("Mariana Costa Lima Refatorada");
         clientePersistido.setStatus("INATIVO");
-        
+
         clienteService.update(clientePersistido);
-        
+
         Cliente clienteModificado = clienteService.get(idGerado);
         assertEquals("Mariana Costa Lima Refatorada", clienteModificado.getNome());
         assertEquals("INATIVO", clienteModificado.getStatus());
@@ -96,7 +100,7 @@ public class ClienteServiceTest {
         // 4. TESTE DA OPERAÇÃO: DELETE (Remoção física)
         // ------------------------------------------------------------------------
         clienteService.delete(idGerado);
-        
+
         Cliente clienteDeletado = clienteService.get(idGerado);
         assertNull("O cliente deveria ter sido completamente apagado do banco", clienteDeletado);
     }
@@ -111,7 +115,7 @@ public class ClienteServiceTest {
 
         // Executa a busca enviando apenas um fragmento do nome ("silva") em letras minúsculas
         List<Cliente> resultadoFiltro = clienteService.getAllLikeNome("silva");
-        
+
         assertEquals(1, resultadoFiltro.size());
         assertEquals("Carlos Silva", resultadoFiltro.get(0).getNome());
     }

@@ -31,7 +31,6 @@ public class Cliente implements Serializable {
     public void setStatus(String status) { this.status = status; }
     public Convenio getConvenio() { return convenio; }
     public void setConvenio(Convenio convenio) { this.convenio = convenio; }
-    public Integer getConvenioId() { return this.convenio != null ? this.convenio.getId() : null; }
 
     @Override
     public int hashCode() {
