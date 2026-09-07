@@ -4,30 +4,29 @@ import org.apache.click.showcase.fisio.infra.DataSourceManager;
 import org.apache.click.showcase.fisio.model.Cliente;
 import org.apache.click.showcase.fisio.model.Modalidade;
 import org.apache.click.showcase.fisio.model.Profissional;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.sql2o.Connection;
 
 import java.util.List;
+import org.junit.AfterClass;
 
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 public class SessaoLookupIntegrationTest {
 
     private SessaoService sessaoService;
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         String jdbcUrl = "jdbc:h2:mem:fisio_lookup_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
         DataSourceManager.runMigrations();        
-        sessaoService = new SessaoService();
 
         seedLookupRecords();
     }
 
-    private void seedLookupRecords() {
+    private static void seedLookupRecords() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // Seed 2 distinct patients (Actors)
             conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
@@ -47,6 +46,7 @@ public class SessaoLookupIntegrationTest {
 
     @Test
     public void shouldLoadAllViewDropdownLookupArraysCorrectly() {
+        sessaoService = new SessaoService();
         // 1. Verify Patient Arrays
         List<Cliente> clientes = sessaoService.getAllClientes();
         System.out.println(clientes);
@@ -68,8 +68,8 @@ public class SessaoLookupIntegrationTest {
         assertEquals("Fisioterapia Ortopedica", modalidades.get(0).getNome());
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         DataSourceManager.shutdown();
     }
 }

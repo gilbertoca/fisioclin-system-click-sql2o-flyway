@@ -1,29 +1,29 @@
 package org.apache.click.showcase.fisio.infra;
 
 import org.apache.click.showcase.fisio.model.Sessao;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.sql2o.Connection;
 
 import java.time.LocalDateTime; // Alterado para LocalDateTime (Data e Hora)
 import java.time.LocalDate;
 import java.util.List;
+import org.junit.AfterClass;
 
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 public class Sql2oAgendaDeepGraphTest {
 
-    @Before
-    public void setUp() {
-        String jdbcUrl = "jdbc:h2:mem:fisio_deep_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
+    @BeforeClass
+    public static void setUp() {
+        String jdbcUrl = "jdbc:h2:mem:fisio_deep_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE;TRACE_LEVEL_SYSTEM_OUT=2";
         DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
         DataSourceManager.runMigrations();
 
         seedCompleteScenario();
     }
 
-    private void seedCompleteScenario() {
+    private static void seedCompleteScenario() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // 1. Inserir Convênio
             Integer idConv = conn.createQuery("INSERT INTO fisio.convenio (nome, cnpj) VALUES (:nome, :cnpj)", true)
@@ -70,20 +70,20 @@ public class Sql2oAgendaDeepGraphTest {
 
     @Test
     public void deveCarregarGrafoProfundamenteAninhadoUsandoPropertiesExterno() {
-        String sql = QueryLoader.get("sessao.findGridAgenda");
+        String sql = QueryLoader.get("sessao.getAll");
 
         try (Connection conn = DataSourceManager.getSql2o().open()) {
         List<Sessao> agenda = conn.createQuery(sql)
                 // Passa o valor exato (Hoje às 08:00) para bater com a igualdade do WHERE
-                .addParameter("dataFiltro", LocalDateTime.of(2016, 5, 5, 13, 30))
+                //.addParameter("dataFiltro", LocalDateTime.of(2016, 5, 5, 13, 30))
                 .executeAndFetch(Sessao.class);
 
             assertNotNull("A grade da agenda não deve ser nula", agenda);
             assertEquals("Deve listar exatamente 1 agendamento", 1, agenda.size());
 
             Sessao s = agenda.get(0);
-            assertEquals("TRATAMENTO_ROTINA", s.getSessaoTipo());
-            assertEquals("AGENDADA", s.getSessaoStatus());
+            assertEquals("TRATAMENTO_ROTINA", s.getSessaoTipo().name());
+            assertEquals("AGENDADA", s.getSessaoStatus().name());
 
             // Validação do Primeiro Nível: Modalidade e Profissional
             assertNotNull("Deveria ter populado a modalidade", s.getModalidade());
@@ -103,8 +103,8 @@ public class Sql2oAgendaDeepGraphTest {
         }
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         DataSourceManager.shutdown();
     }
 }

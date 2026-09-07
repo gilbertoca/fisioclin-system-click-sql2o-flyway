@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 
 public class ClienteServiceTest {
 
-    private static ClienteService clienteService;
+    private ClienteService clienteService;
 
     // IDs de planos de saúde criados para o cenário de teste
     private static Integer convenioIdUnimed;
@@ -26,8 +26,6 @@ public class ClienteServiceTest {
         String jdbcUrl = "jdbc:h2:mem:fisio_cliente_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE;TRACE_LEVEL_SYSTEM_OUT=2";
         DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
         DataSourceManager.runMigrations();
-        // Instanciação direta do Serviço Unificado (Sem camadas intermediárias de Repository)
-        clienteService = new ClienteService();
 
         //Insere os dados básicos de convênio para testar a associação do grafo rico.
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
@@ -40,7 +38,9 @@ public class ClienteServiceTest {
 
     @Test
     public void deveExecutarCicloCompletoDeCrudDoClienteComGrafoRico() {
-        // ------------------------------------------------------------------------
+        // Instanciação direta do Serviço Unificado (Sem camadas intermediárias de Repository)
+        clienteService = new ClienteService();        
+                // ------------------------------------------------------------------------
         // 1. TESTE DO OPERAÇÃO: CREATE (Com Convênio atrelado)
         // ------------------------------------------------------------------------
         Convenio planoUnimed = new Convenio();
@@ -107,6 +107,9 @@ public class ClienteServiceTest {
 
     @Test
     public void deveBuscarClientesFiltandoPeloPadraoLikeNoNome() {
+        // Instanciação direta do Serviço Unificado (Sem camadas intermediárias de Repository)
+        clienteService = new ClienteService();        
+        
         // Insere 2 clientes distintos para testar a busca textual
         try (Connection conn = DataSourceManager.getSql2o().open()) {
             conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
@@ -122,6 +125,9 @@ public class ClienteServiceTest {
 
     @Test
     public void deveValidarOsMetodosAuxiliaresDeCargaDeDropdowns() {
+        // Instanciação direta do Serviço Unificado (Sem camadas intermediárias de Repository)
+        clienteService = new ClienteService();        
+        
         // Valida se o método helper do serviço consegue ler a tabela de convênios para alimentar os combos
         List<Convenio> listaParaCombos = clienteService.getAllConvenios();
         System.out.println(listaParaCombos);

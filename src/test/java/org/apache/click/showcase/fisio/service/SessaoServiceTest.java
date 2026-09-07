@@ -21,7 +21,7 @@ import org.junit.BeforeClass;
 
 public class SessaoServiceTest {
 
-    private static SessaoService sessaoService;
+    private SessaoService sessaoService;
 
     // IDs de referência persistidos no cenário base
     private static Integer clienteId;
@@ -33,9 +33,7 @@ public class SessaoServiceTest {
         // Inicializa banco em memória compatível com Postgres
         String jdbcUrl = "jdbc:h2:mem:fisio_sessao_service_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
-        DataSourceManager.runMigrations();                
-        // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
-        sessaoService = new SessaoService();
+        DataSourceManager.runMigrations();
 
         seedCenarioOperacionalBase();
     }
@@ -45,11 +43,11 @@ public class SessaoServiceTest {
      */
     private static void seedCenarioOperacionalBase() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
-            
+
             // 1. Cadastra Cliente Ator
             clienteId = conn.createQuery(
-                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) " +
-                    "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
+                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) "
+                    + "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Cadastra Profissional Ator
@@ -68,13 +66,19 @@ public class SessaoServiceTest {
 
     @Test
     public void deveAgendarComSucessoERecuperarGrafoRicoDoBanco() {
+        // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
+        sessaoService = new SessaoService();
+
         // Define um horário fixo livre de oscilações de milissegundos (Hoje às 14:00)
         LocalDateTime horarioDesejado = LocalDate.of(1993, 9, 22).atTime(14, 0);
 
         // Instancia os modelos ricos de domínio com seus respectivos IDs
-        Cliente cliente = new Cliente(); cliente.setId(clienteId);
-        Profissional profissional = new Profissional(); profissional.setId(idProfissional);
-        Modalidade modalidade = new Modalidade(); modalidade.setId(idModalidade);
+        Cliente cliente = new Cliente();
+        cliente.setId(clienteId);
+        Profissional profissional = new Profissional();
+        profissional.setId(idProfissional);
+        Modalidade modalidade = new Modalidade();
+        modalidade.setId(idModalidade);
 
         // Monta o Grafo completo da Sessão
         Sessao sessao = new Sessao();
@@ -113,15 +117,23 @@ public class SessaoServiceTest {
 
     @Test
     public void deveBloquearAgendamentoSeHouverConflitoDeHorarioDoTerapeuta() {
+        // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
+        sessaoService = new SessaoService();
+
         LocalDateTime horarioBase = LocalDate.of(1993, 9, 23).atTime(16, 0);
 
-        Cliente c = new Cliente(); c.setId(clienteId);
-        Profissional p = new Profissional(); p.setId(idProfissional);
-        Modalidade m = new Modalidade(); m.setId(idModalidade);
+        Cliente c = new Cliente();
+        c.setId(clienteId);
+        Profissional p = new Profissional();
+        p.setId(idProfissional);
+        Modalidade m = new Modalidade();
+        m.setId(idModalidade);
 
         // Primeiro agendamento legítimo (16:00 às 16:50)
         Sessao sessao1 = new Sessao();
-        sessao1.setCliente(c); sessao1.setProfissional(p); sessao1.setModalidade(m);
+        sessao1.setCliente(c);
+        sessao1.setProfissional(p);
+        sessao1.setModalidade(m);
         sessao1.setDataHoraInicio(horarioBase);
         sessao1.setDataHoraFim(horarioBase.plusMinutes(50));
         sessao1.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
@@ -131,8 +143,10 @@ public class SessaoServiceTest {
 
         // Segundo agendamento em conflito para o mesmo profissional (Interseção às 16:30)
         Sessao sessaoConflitante = new Sessao();
-        sessaoConflitante.setCliente(c); sessaoConflitante.setProfissional(p); sessaoConflitante.setModalidade(m);
-        sessaoConflitante.setDataHoraInicio(horarioBase.plusMinutes(30)); 
+        sessaoConflitante.setCliente(c);
+        sessaoConflitante.setProfissional(p);
+        sessaoConflitante.setModalidade(m);
+        sessaoConflitante.setDataHoraInicio(horarioBase.plusMinutes(30));
         sessaoConflitante.setDataHoraFim(horarioBase.plusMinutes(80));
         sessaoConflitante.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
         sessaoConflitante.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
@@ -149,11 +163,16 @@ public class SessaoServiceTest {
 
     @Test
     public void deveRejeitarAgendamentoSeOClienteNaoExistirNoBanco() {
+        // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
+        sessaoService = new SessaoService();
+        
         Cliente clienteInexistente = new Cliente();
         clienteInexistente.setId(999); // ID fantasma
 
-        Profissional p = new Profissional(); p.setId(idProfissional);
-        Modalidade m = new Modalidade(); m.setId(idModalidade);
+        Profissional p = new Profissional();
+        p.setId(idProfissional);
+        Modalidade m = new Modalidade();
+        m.setId(idModalidade);
 
         Sessao sessaoInvalida = new Sessao();
         sessaoInvalida.setCliente(clienteInexistente);

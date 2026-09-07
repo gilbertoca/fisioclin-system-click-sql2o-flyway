@@ -24,7 +24,15 @@ public class DataSourceManager {
      * Roda estritamente sob privilégios DML (sem comandos de DDL estruturais automáticos).
      */
     public static synchronized void initialize(String url, String username, String password, String driverClassName) {
-        if (dataSource != null) return; 
+        // Check if we already have an active data source matching the requested URL
+         if (dataSource != null && !dataSource.isClosed() && dataSource.getJdbcUrl().equals(url)) {
+             return; 
+         }
+
+         // If a pool was open but points to a different DB name, safely close it first
+         if (dataSource != null && !dataSource.isClosed()) {
+             dataSource.close();
+         }
 
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);

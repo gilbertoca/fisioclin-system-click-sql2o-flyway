@@ -2,8 +2,6 @@ package org.apache.click.showcase.fisio.service;
 
 import org.apache.click.showcase.fisio.infra.DataSourceManager;
 import org.apache.click.showcase.fisio.model.Sessao;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.sql2o.Connection;
 
@@ -11,30 +9,31 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.click.showcase.fisio.model.enums.SessaoStatus;
+import org.junit.AfterClass;
 
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 public class FaturamentoServiceTest {
 
     private FaturamentoService faturamentoService;
 
-    private Integer clienteIdTeste;
-    private final List<Sessao> sessoesParaFaturar = new ArrayList<>();
+    private static Integer clienteIdTeste;
+    private static final List<Sessao> sessoesParaFaturar = new ArrayList<>();
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         String jdbcUrl = "jdbc:h2:mem:fisio_billing_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE";
         DataSourceManager.initialize(jdbcUrl, "sa", "", "org.h2.Driver");
         DataSourceManager.runMigrations();        
-        faturamentoService = new FaturamentoService();
 
         prepararDadosClinicosDeBase();
     }
 
-    private void prepararDadosClinicosDeBase() {
+    private static void prepararDadosClinicosDeBase() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // 1. Cadastra o Cliente
-            this.clienteIdTeste = conn.createQuery(
+            clienteIdTeste = conn.createQuery(
                     "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) " +
                     "VALUES ('Mariana Faturamento', '77788899911', '1995-05-10', '8699992222', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
@@ -64,6 +63,7 @@ public class FaturamentoServiceTest {
 
     @Test
     public void deveExecutarFaturamentoTransacionalComMultiplosModelos() {
+        faturamentoService = new FaturamentoService();
         // Executa a regra do Service: Faturar 2 sessões a R$ 100,00 cada (Total: R$ 200,00) dividido em 2 parcelas
         BigDecimal valorPorSessao = new BigDecimal("100.00");
         int parcelasDesejadas = 2;
@@ -91,7 +91,7 @@ public class FaturamentoServiceTest {
             // 3. Verifica se o fluxo de caixa dividiu corretamente os valores das parcelas (200 / 2 = 100 cada)
             List<BigDecimal> valoresParcelas = conn.createQuery("SELECT valor_parcela FROM fisio.recebimento_parcela WHERE faturamento_id = :id ORDER BY numero_parcela")
                     .addParameter("id", idFaturamentoGerado)
-                    .executeAndFetch(BigDecimal.class);
+                    .executeScalarList(BigDecimal.class);
 
             assertEquals(2, valoresParcelas.size());
             assertEquals(new BigDecimal("100.00"), valoresParcelas.get(0));
@@ -99,8 +99,8 @@ public class FaturamentoServiceTest {
         }
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    public static void tearDown() {
         DataSourceManager.shutdown();
     }
 }

@@ -1,9 +1,7 @@
 package org.apache.click.showcase.fisio.page;
 
 import org.apache.click.control.*;
-import org.apache.click.extras.control.DateField;
 import org.apache.click.showcase.fisio.model.Cliente;
-import org.apache.click.showcase.fisio.model.Convenio;
 import org.apache.click.showcase.fisio.service.ClienteService;
 
 import org.apache.click.extras.control.LocalDateField;
