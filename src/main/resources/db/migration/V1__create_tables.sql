@@ -1,8 +1,9 @@
+--- CREATE SCHEMA fisio;
 drop table if exists fisio.sessao_prontuario cascade;
 drop table if exists fisio.sessao cascade;
 drop table if exists fisio.cliente cascade;
-drop table if exists fisio.modaliade cascade;
-drop table if exists fisio.profisional cascade;
+drop table if exists fisio.modalidade cascade;
+drop table if exists fisio.profissional cascade;
 drop table if exists fisio.convenio cascade;
 
 -- Cadastro de Planos de Saúde / Convênios
