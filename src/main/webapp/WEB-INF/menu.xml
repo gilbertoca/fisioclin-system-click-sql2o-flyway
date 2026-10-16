@@ -1,10 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<menu name="mainMenu" label="Menu Principal">
-    <menu name="home" label="🏠 Início" path="home.htm"/>
-    <menu name="clientes" label="👥 Clientes" path="/cliente-view.htm"/>
-    <menu name="relatorios" label="📊 Relatórios" path="/relatorios.htm"/>
-    <menu name="config" label="⚙ Configurações">
-        <menu name="usuarios" label="Usuários" path="/usuarios.htm"/>
-        <menu name="permissoes" label="Permissões" path="/permissoes.htm"/>
-    </menu>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<menu>
+    <menu name="home"      label="Home"      path="home.htm"/>
+    <menu name="clientes" label="Clientes" path="cliente-view.htm"/>
+    <menu name="login"     label="Login"     path="login.htm"/>
+    <menu name="logout"    label="Logout"    path="logout.htm"/>
 </menu>

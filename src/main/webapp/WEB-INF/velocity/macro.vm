@@ -1,0 +1,31 @@
+#**
+ * Bulma menu macro.
+ *
+ * Iterates Menu#getChildren and uses Menu#getHref, which already
+ * includes the context path.
+ *
+ * Visibility of auth-sensitive items is driven by $authenticated,
+ * exposed by BorderPage#onInit().
+ *#
+#macro(renderMenu $menu)
+  #foreach($item in $menu.children)
+    #set($show = true)
+    #if($item.name == "clientes" || $item.name == "logout")
+      #set($show = $authenticated)
+    #elseif($item.name == "login")
+      #set($show = !$authenticated)
+    #end
+    #if($show)
+      #if($item.hasChildren())
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">$item.label</a>
+          <div class="navbar-dropdown">
+            #renderMenu($item)
+          </div>
+        </div>
+      #else
+        <a class="navbar-item" href="$item.href">$item.label</a>
+      #end
+    #end
+  #end
+#end

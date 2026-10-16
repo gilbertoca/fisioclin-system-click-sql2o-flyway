@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<click-app>
-    <pages package="org.apache.click.showcase.fisio.page"/>
-    <resource-service  classname="org.apache.click.service.BasicResourceService"/>
+<click-app charset="UTF-8" locale="en">
+    <resource-service classname="org.apache.click.service.BasicResourceService"/>
+    <pages package="com.gilbertoca.fisio.page"/>
     <mode value="debug"/>
 </click-app>

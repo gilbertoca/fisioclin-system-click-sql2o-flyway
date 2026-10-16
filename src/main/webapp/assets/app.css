@@ -1,189 +1,138 @@
-/* ============================================
-   Click + Semantic UI - Estilos Customizados
-   ============================================ */
+/* =========================================================
+   Click ↔ Bulma bridge.
 
-/* === Paginador (override FORÇADO do /click/table.css) === */
-span.pagebanner,
-span.pagebanner-nolinks,
-span.pagelinks,
-span.pagelinks-nobanner {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-    margin: 0 !important;
-    padding: 0.75rem 1rem !important;
-    background-color: #f8f9fa !important;
-    border: 1px solid #e0e1e2 !important;
-    border-radius: 0.28571429rem !important;
-    color: #333 !important;
-    font-size: 0.9rem !important;
-    text-align: center;
-}
+   Click's modern fork renders forms with a fixed structure:
+     .click-form > .form-field-group > .form-label
+                                    > .form-control-wrapper > input
+     .click-form > .form-actions-bar > input[type=submit]
 
-span.pagebanner,
-span.pagebanner-nolinks {
-    margin-top: 1rem !important;
-    margin-bottom: 0 !important;
-    border-bottom: none !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    color: #666 !important;
-}
+   This file maps those classes onto Bulma's visual language
+   and provides the few layout helpers Click content needs.
+   Everything else is Bulma's job, themed by theme-green.css.
+   ========================================================= */
 
-span.pagelinks {
-    margin-bottom: 1rem !important;
-    border-top: none !important;
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-}
+/* Prevent the whole page from scrolling sideways on mobile. */
+html, body { overflow-x: hidden; }
 
-span.pagelinks-nobanner {
-    margin-top: 1rem !important;
-    margin-bottom: 1rem !important;
-}
 
-span.pagelinks a,
-span.pagelinks-nobanner a {
-    display: inline-block;
-    padding: 0.35rem 0.7rem;
-    margin: 0 0.15rem;
-    text-decoration: none;
-    color: #2185d0;
-    background: transparent;
-    border: 1px solid #2185d0;
-    border-radius: 0.28571429rem;
-    transition: all 0.2s ease;
-}
+/* ---------------------------------------------------------
+   Responsive table wrapper.
 
-span.pagelinks a:hover,
-span.pagelinks-nobanner a:hover {
-    background-color: #2185d0;
-    color: #fff;
-    text-decoration: none;
-}
-
-span.pagelinks strong,
-span.pagelinks-nobanner strong {
-    display: inline-block;
-    padding: 0.35rem 0.7rem;
-    margin: 0 0.15rem;
-    background-color: #2185d0;
-    color: #fff;
-    border-radius: 0.28571429rem;
-    font-weight: 600;
-}
-
-img.link {
-    vertical-align: middle;
-    border: none;
-}
-
-/* === Form Layout DIV (Semantic UI) === */
-.click-form {
-    margin-bottom: 1rem;
-}
-
-.form-field-group {
-    margin-bottom: 1rem;
-}
-
-/* Labels estilo Semantic UI */
-.form-label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: 700;
-    color: #333;
-}
-
-.form-label.error {
-    color: #db2828;
-}
-
-.form-required-marker {
-    color: #db2828;
-    margin-left: 0.25rem;
-}
-
-/* Inputs dentro do form DIV herdam estilos do Semantic UI */
-.click-form input[type="text"],
-.click-form input[type="email"],
-.click-form input[type="password"],
-.click-form input[type="number"],
-.click-form input[type="date"],
-.click-form input[type="url"],
-.click-form input[type="tel"],
-.click-form input[type="search"],
-.click-form select,
-.click-form textarea {
-    min-width: 200px;
-    box-sizing: border-box;
-}
-
-/* Campos grandes expandem */
-.click-form input[name="name"],
-.click-form input[name="email"] {
+   Bulma's .table is width:100% and wraps cells on narrow
+   screens. Wrapping it here lets the table keep its natural
+   width and scroll horizontally without pushing the page
+   sideways. (Bulma has no built-in table-container that
+   also handles the paginator, which Click renders outside
+   the <table>.)
+   --------------------------------------------------------- */
+.table-wrapper {
     width: 100%;
-    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
-
-/* Campos pequenos ficam compactos */
-.click-form input[name="age"],
-.click-form input[name="holdings"] {
+.table-wrapper table {
     width: auto;
-    min-width: 120px;
+    min-width: 100%;
+    white-space: nowrap;
 }
 
-.form-field-error {
+
+/* ---------------------------------------------------------
+   Click form → Bulma.
+   Colors use Bulma's own variables so theme-green.css can
+   retint everything by changing :root, not by editing here.
+   --------------------------------------------------------- */
+.click-form {
+    width: 100%;
+}
+.click-form .form-field-group {
+    margin-bottom: 1rem;
+}
+.click-form .form-label {
     display: block;
-    margin-top: 0.25rem;
-    font-size: 0.85rem;
-    color: #db2828;
+    color: var(--bulma-text-strong);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5em;
 }
-
-/* Botões de ação lado a lado */
-.form-actions-bar {
+.click-form .form-control-wrapper input[type="text"],
+.click-form .form-control-wrapper input[type="password"],
+.click-form .form-control-wrapper input[type="email"] {
+    width: 100%;
+    max-width: 480px;
+    height: 2.5em;
+    padding: calc(0.5em - 1px) calc(0.75em - 1px);
+    border: 1px solid var(--bulma-border);
+    border-radius: var(--bulma-radius, 4px);
+    background-color: var(--bulma-scheme-main, #fff);
+    color: var(--bulma-text);
+    font-size: 1rem;
+    line-height: 1.5;
+    box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+}
+.click-form .form-control-wrapper input:focus {
+    border-color: var(--bulma-primary);
+    box-shadow: 0 0 0 0.125em var(--bulma-primary-light, rgba(72, 95, 199, 0.25));
+    outline: none;
+}
+.click-form .form-actions-bar {
     margin-top: 1.5rem;
     display: flex;
     gap: 0.5rem;
-    flex-wrap: wrap;
+}
+.click-form .form-actions-bar input[type="submit"] {
+    appearance: none;
+    background-color: var(--bulma-primary);
+    border: 1px solid transparent;
+    border-radius: var(--bulma-radius, 4px);
+    color: var(--bulma-primary-invert, #fff);
+    cursor: pointer;
+    font-size: 1rem;
+    height: 2.5em;
+    padding: calc(0.5em - 1px) 1em;
+    transition: background-color 0.15s ease-in-out;
+}
+.click-form .form-actions-bar input[type="submit"]:hover {
+    background-color: var(--bulma-primary-dark, #3e56c4);
 }
 
-.form-actions-bar input[type="submit"],
-.form-actions-bar button {
-    flex: 0 0 auto;
-    min-width: 120px;
+/* Note: the required-field asterisk is injected by Click's own
+   click/control.css; we do not style .required here to avoid
+   a double asterisk. */
+
+
+/* ---------------------------------------------------------
+   Fixed footer.
+
+   Bulma's .footer is in normal flow. Pin it to the bottom
+   of the viewport and give <main> enough bottom padding so
+   nothing is obscured.
+   --------------------------------------------------------- */
+body > footer.footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    background: var(--bulma-scheme-main-bis, #fafafa);
+    border-top: 1px solid var(--bulma-border);
+    z-index: 100;
+}
+body > footer.footer .content { margin-bottom: 0; }
+
+main.section {
+    padding-bottom: 100px;
 }
 
-.form-errors-container {
-    background-color: #fff6f6;
-    border: 1px solid #db2828;
-    border-radius: 0.28571429rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
 
-.form-error-global {
-    font-weight: 700;
-    color: #db2828;
-    margin-bottom: 0.5rem;
-}
+/* ---------------------------------------------------------
+   Modal sizing.
 
-.form-error-item a.error {
-    color: #db2828;
-    text-decoration: underline;
-}
-
-/* === Filtro compacto === */
-form[name="filterForm"] table.fields {
-    width: 100%;
-}
-
-form[name="filterForm"] table.fields td {
-    vertical-align: middle;
-    padding: 0.25rem;
-}
-
-form[name="filterForm"] table.buttons td {
-    padding-top: 0.5rem;
+   Bulma's modal-card has no max-width by default; we cap it
+   so the confirm dialog doesn't stretch across wide screens.
+   --------------------------------------------------------- */
+.modal-card {
+    max-width: 480px;
+    width: auto;
 }
