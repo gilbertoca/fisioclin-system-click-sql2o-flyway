@@ -8,54 +8,41 @@
 
 $formTable
 
-
-<!-- Bulma modal. Visibility toggled via .is-active. -->
-<div id="deleteModal" class="modal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-        <header class="modal-card-head">
-            <p class="modal-card-title">Confirm deletion</p>
-            <button class="delete" aria-label="close" id="deleteModalClose" type="button"></button>
-        </header>
-        <section class="modal-card-body">
-            Are you sure you want to delete this cliente?
-            This action cannot be undone.
-        </section>
-        <footer class="modal-card-foot">
-            <button class="button" id="deleteCancel" type="button">Cancel</button>
-            <button class="button is-danger" id="deleteConfirm" type="button">Delete</button>
+<!-- Delete confirmation dialog (native <dialog>) -->
+<dialog id="deleteDialog">
+    <article>
+        <header><strong>Confirm deletion</strong></header>
+        <p>Are you sure you want to delete this customer? This action cannot be undone.</p>
+        <footer>
+            <button id="deleteCancel" class="secondary" type="button">Cancel</button>
+            <button id="deleteConfirm" class="contrast" type="button">Delete</button>
         </footer>
-    </div>
-</div>
+    </article>
+</dialog>
 
 <script>
 (function () {
-    var modal = document.getElementById('deleteModal');
+    var dialog = document.getElementById('deleteDialog');
     var pendingHref = null;
 
-    // Intercept the ActionLink click, store the real href, show the modal.
-    // The href Click rendered is preserved; only the default navigation
-    // is suppressed until the user confirms.
+    // Intercept the ActionLink click, store its href, show the dialog.
     window.onDeleteClick = function (link) {
         pendingHref = link.href;
-        modal.classList.add('is-active');
+        dialog.showModal();
         return false;
     };
 
-    function close() {
+    document.getElementById('deleteCancel').addEventListener('click', function () {
         pendingHref = null;
-        modal.classList.remove('is-active');
-    }
+        dialog.close();
+    });
 
-    document.getElementById('deleteCancel').addEventListener('click', close);
-    document.getElementById('deleteModalClose').addEventListener('click', close);
-    document.querySelector('#deleteModal .modal-background').addEventListener('click', close);
-
+    // Confirm: navigate to the original ActionLink URL.
     document.getElementById('deleteConfirm').addEventListener('click', function () {
         if (pendingHref) {
             window.location.href = pendingHref;
         }
-        modal.classList.remove('is-active');
+        dialog.close();
     });
 })();
 </script>

@@ -1,61 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bulma CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
-    <!-- Your App CSS (for Click form bridging) -->
-    <link rel="stylesheet" href="$context/assets/app.css">
-    $headElements
     <title>$title</title>
+
+    <!-- Pico.css via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kimeiga/bahunya/dist/bahunya.min.css">
+    <!-- Application overrides -->
+    <link rel="stylesheet" href="$context/assets/app.css">
+
+    $headElements
 </head>
 <body>
-    <nav class="navbar is-dark-green" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="$context/home.htm">
-                <strong>Click + Bulma Demo</strong>
-            </a>
-            <a role="button" class="navbar-burger" aria-label="menu"
-               aria-expanded="false" data-target="mainNavbar">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-
-        <div id="mainNavbar" class="navbar-menu">
-            <div class="navbar-end">
+    <header class="container">
+        <nav>
+            <ul>
+                <li><strong>Click + Pico.css Demo</strong></li>
+            </ul>
+            <ul>
                 #parse("/WEB-INF/velocity/macro.vm")
                 #renderMenu($rootMenu)
-            </div>
-        </div>
-    </nav>
+            </ul>
+        </nav>
+    </header>
 
-    <main class="section">
-        <div class="container">
-            #parse($path)
-        </div>
+    <main class="container">
+        #parse($path)
     </main>
 
-    <footer class="footer">
-        <div class="content has-text-centered">
-            <small>Apache Click modern fork demo &middot; for teaching purposes only</small>
-        </div>
+    <footer class="container">
+        <small>Apache Click modern fork demo &middot; for teaching purposes only</small>
     </footer>
-
-    <script>
-    // Minimal navbar burger toggle (Bulma does not ship JS).
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.navbar-burger').forEach(function (burger) {
-            burger.addEventListener('click', function () {
-                var target = document.getElementById(burger.dataset.target);
-                burger.classList.toggle('is-active');
-                if (target) target.classList.toggle('is-active');
-            });
-        });
-    });
-    </script>
 
     $jsElements
 </body>

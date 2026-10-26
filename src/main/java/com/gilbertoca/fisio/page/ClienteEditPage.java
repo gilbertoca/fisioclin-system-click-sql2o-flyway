@@ -19,7 +19,7 @@ public class ClienteEditPage extends BorderPage {
     private final LocalDateField dtNascimento;
     private final TextField telefone;
     private final TextField email;
-    private final Select selectConvenio;
+    //private final Select selectConvenio;
     private final Select selectSituacao;
     private final ClienteService clienteService = new ClienteService();
 
@@ -33,7 +33,7 @@ public class ClienteEditPage extends BorderPage {
         dtNascimento = new LocalDateField("dtNascimento", "Data de Nascimento:", true);
         telefone = new TextField("telefone", "Telefone/Celular:", false);
         email = new TextField("email", "Email:", false);
-        selectConvenio = new Select("convenio", "Plano de Saúde / Convênio:", false);
+        //selectConvenio = new Select("convenio", "Plano de Saúde / Convênio:", false);
         selectSituacao = new Select("situacao", "Situação:", true);
 
         form.add(idField);
@@ -60,7 +60,7 @@ public class ClienteEditPage extends BorderPage {
 //        }
 
         selectSituacao.getOptionList().clear();
-        selectSituacao.add(new Option("U", ""));
+        selectSituacao.add(Option.EMPTY_OPTION);
         selectSituacao.add(new Option("ATIVO", "Ativo / Em Atendimento"));
         selectSituacao.add(new Option("INATIVO", "Inativo"));
     }

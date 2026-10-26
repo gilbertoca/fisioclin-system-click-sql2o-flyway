@@ -2,5 +2,5 @@
 <click-app charset="UTF-8" locale="en">
     <resource-service classname="org.apache.click.service.BasicResourceService"/>
     <pages package="com.gilbertoca.fisio.page"/>
-    <mode value="debug"/>
+    <mode value="trace"/>
 </click-app>

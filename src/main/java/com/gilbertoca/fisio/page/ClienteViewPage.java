@@ -17,16 +17,6 @@ import java.util.Map;
 
 /**
  * Cliente view page.
- *
- * Contains a filter form, a Table with pagination/sorting, and an
- * actions column rendered by LinkDecorator. The delete action is
- * confirmed via a Bulma modal; the real deletion happens in
- * onDelete() through the ActionLink.
- *
- * IMPORTANT: The ActionLink and PageLink used inside the LinkDecorator
- * are private fields, so they must be registered with the page's control
- * tree via addControl(...). Without that, Click cannot dispatch
- * ?actionLink=delete to onDelete().
  */
 public class ClienteViewPage extends BorderPage {
 
