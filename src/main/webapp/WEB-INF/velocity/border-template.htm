@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>$title</title>
 
-    <!-- Pico.css via CDN -->
+    <!-- Css via CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kimeiga/bahunya/dist/bahunya.min.css">
     <!-- Application overrides -->
     <link rel="stylesheet" href="$context/assets/app.css">
@@ -13,10 +13,10 @@
     $headElements
 </head>
 <body>
-    <header class="container">
+    <header>
         <nav>
             <ul>
-                <li><strong>Click + Pico.css Demo</strong></li>
+                <li><strong>Click + Bahunya css Demo</strong></li>
             </ul>
             <ul>
                 #parse("/WEB-INF/velocity/macro.vm")
@@ -25,11 +25,11 @@
         </nav>
     </header>
 
-    <main class="container">
+    <main>
         #parse($path)
     </main>
 
-    <footer class="container">
+    <footer>
         <small>Apache Click modern fork demo &middot; for teaching purposes only</small>
     </footer>
 

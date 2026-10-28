@@ -1,5 +1,5 @@
 #**
- * Bulma menu macro.
+ * Css menu macro.
  *
  * Iterates Menu#getChildren and uses Menu#getHref, which already
  * includes the context path.
@@ -9,23 +9,20 @@
  *#
 #macro(renderMenu $menu)
   #foreach($item in $menu.children)
-    #set($show = true)
-    #if($item.name == "clientes" || $item.name == "logout")
-      #set($show = $authenticated)
-    #elseif($item.name == "login")
-      #set($show = !$authenticated)
-    #end
-    #if($show)
-      #if($item.hasChildren())
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link">$item.label</a>
-          <div class="navbar-dropdown">
+    #if($authenticated)
+      <li>
+        #if($item.hasChildren())
+          <!-- Item pai do dropdown -->
+          <a href="#">$item.label</a>
+          <!-- Submenu semântico que o Bahunya transforma em dropdown automático -->
+          <ul>
             #renderMenu($item)
-          </div>
-        </div>
-      #else
-        <a class="navbar-item" href="$item.href">$item.label</a>
-      #end
+          </ul>
+        #else
+          <!-- Item de link comum -->
+          <a href="$item.href">$item.label</a>
+        #end
+      </li>
     #end
   #end
 #end

@@ -1,48 +1,49 @@
-<h1 class="title">Clientes</h1>
-<div class="level">
-    <div class="level-left"></div>
-    <div class="level-right">
-        <a class="button is-primary" href="$context/cliente-edit.htm">New cliente</a>
-    </div>
-</div>
+<article id="cliente-view">
+    <header>
+        <h1>Cientes</h1>
+        <div>
+            <a href="$context/cliente-edit.htm">New cliente</a>
+        </div>
+    </header>
 
-$formTable
+    $formTable
 
-<!-- Delete confirmation dialog (native <dialog>) -->
-<dialog id="deleteDialog">
-    <article>
-        <header><strong>Confirm deletion</strong></header>
-        <p>Are you sure you want to delete this customer? This action cannot be undone.</p>
-        <footer>
-            <button id="deleteCancel" class="secondary" type="button">Cancel</button>
-            <button id="deleteConfirm" class="contrast" type="button">Delete</button>
-        </footer>
-    </article>
-</dialog>
+    <!-- Delete confirmation dialog (native <dialog>) -->
+    <dialog id="deleteDialog">
+        <article>
+            <header><strong>Confirme a deleção</strong></header>
+            <p>Tem certeza que quer deletar esse registro? Essa ação não poderá ser desfeita.</p>
+            <footer>
+                <button id="deleteCancel" class="secondary" type="button">Cancelar</button>
+                <button id="deleteConfirm" class="contrast" type="button">Deletar</button>
+            </footer>
+        </article>
+    </dialog>
+    <script>
+        (function () {
+            var dialog = document.getElementById('deleteDialog');
+            var pendingHref = null;
 
-<script>
-(function () {
-    var dialog = document.getElementById('deleteDialog');
-    var pendingHref = null;
+            // Intercept the ActionLink click, store its href, show the dialog.
+            window.onDeleteClick = function (link) {
+                pendingHref = link.href;
+                dialog.showModal();
+                return false;
+            };
 
-    // Intercept the ActionLink click, store its href, show the dialog.
-    window.onDeleteClick = function (link) {
-        pendingHref = link.href;
-        dialog.showModal();
-        return false;
-    };
+            document.getElementById('deleteCancel').addEventListener('click', function () {
+                pendingHref = null;
+                dialog.close();
+            });
 
-    document.getElementById('deleteCancel').addEventListener('click', function () {
-        pendingHref = null;
-        dialog.close();
-    });
+            // Confirm: navigate to the original ActionLink URL.
+            document.getElementById('deleteConfirm').addEventListener('click', function () {
+                if (pendingHref) {
+                    window.location.href = pendingHref;
+                }
+                dialog.close();
+            });
+        })();
+    </script>
+</article>
 
-    // Confirm: navigate to the original ActionLink URL.
-    document.getElementById('deleteConfirm').addEventListener('click', function () {
-        if (pendingHref) {
-            window.location.href = pendingHref;
-        }
-        dialog.close();
-    });
-})();
-</script>

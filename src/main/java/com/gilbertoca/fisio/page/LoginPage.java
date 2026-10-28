@@ -5,6 +5,7 @@ import org.apache.click.control.Form;
 import org.apache.click.control.PasswordField;
 import org.apache.click.control.Submit;
 import org.apache.click.control.TextField;
+import org.apache.click.util.Bindable;
 
 /**
  * Login page.
@@ -16,6 +17,8 @@ public class LoginPage extends BorderPage {
     private Form form = new Form("form");
     private TextField username = new TextField("username", "Username", true);
     private PasswordField password = new PasswordField("password", "Password", true);
+    @Bindable
+    protected String action;
 
     public LoginPage() {
         form.setNoLayout(true);
@@ -42,5 +45,14 @@ public class LoginPage extends BorderPage {
             }
         }
         return true;
+    }
+
+    @Override
+    public void onGet() {
+        // Se veio com ?action=logout, desloga e redireciona
+        if ("logout".equals(action)) {
+            getContext().getSession().invalidate();
+            setRedirect(HomePage.class);
+        }
     }
 }

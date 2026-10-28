@@ -26,7 +26,6 @@ public abstract class BorderPage extends Page {
     public BorderPage() {
         MenuFactory menuFactory = new MenuFactory();
         rootMenu = menuFactory.getRootMenu();
-        addControl(rootMenu);
     }
 
     @Override
@@ -38,6 +37,12 @@ public abstract class BorderPage extends Page {
                 && ctx.getSessionAttribute(AuthenticatedPage.SESSION_USER) != null;
         addModel("authenticated", Boolean.valueOf(authenticated));
 
+        Menu authMenu = new Menu(authenticated ? "Log out" : "Log in");
+        authMenu.setPath(authenticated ? "login.htm?action=logout" : "login.htm");
+        authMenu.setImageSrc("/assets/images/user.png"); // opcional
+        rootMenu.add(authMenu);
+        addControl(rootMenu);
+        
         // Default page title. Pages can override by calling
         // addModel("title", "...") in their own onInit().
         if (getModel().get("title") == null) {

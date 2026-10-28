@@ -2,6 +2,9 @@
 <menu>
     <menu name="home"      label="Home"      path="home.htm"/>
     <menu name="clientes" label="Clientes" path="cliente-view.htm"/>
-    <menu name="login"     label="Login"     path="login.htm"/>
-    <menu name="logout"    label="Logout"    path="logout.htm"/>
+    <menu name="profissionais" label="Profissionais" path="profissional-view.htm"/>
+    <menu name="config" label="⚙ Configurações">
+        <menu name="usuarios" label="Usuários" path="/usuarios.htm"/>
+        <menu name="permissoes" label="Permissões" path="/permissoes.htm"/>
+    </menu>
 </menu>
