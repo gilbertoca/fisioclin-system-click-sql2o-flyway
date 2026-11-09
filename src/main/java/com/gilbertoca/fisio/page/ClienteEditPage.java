@@ -26,7 +26,7 @@ public class ClienteEditPage extends BorderPage {
     public ClienteEditPage() {
         addModel("title", "Cliente Edit");
 
-        form.setNoLayout(true);
+        //form.setNoLayout(true);
         
         nome = new TextField("nome", "Nome Completo:", true);
         cpf = new TextField("cpf", "CPF (Somente Números):", false);
