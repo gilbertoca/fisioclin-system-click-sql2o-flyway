@@ -26,7 +26,7 @@ public class ClienteEditPage extends BorderPage {
     public ClienteEditPage() {
         addModel("title", "Cliente Edit");
 
-        //form.setNoLayout(true);
+        form.setNoLayout(true);
         
         nome = new TextField("nome", "Nome Completo:", true);
         cpf = new TextField("cpf", "CPF (Somente Números):", false);
@@ -52,9 +52,9 @@ public class ClienteEditPage extends BorderPage {
     @Override
     public void onInit() {
         super.onInit();
-        // Populate dropdown lookup metrics
+        // Populate dropdown lookup 
 //        selectConvenio.getOptionList().clear();
-//        selectConvenio.add(new Option("", "-- Particular (Sem Convênio) --"));
+//        selectConvenio.add(Option.EMPTY_OPTION);
 //        for (Convenio conv : clienteService.getAllConvenios()) {
 //            selectConvenio.add(new Option(conv.getId().toString(), conv.getNome()));
 //        }

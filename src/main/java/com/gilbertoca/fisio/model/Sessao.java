@@ -17,6 +17,9 @@ public class Sessao implements Serializable {
     private PagamentoOrigem pagamentoOrigem;
     private SessaoSituacao situacao;
     private String observacoesRecepcao;
+    /** Flag de leitura para listagens: a sessão já possui registro clínico? */
+    private Boolean possuiProntuario;
+    private String pacientesResumo; // transient: nomes dos pacientes da sessão, para listagens
 
     private Cliente cliente;
     private Profissional profissional;
@@ -36,8 +39,12 @@ public class Sessao implements Serializable {
     public void setPagamentoOrigem(PagamentoOrigem pagamentoOrigem) { this.pagamentoOrigem = pagamentoOrigem; }
     public SessaoSituacao getSituacao() { return situacao; }
     public void setSituacao(SessaoSituacao situacao) { this.situacao = situacao; }
+    public Boolean getPossuiProntuario() { return possuiProntuario; }
+    public void setPossuiProntuario(Boolean possuiProntuario) { this.possuiProntuario = possuiProntuario; }
     public String getObservacoesRecepcao() { return observacoesRecepcao; }
     public void setObservacoesRecepcao(String observacoesRecepcao) { this.observacoesRecepcao = observacoesRecepcao; }
+    public String getPacientesResumo() { return pacientesResumo; }
+    public void setPacientesResumo(String pacientesResumo) { this.pacientesResumo = pacientesResumo; }
     public Cliente getCliente() { return cliente; }
     public Integer getClienteId() { return this.cliente != null ? this.cliente.getId() : null; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }

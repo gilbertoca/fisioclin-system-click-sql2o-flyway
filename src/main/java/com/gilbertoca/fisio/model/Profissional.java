@@ -14,7 +14,8 @@ public class Profissional implements Serializable {
     private String telefone;
     private String email;
 
-    private String crefitoOuRegistro;
+    private String registroNumero;
+    private String registroOrgao;
 
     public Profissional() {}
 
@@ -30,8 +31,10 @@ public class Profissional implements Serializable {
     public void setTelefone(String telefone) { this.telefone = telefone; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getCrefitoOuRegistro() { return crefitoOuRegistro; }
-    public void setCrefitoOuRegistro(String crefitoOuRegistro) { this.crefitoOuRegistro = crefitoOuRegistro; }
+    public String getRegistroNumero() { return registroNumero; }
+    public void setRegistroNumero(String registroNumero) { this.registroNumero = registroNumero; }
+    public String getRegistroOrgao() { return registroOrgao; }
+    public void setRegistroOrgao(String registroOrgao) { this.registroOrgao = registroOrgao; }
 
     @Override
     public int hashCode() {
@@ -65,7 +68,8 @@ public class Profissional implements Serializable {
         sb.append("Profissional{");
         sb.append("id=").append(id);
         sb.append(", nome=").append(nome);
-        sb.append(", crefitoOuRegistro=").append(crefitoOuRegistro);
+        sb.append(", registroNumero=").append(registroNumero);
+        sb.append(", registroOrgao=").append(registroOrgao);
         sb.append(", telefone=").append(telefone);
         sb.append('}');
         return sb.toString();

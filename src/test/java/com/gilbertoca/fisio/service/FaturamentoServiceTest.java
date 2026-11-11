@@ -34,20 +34,20 @@ public class FaturamentoServiceTest {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // 1. Cadastra o Cliente
             clienteIdTeste = conn.createQuery(
-                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) " +
+                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) " +
                     "VALUES ('Mariana Faturamento', '77788899911', '1995-05-10', '8699992222', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Cadastra Profissional e Modalidade (Ex: Massagem)
-            Integer idProf = conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Juliana Melo', 'REG-MASS-77', '8699') ", true).executeUpdate().getKey(Integer.class);
+            Integer idProf = conn.createQuery("INSERT INTO fisio.profissional (nome, cpf, dt_nascimento, email, telefone, registro_numero, registro_orgao) VALUES ('Juliana Melo', '44444444444', '1990-03-15', 'juliana@fisioclin.com', '8699', 'REG-MASS-77', 'COREFO') ", true).executeUpdate().getKey(Integer.class);
             Integer idMod = conn.createQuery("INSERT INTO fisio.modalidade (nome, valor_base) VALUES ('Massagem Relaxante', 100.00)", true).executeUpdate().getKey(Integer.class);
 
             // 3. Agenda 2 sessões realizadas que precisam de acerto financeiro
             for (int i = 0; i < 2; i++) {
                 Sessao s = new Sessao();
                 Integer idSessao = conn.createQuery(
-                        "INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_status) " +
-                        "VALUES (:idCli, :idProf, :idMod, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'TRATAMENTO_ROTINA', 'PARTICULAR', 'REALIZADA')", true)
+                        "INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) " +
+                        "VALUES (:idCli, :idProf, :idMod, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '50' MINUTE, 'TRATAMENTO', 'PARTICULAR', 'REALIZADA')", true)
                         .addParameter("idCli", clienteIdTeste)
                         .addParameter("idProf", idProf)
                         .addParameter("idMod", idMod)

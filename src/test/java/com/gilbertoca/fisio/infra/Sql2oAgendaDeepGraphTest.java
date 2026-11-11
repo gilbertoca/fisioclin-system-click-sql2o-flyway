@@ -42,10 +42,14 @@ public class Sql2oAgendaDeepGraphTest {
                     .executeUpdate().getKey(Integer.class);
 
             // 3. Inserir Profissional
-            Integer idProf = conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES (:nome, :crefito, :tel)", true)
+            Integer idProf = conn.createQuery("INSERT INTO fisio.profissional (nome, cpf, dt_nascimento, email, telefone, registro_numero, registro_orgao) VALUES (:nome, :cpf, :dtNasc, :email, :tel, :regNum, :regOrg)", true)
                     .addParameter("nome", "Dra. Amanda Rodrigues")
-                    .addParameter("crefito", "CREFITO-67890-F")
+                    .addParameter("cpf", "33333333333")
+                    .addParameter("dtNasc", LocalDate.of(1985, 2, 10))
+                    .addParameter("email", "amanda@fisioclin.com")
                     .addParameter("tel", "8688888888")
+                    .addParameter("regNum", "CREFITO-67890-F")
+                    .addParameter("regOrg", "CREFITO-3")
                     .executeUpdate().getKey(Integer.class);
 
             // 4. Inserir Modalidade
@@ -55,8 +59,8 @@ public class Sql2oAgendaDeepGraphTest {
                     .executeUpdate().getKey(Integer.class);
 
             // 5. Agendar Sessão para a data de hoje
-            conn.createQuery("INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_status) " +
-                            "VALUES (:idCli, :idProf, :idMod, :dataHoraInicio, :dataHoraFim, 'TRATAMENTO_ROTINA', 'CONVENIO', 'AGENDADA')")
+            conn.createQuery("INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) " +
+                            "VALUES (:idCli, :idProf, :idMod, :dataHoraInicio, :dataHoraFim, 'TRATAMENTO', 'CONVENIO', 'AGENDADA')")
                     .addParameter("idCli", idCli)
                     .addParameter("idProf", idProf)
                     .addParameter("idMod", idMod)
@@ -74,15 +78,14 @@ public class Sql2oAgendaDeepGraphTest {
 
         try (Connection conn = DataSourceManager.getSql2o().open()) {
         List<Sessao> agenda = conn.createQuery(sql)
-                // Passa o valor exato (Hoje às 08:00) para bater com a igualdade do WHERE
-                //.addParameter("dataFiltro", LocalDateTime.of(2016, 5, 5, 13, 30))
+                .addParameter("profissionalNome", (Object) null) // sem filtro: todos os registros
                 .executeAndFetch(Sessao.class);
 
             assertNotNull("A grade da agenda não deve ser nula", agenda);
             assertEquals("Deve listar exatamente 1 agendamento", 1, agenda.size());
 
             Sessao s = agenda.get(0);
-            assertEquals("TRATAMENTO_ROTINA", s.getSessaoTipo().name());
+            assertEquals("TRATAMENTO", s.getSessaoTipo().name());
             assertEquals("AGENDADA", s.getSituacao().name());
 
             // Validação do Primeiro Nível: Modalidade e Profissional

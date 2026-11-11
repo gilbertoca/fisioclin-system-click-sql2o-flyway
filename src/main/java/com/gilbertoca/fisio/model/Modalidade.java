@@ -11,6 +11,7 @@ public class Modalidade implements Serializable {
     private String nome;
     private int duracaoMinutos;
     private BigDecimal valorBase;
+    private Integer capacidadeSimultanea;
 
     public Modalidade() {}
 
@@ -22,6 +23,8 @@ public class Modalidade implements Serializable {
     public void setDuracaoMinutos(int duracaoMinutos) { this.duracaoMinutos = duracaoMinutos; }
     public BigDecimal getValorBase() { return valorBase; }
     public void setValorBase(BigDecimal valorBase) { this.valorBase = valorBase; }
+    public Integer getCapacidadeSimultanea() { return capacidadeSimultanea; }
+    public void setCapacidadeSimultanea(Integer capacidadeSimultanea) { this.capacidadeSimultanea = capacidadeSimultanea; }
 
     @Override
     public int hashCode() {

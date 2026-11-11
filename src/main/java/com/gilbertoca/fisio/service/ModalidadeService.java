@@ -43,7 +43,7 @@ public class ModalidadeService {
 
     public List<Modalidade> getAllLikeNome(String nome) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            return conn.createQuery(QueryLoader.get("modalidade.getAllLikeNome")).addParameter("nome", "%" + nome + "%").executeAndFetch(Modalidade.class);
+            return conn.createQuery(QueryLoader.get("modalidade.getAllLikeNome")).addParameter("nome", nome).executeAndFetch(Modalidade.class);
         }
     }
 }

@@ -1,0 +1,48 @@
+<article id="profissional-view">
+    <header>
+        <h1>Profissionais</h1>
+        <div>
+            <a href="$context/profissional-edit.htm">New profissional</a>
+        </div>
+    </header>
+
+    $formTable
+
+    <!-- Delete confirmation dialog (native <dialog>) -->
+    <dialog id="deleteDialog">
+        <article>
+            <header><strong>Confirme a deleção</strong></header>
+            <p>Tem certeza que quer deletar esse registro? Essa ação não poderá ser desfeita.</p>
+            <footer>
+                <button id="deleteCancel" type="button">Cancelar</button>
+                <button id="deleteConfirm" type="button">Deletar</button>
+            </footer>
+        </article>
+    </dialog>
+    <script>
+        (function () {
+            var dialog = document.getElementById('deleteDialog');
+            var pendingHref = null;
+
+            // Intercept the ActionLink click, store its href, show the dialog.
+            window.onDeleteClick = function (link) {
+                pendingHref = link.href;
+                dialog.showModal();
+                return false;
+            };
+
+            document.getElementById('deleteCancel').addEventListener('click', function () {
+                pendingHref = null;
+                dialog.close();
+            });
+
+            // Confirm: navigate to the original ActionLink URL.
+            document.getElementById('deleteConfirm').addEventListener('click', function () {
+                if (pendingHref) {
+                    window.location.href = pendingHref;
+                }
+                dialog.close();
+            });
+        })();
+    </script>
+</article>

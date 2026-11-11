@@ -14,6 +14,7 @@ public class Cliente implements Serializable {
     private String telefone;
     private String email;
     private String situacao;
+    private String convenioNumero;
     private Convenio convenio;
 
     public Cliente() {}
@@ -32,6 +33,8 @@ public class Cliente implements Serializable {
     public void setEmail(String email) { this.email = email; }
     public String getSituacao() { return situacao; }
     public void setSituacao(String situacao) { this.situacao = situacao; }
+    public String getConvenioNumero() { return convenioNumero; }
+    public void setConvenioNumero(String convenioNumero) { this.convenioNumero = convenioNumero; }
     public Convenio getConvenio() { return convenio; }
     public void setConvenio(Convenio convenio) { this.convenio = convenio; }
 

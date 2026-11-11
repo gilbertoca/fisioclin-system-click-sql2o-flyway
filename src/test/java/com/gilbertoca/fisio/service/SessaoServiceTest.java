@@ -46,13 +46,14 @@ public class SessaoServiceTest {
 
             // 1. Cadastra Cliente Ator
             clienteId = conn.createQuery(
-                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) "
+                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) "
                     + "VALUES ('Roberto Miranda', '98765432100', '1988-10-05', '869994455', 'ATIVO')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 2. Cadastra Profissional Ator
             idProfissional = conn.createQuery(
-                    "INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. Marcos Vinícius', 'CREFITO-999-F', '868882211')", true)
+                    "INSERT INTO fisio.profissional (nome, cpf, dt_nascimento, email, telefone, registro_numero, registro_orgao) "
+                    + "VALUES ('Dr. Marcos Vinícius', '12345678900', '1980-01-01', 'marcos@fisioclin.com', '868882211', 'CREFITO-999-F', 'CREFITO-3')", true)
                     .executeUpdate().getKey(Integer.class);
 
             // 3. Cadastra Modalidade Descrição
@@ -87,7 +88,7 @@ public class SessaoServiceTest {
         sessao.setModalidade(modalidade);
         sessao.setDataHoraInicio(horarioDesejado);
         sessao.setDataHoraFim(horarioDesejado.plusMinutes(50));
-        sessao.setSessaoTipo(SessaoTipo.AVALIACAO_INICIAL);
+        sessao.setSessaoTipo(SessaoTipo.AVALIACAO);
         sessao.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
         sessao.setSituacao(SessaoSituacao.AGENDADA);
         sessao.setObservacoesRecepcao("Teste de serviço unificado.");
@@ -101,7 +102,7 @@ public class SessaoServiceTest {
         // 3. Asserts de Integridade
         assertEquals(1, agenda.size());
         Sessao sGravada = agenda.get(0);
-        assertEquals(SessaoTipo.AVALIACAO_INICIAL, sGravada.getSessaoTipo());
+        assertEquals(SessaoTipo.AVALIACAO, sGravada.getSessaoTipo());
         assertEquals(horarioDesejado, sGravada.getDataHoraInicio());
 
         // 4. Prova do Mapeamento de Grafo Rico (Múltiplos Níveis via dot-notation)
@@ -136,7 +137,7 @@ public class SessaoServiceTest {
         sessao1.setModalidade(m);
         sessao1.setDataHoraInicio(horarioBase);
         sessao1.setDataHoraFim(horarioBase.plusMinutes(50));
-        sessao1.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+        sessao1.setSessaoTipo(SessaoTipo.TRATAMENTO);
         sessao1.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
         sessao1.setSituacao(SessaoSituacao.AGENDADA);
         sessaoService.create(sessao1);
@@ -148,7 +149,7 @@ public class SessaoServiceTest {
         sessaoConflitante.setModalidade(m);
         sessaoConflitante.setDataHoraInicio(horarioBase.plusMinutes(30));
         sessaoConflitante.setDataHoraFim(horarioBase.plusMinutes(80));
-        sessaoConflitante.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+        sessaoConflitante.setSessaoTipo(SessaoTipo.TRATAMENTO);
         sessaoConflitante.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
         sessaoConflitante.setSituacao(SessaoSituacao.AGENDADA);
 
@@ -180,7 +181,7 @@ public class SessaoServiceTest {
         sessaoInvalida.setModalidade(m);
         sessaoInvalida.setDataHoraInicio(LocalDateTime.now());
         sessaoInvalida.setDataHoraFim(LocalDateTime.now().plusMinutes(50));
-        sessaoInvalida.setSessaoTipo(SessaoTipo.TRATAMENTO_ROTINA);
+        sessaoInvalida.setSessaoTipo(SessaoTipo.TRATAMENTO);
         sessaoInvalida.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
         sessaoInvalida.setSituacao(SessaoSituacao.AGENDADA);
 
@@ -190,6 +191,75 @@ public class SessaoServiceTest {
         } catch (IllegalArgumentException ex) {
             assertEquals("Operação cancelada: O cliente informado não existe.", ex.getMessage());
         }
+    }
+
+    @Test
+    public void devePermitirSessoesEmGrupoAteCapacidadeEBloquearExcedenteEOutraModalidade() {
+        // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
+        sessaoService = new SessaoService();
+
+        // Modalidade em grupo: pilates com capacidade para 2 pacientes na mesma aula
+        Integer pilatesId;
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            pilatesId = conn.createQuery(
+                    "INSERT INTO fisio.modalidade (nome, duracao_minutos, valor_base, capacidade_simultanea) "
+                    + "VALUES ('Pilates Grupo', 50, 80.00, 2)", true)
+                    .executeUpdate().getKey(Integer.class);
+        }
+
+        LocalDateTime slot = LocalDate.of(1993, 9, 24).atTime(10, 0);
+
+        // Paciente 1 e 2 no mesmo slot: permitido (capacidade 2)
+        Sessao primeiro = novaSessaoGrupo(clienteId, pilatesId, slot);
+        sessaoService.create(primeiro);
+
+        Integer clienteGrupo2Id;
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            clienteGrupo2Id = conn.createQuery(
+                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) "
+                    + "VALUES ('Roberta Grupo', '77777777777', '1991-02-02', '8699001122', 'ATIVO')", true)
+                    .executeUpdate().getKey(Integer.class);
+        }
+        Sessao segundo = novaSessaoGrupo(clienteGrupo2Id, pilatesId, slot);
+        sessaoService.create(segundo);
+
+        // Paciente 3 no mesmo slot: grupo cheio
+        try {
+            Sessao terceiro = novaSessaoGrupo(clienteId, pilatesId, slot);
+            sessaoService.create(terceiro);
+            fail("Deveria bloquear o terceiro paciente do grupo de capacidade 2.");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("Grupo cheio"));
+        }
+
+        // Overlap com modalidade diferente (RPG, individual) no mesmo slot: conflito
+        try {
+            Sessao rpgSobreposto = novaSessaoGrupo(clienteId, idModalidade, slot);
+            sessaoService.create(rpgSobreposto);
+            fail("Deveria bloquear overlap com outra modalidade.");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("outra modalidade"));
+        }
+    }
+
+    private Sessao novaSessaoGrupo(Integer clienteIdRef, Integer modalidadeIdRef, LocalDateTime inicio) {
+        Cliente c = new Cliente();
+        c.setId(clienteIdRef);
+        Profissional p = new Profissional();
+        p.setId(idProfissional);
+        Modalidade m = new Modalidade();
+        m.setId(modalidadeIdRef);
+
+        Sessao sessao = new Sessao();
+        sessao.setCliente(c);
+        sessao.setProfissional(p);
+        sessao.setModalidade(m);
+        sessao.setDataHoraInicio(inicio);
+        sessao.setDataHoraFim(inicio.plusMinutes(50));
+        sessao.setSessaoTipo(SessaoTipo.TRATAMENTO);
+        sessao.setPagamentoOrigem(PagamentoOrigem.PARTICULAR);
+        sessao.setSituacao(SessaoSituacao.AGENDADA);
+        return sessao;
     }
 
     @AfterClass

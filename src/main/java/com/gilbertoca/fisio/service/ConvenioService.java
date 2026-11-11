@@ -42,7 +42,7 @@ public class ConvenioService {
 
     public List<Convenio> getAllLikeNome(String nome) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            return conn.createQuery(QueryLoader.get("convenio.getAllLikeNome")).addParameter("nome", "%" + nome + "%").executeAndFetch(Convenio.class);
+            return conn.createQuery(QueryLoader.get("convenio.getAllLikeNome")).addParameter("nome", nome).executeAndFetch(Convenio.class);
         }
     }
 }

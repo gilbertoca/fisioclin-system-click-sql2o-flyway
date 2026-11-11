@@ -43,7 +43,17 @@ public class ProfissionalService {
 
     public List<Profissional> getAllLikeNome(String nome) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            return conn.createQuery(QueryLoader.get("profissional.getAllLikeNome")).addParameter("nome", "%" + nome + "%").executeAndFetch(Profissional.class);
+            return conn.createQuery(QueryLoader.get("profissional.getAllLikeNome")).addParameter("nome", nome).executeAndFetch(Profissional.class);
+        }
+    }
+
+    /** Vínculo do usuário autenticado com o profissional (login opcional). */
+    public Profissional getByLogin(String login) {
+        if (login == null || login.isEmpty()) {
+            return null;
+        }
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("profissional.getByLogin")).addParameter("login", login).executeAndFetchFirst(Profissional.class);
         }
     }
 }

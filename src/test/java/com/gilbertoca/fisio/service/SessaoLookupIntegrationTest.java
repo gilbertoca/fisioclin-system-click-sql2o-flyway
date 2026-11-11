@@ -29,12 +29,12 @@ public class SessaoLookupIntegrationTest {
     private static void seedLookupRecords() {
         try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
             // Seed 2 distinct patients (Actors)
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) VALUES ('Alice Smith', '111', '1990-01-01', '555', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) VALUES ('Bob Jones', '222', '1992-01-01', '666', 'ATIVO')").executeUpdate();
 
             // Seed 2 distinct therapists (Actors)
-            conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dr. John', 'CRE-1', '111')").executeUpdate();
-            conn.createQuery("INSERT INTO fisio.profissional (nome, crefito_ou_registro, telefone) VALUES ('Dra. Jane', 'CRE-2', '222')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.profissional (nome, cpf, dt_nascimento, email, telefone, registro_numero, registro_orgao) VALUES ('Dr. John', '11111111111', '1980-01-01', 'john@fisioclin.com', '111', 'CRE-1', 'CREFITO-3')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.profissional (nome, cpf, dt_nascimento, email, telefone, registro_numero, registro_orgao) VALUES ('Dra. Jane', '22222222222', '1985-01-01', 'jane@fisioclin.com', '222', 'CRE-2', 'CREFITO-3')").executeUpdate();
 
             // Seed 2 distinct modalities (Descriptions)
             conn.createQuery("INSERT INTO fisio.modalidade (nome, valor_base) VALUES ('Fisioterapia Ortopedica', 90.00)").executeUpdate();

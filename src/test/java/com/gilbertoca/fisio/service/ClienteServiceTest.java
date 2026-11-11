@@ -112,8 +112,8 @@ public class ClienteServiceTest {
         
         // Insere 2 clientes distintos para testar a busca textual
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
-            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, status) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) VALUES ('Carlos Silva', '111', '1985-04-12', '99', 'ATIVO')").executeUpdate();
+            conn.createQuery("INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) VALUES ('Ana Beatriz', '222', '1978-11-05', '88', 'ATIVO')").executeUpdate();
         }
 
         // Executa a busca enviando apenas um fragmento do nome ("silva") em letras minúsculas

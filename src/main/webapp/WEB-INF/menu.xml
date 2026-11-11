@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <menu>
     <menu name="home"      label="Home"      path="home.htm"/>
+    <menu name="agenda" label="Agenda" path="sessao-view.htm"/>
+    <menu name="atendimento" label="Atendimento" path="sessao-prontuario-view.htm"/>
     <menu name="clientes" label="Clientes" path="cliente-view.htm"/>
     <menu name="profissionais" label="Profissionais" path="profissional-view.htm"/>
+    <menu name="convenios" label="Convênios" path="convenio-view.htm"/>
+    <menu name="modalidades" label="Modalidades" path="modalidade-view.htm"/>
     <menu name="config" label="⚙ Configurações">
         <menu name="usuarios" label="Usuários" path="/usuarios.htm"/>
         <menu name="permissoes" label="Permissões" path="/permissoes.htm"/>
