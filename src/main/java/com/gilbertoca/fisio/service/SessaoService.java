@@ -4,6 +4,7 @@ import com.gilbertoca.fisio.model.Cliente;
 import com.gilbertoca.fisio.model.Modalidade;
 import com.gilbertoca.fisio.model.Profissional;
 import com.gilbertoca.fisio.model.Sessao;
+import com.gilbertoca.fisio.model.SessaoProntuario;
 import com.gilbertoca.fisio.model.enums.SessaoSituacao;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,9 +13,23 @@ import com.gilbertoca.fisio.infra.DataSourceManager;
 import com.gilbertoca.fisio.infra.QueryLoader;
 import org.sql2o.Connection;
 
+/**
+ * Dono do agregado Sessao (padrão ContratoService do GACE): CRUD de
+ * agendamento, consultas de agenda e as TRANSIÇÕES DE SITUAÇÃO do ciclo
+ * operacional — iniciarAtendimento (EM_ANDAMENTO) e finalizarAtendimento
+ * (REALIZADA) — como ContratoService.consignar define a situação do
+ * contrato. O registro clínico é a entidade filha em 1:1
+ * ({@link SessaoProntuarioService}); o compartilhamento de ambiente em
+ * modalidades de grupo (N sessões individuais no mesmo slot) é governado
+ * aqui pela capacidade_simultanea da modalidade. Dependência unidirecional,
+ * do dono do agregado para o service do filho.
+ */
 public class SessaoService {
 
     public SessaoService() {}
+
+    private final SessaoProntuarioService prontuarioService = new SessaoProntuarioService();
+
     
     // ============================================================================
     // RICH RELATIONSHIP LOOKUP HELPERS FOR MULTI-ENTITY VIEW BINDING
@@ -218,5 +233,101 @@ public class SessaoService {
             conn.createQuery(QueryLoader.get("sessao.delete")).addParameter("id", id).executeUpdate();
             conn.commit();
         }
+    }
+
+    // =========================================================================
+    // Fluxo da sala: transições de situação do agregado (dono: SessaoService)
+    // =========================================================================
+
+    /**
+     * Recepção chama o cliente; profissional entra na sala. Idempotente:
+     * valida a máquina de estados do agregado e avança para EM_ANDAMENTO.
+     * O registro clínico (1:1) é criado na primeira gravação de anotações.
+     */
+    public Sessao iniciarAtendimento(Integer sessaoId) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
+            SessaoSituacao atual = carregarSituacao(conn, sessaoId);
+
+            if (atual != SessaoSituacao.EM_ANDAMENTO) {
+                if (!atual.podeTransicionarPara(SessaoSituacao.EM_ANDAMENTO)) {
+                    throw new IllegalStateException(
+                            "Não é possível iniciar atendimento a partir de " + atual + ".");
+                }
+                transicionarSituacao(conn, sessaoId, SessaoSituacao.EM_ANDAMENTO);
+                conn.commit();
+            }
+
+            return get(sessaoId);
+        }
+    }
+
+    /**
+     * Pré-condição de finalização visível na sala: a sessão já possui
+     * registro clínico com conduta — mesmo critério do guard de
+     * {@link #finalizarAtendimento}.
+     */
+    public boolean podeFinalizar(Integer sessaoId) {
+        SessaoProntuario registro = prontuarioService.getBySessao(sessaoId);
+        return registro != null && possuiConduta(registro);
+    }
+
+    /**
+     * Fim da sessão na sala: valida a máquina de estados, exige o registro
+     * clínico 1:1 da sessão com conduta registrada (dados filhos do
+     * agregado, como as parcelas consultadas por ContratoService) e avança
+     * a sessão para REALIZADA na mesma transação.
+     */
+    public Sessao finalizarAtendimento(Integer sessaoId) {
+        try (Connection conn = DataSourceManager.getSql2o().beginTransaction()) {
+            SessaoSituacao atual = carregarSituacao(conn, sessaoId);
+            if (!atual.podeTransicionarPara(SessaoSituacao.REALIZADA)) {
+                throw new IllegalStateException(
+                        "Não é possível finalizar atendimento a partir de " + atual + ".");
+            }
+
+            SessaoProntuario registro = conn.createQuery(QueryLoader.get("prontuario.getBySessao"))
+                    .addParameter("sessaoId", sessaoId)
+                    .executeAndFetchFirst(SessaoProntuario.class);
+            if (registro == null) {
+                throw new IllegalStateException(
+                        "Finalização exige registro clínico do paciente.");
+            }
+            if (!possuiConduta(registro)) {
+                throw new IllegalStateException(
+                        "Finalização exige a conduta registrada do paciente.");
+            }
+
+            transicionarSituacao(conn, sessaoId, SessaoSituacao.REALIZADA);
+
+            conn.commit();
+            return get(sessaoId);
+        }
+    }
+
+    // =========================================================================
+    // Internos
+    // =========================================================================
+
+    private SessaoSituacao carregarSituacao(Connection conn, Integer sessaoId) {
+        String situacaoStr = conn.createQuery(QueryLoader.get("sessao.getSituacao"))
+                .addParameter("id", sessaoId)
+                .executeScalar(String.class);
+        if (situacaoStr == null) {
+            throw new IllegalArgumentException("Sessão informada não existe.");
+        }
+        return SessaoSituacao.valueOf(situacaoStr);
+    }
+
+    private void transicionarSituacao(Connection conn, Integer sessaoId, SessaoSituacao destino) {
+        conn.createQuery(QueryLoader.get("sessao.updateSituacao"))
+                .addParameter("situacao", destino.name())
+                .addParameter("id", sessaoId)
+                .executeUpdate();
+    }
+
+    /** Conduta registrada: critério único usado pelo guard e pela pré-condição. */
+    private static boolean possuiConduta(SessaoProntuario registro) {
+        String conduta = registro.getCondutaProcedimento();
+        return conduta != null && !conduta.trim().isEmpty();
     }
 }

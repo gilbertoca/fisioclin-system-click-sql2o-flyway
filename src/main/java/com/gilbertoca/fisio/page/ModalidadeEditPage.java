@@ -19,8 +19,6 @@ public class ModalidadeEditPage extends BorderPage {
     private final ModalidadeService modalidadeService = new ModalidadeService();
 
     public ModalidadeEditPage() {
-        addModel("title", "Modalidade Edit");
-
         form.setNoLayout(true);
 
         nome = new TextField("nome", "Nome da Modalidade:", true);
@@ -39,6 +37,12 @@ public class ModalidadeEditPage extends BorderPage {
     }
 
     @Override
+    public void onInit() {
+        super.onInit();
+        addModel("title", "Modalidade Edit");
+    }
+
+    @Override
     public void onGet() {
         if (id != null) {
             Modalidade modalidade = modalidadeService.get(id);
@@ -50,9 +54,12 @@ public class ModalidadeEditPage extends BorderPage {
 
     public boolean onSaveClick() {
         if (form.isValid()) {
-            Integer modalidadeId = (Integer) idField.getValueObject();
-            if (modalidadeId != null) {
-                Modalidade modalidade = modalidadeService.get(modalidadeId);
+            if (id != null) {
+                Modalidade modalidade = modalidadeService.get(id);
+                if (modalidade == null) {
+                    form.setError("Modalidade informada não existe mais.");
+                    return true;
+                }
                 form.copyTo(modalidade);
                 modalidadeService.update(modalidade);
             } else {

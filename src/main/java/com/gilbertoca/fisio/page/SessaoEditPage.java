@@ -50,8 +50,6 @@ public class SessaoEditPage extends BorderPage {
     private final ModalidadeService modalidadeService = new ModalidadeService();
 
     public SessaoEditPage() {
-        addModel("title", "Sessão Edit");
-
         form.setNoLayout(true);
 
         form.add(idField);
@@ -70,6 +68,7 @@ public class SessaoEditPage extends BorderPage {
     @Override
     public void onInit() {
         super.onInit();
+        addModel("title", "Sessão Edit");
 
         selectCliente.getOptionList().clear();
         selectCliente.add(Option.EMPTY_OPTION);
@@ -92,13 +91,13 @@ public class SessaoEditPage extends BorderPage {
         selectTipo.getOptionList().clear();
         selectTipo.add(Option.EMPTY_OPTION);
         for (SessaoTipo tipo : SessaoTipo.values()) {
-            selectTipo.add(new Option(tipo.name(), traduzTipo(tipo)));
+            selectTipo.add(new Option(tipo.name(), tipo.toString()));
         }
 
         selectPagamentoOrigem.getOptionList().clear();
         selectPagamentoOrigem.add(Option.EMPTY_OPTION);
         for (PagamentoOrigem origem : PagamentoOrigem.values()) {
-            selectPagamentoOrigem.add(new Option(origem.name(), traduzOrigem(origem)));
+            selectPagamentoOrigem.add(new Option(origem.name(), origem.toString()));
         }
     }
 
@@ -137,7 +136,7 @@ public class SessaoEditPage extends BorderPage {
             return true;
         }
 
-        Integer sessaoId = (Integer) idField.getValueObject();
+        Integer sessaoId = id;
         Sessao sessao = (sessaoId != null) ? sessaoService.get(sessaoId) : new Sessao();
         if (sessao == null) {
             form.setError("Sessão informada não existe mais.");
@@ -223,23 +222,6 @@ public class SessaoEditPage extends BorderPage {
             return Integer.valueOf(value.trim());
         } catch (NumberFormatException ex) {
             return null;
-        }
-    }
-
-    private String traduzTipo(SessaoTipo tipo) {
-        switch (tipo) {
-            case AVALIACAO:   return "Avaliação";
-            case TRATAMENTO:  return "Tratamento";
-            case REAVALIACAO: return "Reavaliação";
-            default:          return tipo.name();
-        }
-    }
-
-    private String traduzOrigem(PagamentoOrigem origem) {
-        switch (origem) {
-            case PARTICULAR: return "Particular";
-            case CONVENIO:   return "Convênio";
-            default:         return origem.name();
         }
     }
 }

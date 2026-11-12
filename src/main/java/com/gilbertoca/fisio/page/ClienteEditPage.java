@@ -24,8 +24,6 @@ public class ClienteEditPage extends BorderPage {
     private final ClienteService clienteService = new ClienteService();
 
     public ClienteEditPage() {
-        addModel("title", "Cliente Edit");
-
         form.setNoLayout(true);
         
         nome = new TextField("nome", "Nome Completo:", true);
@@ -52,6 +50,7 @@ public class ClienteEditPage extends BorderPage {
     @Override
     public void onInit() {
         super.onInit();
+        addModel("title", "Cliente Edit");
         // Populate dropdown lookup 
 //        selectConvenio.getOptionList().clear();
 //        selectConvenio.add(Option.EMPTY_OPTION);
@@ -77,11 +76,14 @@ public class ClienteEditPage extends BorderPage {
 
     public boolean onSaveClick() {
         if (form.isValid()) {
-            Integer clienteId = (Integer) idField.getValueObject();
-            if (clienteId != null) {
-                Cliente cliente = clienteService.get(clienteId);
+            if (id != null) {
+                Cliente cliente = clienteService.get(id);
+                if (cliente == null) {
+                    form.setError("Cliente informado não existe mais.");
+                    return true;
+                }
                 form.copyTo(cliente);
-                clienteService.update(cliente);                
+                clienteService.update(cliente);
             } else {
                 Cliente cliente = new Cliente();
                 form.copyTo(cliente);

@@ -23,8 +23,6 @@ public class ProfissionalEditPage extends BorderPage {
     private final ProfissionalService profissionalService = new ProfissionalService();
 
     public ProfissionalEditPage() {
-        addModel("title", "Profissional Edit");
-
         form.setNoLayout(true);
 
         nome = new TextField("nome", "Nome Completo:", true);
@@ -49,6 +47,12 @@ public class ProfissionalEditPage extends BorderPage {
     }
 
     @Override
+    public void onInit() {
+        super.onInit();
+        addModel("title", "Profissional Edit");
+    }
+
+    @Override
     public void onGet() {
         if (id != null) {
             Profissional profissional = profissionalService.get(id);
@@ -60,9 +64,12 @@ public class ProfissionalEditPage extends BorderPage {
 
     public boolean onSaveClick() {
         if (form.isValid()) {
-            Integer profissionalId = (Integer) idField.getValueObject();
-            if (profissionalId != null) {
-                Profissional profissional = profissionalService.get(profissionalId);
+            if (id != null) {
+                Profissional profissional = profissionalService.get(id);
+                if (profissional == null) {
+                    form.setError("Profissional informado não existe mais.");
+                    return true;
+                }
                 form.copyTo(profissional);
                 profissionalService.update(profissional);
             } else {

@@ -4,7 +4,6 @@ import com.gilbertoca.fisio.infra.DataSourceManager;
 import com.gilbertoca.fisio.model.Sessao;
 import com.gilbertoca.fisio.model.SessaoProntuario;
 import com.gilbertoca.fisio.model.enums.SessaoSituacao;
-import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,13 +12,17 @@ import org.sql2o.Connection;
 import static org.junit.Assert.*;
 
 /**
- * Fluxo do atendimento multi-paciente: iniciar garante o titular; anotações
- * são por sessão/paciente; grupo aceita até 4 pacientes; finalização exige
- * a conduta de todos os pacientes da sessão.
+ * Fluxo do atendimento na sala, com registro clínico 1:1: iniciar avança a
+ * situação (EM_ANDAMENTO) sem criar registro; as anotações fazem upsert do
+ * registro da sessão preservando data_registro; a finalização exige o
+ * registro com conduta. O compartilhamento de ambiente em grupo (N sessões
+ * individuais no mesmo slot) é da agenda e é coberto por
+ * SessaoServiceTest.devePermitirSessoesEmGrupoAteCapacidade...
  */
 public class SessaoProntuarioServiceTest {
 
     private SessaoProntuarioService prontuarioService;
+    private SessaoService sessaoService;
 
     private static Integer clienteId;
     private static Integer profissionalId;
@@ -63,17 +66,6 @@ public class SessaoProntuarioServiceTest {
         }
     }
 
-    private Integer novoCliente(String nome) {
-        try (Connection conn = DataSourceManager.getSql2o().open()) {
-            return conn.createQuery(
-                    "INSERT INTO fisio.cliente (nome, cpf, dt_nascimento, telefone, cliente_situacao) "
-                    + "VALUES (:nome, :cpf, '1990-01-01', '8699990000', 'ATIVO')", true)
-                    .addParameter("nome", nome)
-                    .addParameter("cpf", String.valueOf(System.nanoTime()).substring(0, 11))
-                    .executeUpdate().getKey(Integer.class);
-        }
-    }
-
     private Integer novaSessaoEmAndamento() {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
             return conn.createQuery(
@@ -87,49 +79,44 @@ public class SessaoProntuarioServiceTest {
     }
 
     @Test
-    public void deveExecutarFluxoCompletoDeAtendimentoMultiPaciente() {
+    public void deveExecutarFluxoCompletoDeAtendimento() {
+        sessaoService = new SessaoService();
         prontuarioService = new SessaoProntuarioService();
 
-        // 1. Iniciar: titular do agendamento entra automaticamente como paciente
-        Sessao emAndamento = prontuarioService.iniciarAtendimento(sessaoId);
+        // 1. Iniciar: avança a situação; NÃO cria registro clínico
+        Sessao emAndamento = sessaoService.iniciarAtendimento(sessaoId);
         assertEquals(SessaoSituacao.EM_ANDAMENTO, emAndamento.getSituacao());
-        List<SessaoProntuario> pacientes = prontuarioService.listarPacientesDaSessao(sessaoId);
-        assertEquals(1, pacientes.size());
-        assertEquals("Helena Prontuario", pacientes.get(0).getClienteNome());
+        assertNull("O registro clínico 1:1 nasce com a primeira anotação, não no iniciar.",
+                prontuarioService.getBySessao(sessaoId));
 
-        // 2. Anotações do titular
-        SessaoProntuario titular = new SessaoProntuario();
-        titular.setQueixaSubjetiva("Dor lombar 7/10 ao sentar.");
-        titular.setCondutaProcedimento("Alongamento passivo, estabilização segmentar.");
-        prontuarioService.salvarAnotacoes(sessaoId, clienteId, titular);
+        // 2. Primeiras anotações: cria o registro com data_registro original
+        SessaoProntuario rascunho = new SessaoProntuario();
+        rascunho.setQueixaSubjetiva("Dor lombar 7/10 ao sentar.");
+        SessaoProntuario criado = prontuarioService.salvarAnotacoes(sessaoId, rascunho);
+        assertNotNull(criado.getDataRegistro());
 
-        // 3. Grupo: segundo paciente entra com placeholder
-        Integer segundoCliente = novoCliente("Marcos Grupo");
-        prontuarioService.adicionarPaciente(sessaoId, segundoCliente);
-        assertEquals(2, prontuarioService.listarPacientesDaSessao(sessaoId).size());
-
-        // 4. Finalizar sem conduta do segundo: bloqueado na mesma transação
+        // 3. Finalizar sem conduta: bloqueado na mesma transação
         try {
-            prontuarioService.finalizarAtendimento(sessaoId);
-            fail("Deveria exigir a conduta de todos os pacientes.");
+            sessaoService.finalizarAtendimento(sessaoId);
+            fail("Deveria exigir a conduta registrada do paciente.");
         } catch (IllegalStateException ex) {
             assertTrue(ex.getMessage().contains("conduta"));
         }
 
-        // 5. Conduta do segundo paciente e finalização
-        SessaoProntuario doSegundo = new SessaoProntuario();
-        doSegundo.setCondutaProcedimento("Circuito de força com reformer.");
-        prontuarioService.salvarAnotacoes(sessaoId, segundoCliente, doSegundo);
+        // 4. Conduta registrada: upsert consolida e preserva data_registro
+        SessaoProntuario consolidacao = new SessaoProntuario();
+        consolidacao.setQueixaSubjetiva("Dor lombar 3/10 após a sessão.");
+        consolidacao.setCondutaProcedimento("Alongamento passivo, estabilização segmentar.");
+        SessaoProntuario salvo = prontuarioService.salvarAnotacoes(sessaoId, consolidacao);
 
-        Sessao realizada = prontuarioService.finalizarAtendimento(sessaoId);
+        Sessao realizada = sessaoService.finalizarAtendimento(sessaoId);
         assertEquals(SessaoSituacao.REALIZADA, realizada.getSituacao());
 
-        // 6. Upsert preservou data_registro e somou as condutas
-        SessaoProntuario consolidadoTitular = prontuarioService.getBySessaoCliente(sessaoId, clienteId);
-        assertNotNull(consolidadoTitular.getDataRegistro());
-        assertEquals("Alongamento passivo, estabilização segmentar.", consolidadoTitular.getCondutaProcedimento());
-        assertEquals("Circuito de força com reformer.",
-                prontuarioService.getBySessaoCliente(sessaoId, segundoCliente).getCondutaProcedimento());
+        // 5. Upsert preservou data_registro e consolidou o conteúdo
+        SessaoProntuario consolidado = prontuarioService.getBySessao(sessaoId);
+        assertEquals(criado.getDataRegistro(), consolidado.getDataRegistro());
+        assertEquals("Dor lombar 3/10 após a sessão.", consolidado.getQueixaSubjetiva());
+        assertEquals("Alongamento passivo, estabilização segmentar.", salvo.getCondutaProcedimento());
     }
 
     @Test
@@ -151,50 +138,54 @@ public class SessaoProntuarioServiceTest {
         prontuario.setCondutaProcedimento("Tentativa em sessão não iniciada.");
 
         try {
-            prontuarioService.salvarAnotacoes(sessaoAgendadaId, clienteId, prontuario);
+            prontuarioService.salvarAnotacoes(sessaoAgendadaId, prontuario);
             fail("Deveria bloquear registro clínico em sessão AGENDADA.");
         } catch (IllegalStateException ex) {
-            assertTrue(ex.getMessage().contains("AGENDADA"));
+            assertTrue(ex.getMessage().contains("Agendada"));
         }
     }
 
     @Test
-    public void deveBloquearFinalizacaoSemNenhumRegistroClinico() {
+    public void deveBloquearFinalizacaoSemRegistroClinico() {
         prontuarioService = new SessaoProntuarioService();
+        sessaoService = new SessaoService();
 
         Integer sessaoSemProntuario = novaSessaoEmAndamento();
 
         try {
-            prontuarioService.finalizarAtendimento(sessaoSemProntuario);
-            fail("Deveria exigir registro clínico de pelo menos um paciente.");
+            sessaoService.finalizarAtendimento(sessaoSemProntuario);
+            fail("Deveria exigir registro clínico do paciente.");
         } catch (IllegalStateException ex) {
             assertTrue(ex.getMessage().contains("registro clínico"));
         }
 
         // Estado não pode ter sido alterado pela falha
-        assertEquals(SessaoSituacao.EM_ANDAMENTO, prontuarioService.getBySessaoCliente(sessaoSemProntuario, clienteId) == null
-                ? SessaoSituacao.EM_ANDAMENTO : SessaoSituacao.REALIZADA);
+        assertEquals(SessaoSituacao.EM_ANDAMENTO, sessaoService.get(sessaoSemProntuario).getSituacao());
+        assertNull(prontuarioService.getBySessao(sessaoSemProntuario));
     }
 
     @Test
-    public void deveLimitarGrupoAQuatroPacientes() {
+    public void deveRefletirPreCondicaoDeFinalizacao() {
         prontuarioService = new SessaoProntuarioService();
+        sessaoService = new SessaoService();
 
-        Integer sessaoGrupoId = novaSessaoEmAndamento();
+        Integer sessaoEmSala = novaSessaoEmAndamento();
 
-        // Titular + 3 adicionais = 4 pacientes (limite)
-        prontuarioService.adicionarPaciente(sessaoGrupoId, novoCliente("Grupo P1"));
-        prontuarioService.adicionarPaciente(sessaoGrupoId, novoCliente("Grupo P2"));
-        prontuarioService.adicionarPaciente(sessaoGrupoId, novoCliente("Grupo P3"));
-        prontuarioService.adicionarPaciente(sessaoGrupoId, novoCliente("Grupo P4"));
-        assertEquals(4, prontuarioService.listarPacientesDaSessao(sessaoGrupoId).size());
+        // Sem registro clínico: não pode finalizar
+        assertFalse(sessaoService.podeFinalizar(sessaoEmSala));
 
-        try {
-            prontuarioService.adicionarPaciente(sessaoGrupoId, novoCliente("Grupo P5"));
-            fail("Deveria bloquear o quinto paciente da sessão.");
-        } catch (IllegalStateException ex) {
-            assertTrue(ex.getMessage().contains("no máximo"));
-        }
+        // Registro criado, mas sem conduta: ainda não é prontuário completo
+        SessaoProntuario rascunho = new SessaoProntuario();
+        rascunho.setQueixaSubjetiva("Relato inicial do cliente.");
+        prontuarioService.salvarAnotacoes(sessaoEmSala, rascunho);
+        assertFalse("Registro sem conduta não deve habilitar a finalização.",
+                sessaoService.podeFinalizar(sessaoEmSala));
+
+        // Conduta registrada: pré-condição de finalização satisfeita
+        SessaoProntuario anotacoes = new SessaoProntuario();
+        anotacoes.setCondutaProcedimento("Terapia manual e orientações domiciliares.");
+        prontuarioService.salvarAnotacoes(sessaoEmSala, anotacoes);
+        assertTrue(sessaoService.podeFinalizar(sessaoEmSala));
     }
 
     @AfterClass

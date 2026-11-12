@@ -17,8 +17,6 @@ public class ConvenioEditPage extends BorderPage {
     private final ConvenioService convenioService = new ConvenioService();
 
     public ConvenioEditPage() {
-        addModel("title", "Convênio Edit");
-
         form.setNoLayout(true);
 
         nome = new TextField("nome", "Nome do Convênio:", true);
@@ -33,6 +31,12 @@ public class ConvenioEditPage extends BorderPage {
     }
 
     @Override
+    public void onInit() {
+        super.onInit();
+        addModel("title", "Convênio Edit");
+    }
+
+    @Override
     public void onGet() {
         if (id != null) {
             Convenio convenio = convenioService.get(id);
@@ -44,9 +48,12 @@ public class ConvenioEditPage extends BorderPage {
 
     public boolean onSaveClick() {
         if (form.isValid()) {
-            Integer convenioId = (Integer) idField.getValueObject();
-            if (convenioId != null) {
-                Convenio convenio = convenioService.get(convenioId);
+            if (id != null) {
+                Convenio convenio = convenioService.get(id);
+                if (convenio == null) {
+                    form.setError("Convênio informado não existe mais.");
+                    return true;
+                }
                 form.copyTo(convenio);
                 convenioService.update(convenio);
             } else {

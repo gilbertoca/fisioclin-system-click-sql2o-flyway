@@ -27,11 +27,9 @@ public class ClienteViewPage extends BorderPage {
     private ActionLink deleteLink = new ActionLink("delete", "Delete", this, "onDelete");
 
     public ClienteViewPage() {
-        addModel("title", "Cliente View");
-        
         form.setNoLayout(true);
-        // Bulma's native table classes. Do NOT use Table.CLASS_ITS, which
-        // is Click's own non-Bulma class nome.
+        // Bahunya's native table classes. Do NOT use Table.CLASS_ITS, which
+        // is Click's own non-Bahunya class nome.
         //table.setClass("table");
         //table.setPageSize(5);
         table.setShowBanner(true);
@@ -55,7 +53,7 @@ public class ClienteViewPage extends BorderPage {
         actionsCol.setDecorator(new LinkDecorator(table, links, "id"));
         table.addColumn(actionsCol);
 
-        // The delete link opens the Bulma modal. The href Click rendered
+        // The delete link opens the Bahunya modal. The href Click rendered
         // is preserved on the link and copied to the modal's confirm
         // anchor at click time.
         deleteLink.setAttribute("onclick", "return onDeleteClick(this);");
@@ -64,7 +62,6 @@ public class ClienteViewPage extends BorderPage {
             @Override
             public List<Cliente> getData() {
                 Map<String, String> filters = table.getFilters(); // Returns {"nome" -> "John"}
-                System.out.println("table.getFilters()" + filters);
                 List<Cliente> all = clienteService.getAllLikeNome(filters.get("nome"));
                 return all;
             }
@@ -80,13 +77,11 @@ public class ClienteViewPage extends BorderPage {
     @Override
     public void onInit() {
         super.onInit();
-        System.out.println("onInit()");
         addModel("title", "Clientes View");
     }
 
     /** Invoked by the ActionLink after the user confirms the modal. */
     public boolean onDelete() {
-        System.out.println("onDelete()");
         Integer id = deleteLink.getValueInteger();
         if (id != null) {
             clienteService.delete(id.intValue());

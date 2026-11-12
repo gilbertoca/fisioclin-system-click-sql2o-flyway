@@ -5,8 +5,11 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Registro clínico da sessão (1:1 com Sessao). Alimenta o prontuário:
- * queixa, avaliação objetiva, conduta e orientações.
+ * Registro clínico da sessão (1:1 com Sessao, enforced pelo UNIQUE de
+ * sessao_id). Alimenta o prontuário: queixa, avaliação objetiva, conduta
+ * e orientações. O paciente é o cliente_id do agendamento — atendimento
+ * individualizado; o compartilhamento de ambiente (pilates em grupo) é
+ * propriedade da agenda, não deste registro.
  */
 public class SessaoProntuario implements Serializable {
 
@@ -14,13 +17,11 @@ public class SessaoProntuario implements Serializable {
 
     private Integer id;
     private Integer sessaoId;
-    private Integer clienteId;
     private LocalDateTime dataRegistro;
     private String queixaSubjetiva;      // Relato do cliente (escala de dor, sintomas)
     private String avaliacaoObjetiva;    // Testes físicos e palpação
     private String condutaProcedimento;  // O que foi executado (exercícios, manipulações)
     private String planoOrientacoes;     // Recomendações para casa ou próximos passos
-    private String clienteNome;          // transient: preenchido por JOIN em listagens
 
     public SessaoProntuario() {}
 
@@ -28,10 +29,6 @@ public class SessaoProntuario implements Serializable {
     public void setId(Integer id) { this.id = id; }
     public Integer getSessaoId() { return sessaoId; }
     public void setSessaoId(Integer sessaoId) { this.sessaoId = sessaoId; }
-    public Integer getClienteId() { return clienteId; }
-    public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
-    public String getClienteNome() { return clienteNome; }
-    public void setClienteNome(String clienteNome) { this.clienteNome = clienteNome; }
     public LocalDateTime getDataRegistro() { return dataRegistro; }
     public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }
     public String getQueixaSubjetiva() { return queixaSubjetiva; }

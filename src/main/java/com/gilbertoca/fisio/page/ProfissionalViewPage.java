@@ -30,8 +30,6 @@ public class ProfissionalViewPage extends BorderPage {
     private ActionLink deleteLink = new ActionLink("delete", "Delete", this, "onDelete");
 
     public ProfissionalViewPage() {
-        addModel("title", "Profissional View");
-
         form.setNoLayout(true);
         table.setShowBanner(true);
         table.setSortable(true);

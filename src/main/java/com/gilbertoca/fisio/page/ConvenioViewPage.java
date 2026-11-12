@@ -30,8 +30,6 @@ public class ConvenioViewPage extends BorderPage {
     private ActionLink deleteLink = new ActionLink("delete", "Delete", this, "onDelete");
 
     public ConvenioViewPage() {
-        addModel("title", "Convênio View");
-
         form.setNoLayout(true);
         table.setShowBanner(true);
         table.setSortable(true);

@@ -4,34 +4,8 @@
         <div><a href="$context/sessao-prontuario-view.htm">&larr; Meus Atendimentos</a></div>
     </header>
 
-    <dl class="row">
-        <dt>Profissional</dt><dd>$profissionalNome</dd>
-        <dt>Modalidade</dt><dd>$modalidadeNome</dd>
-        <dt>Tipo</dt><dd>$sessaoTipo</dd>
-        <dt>Horário</dt><dd>$dataHoraInicio</dd>
-        <dt>Situação</dt><dd><strong>$situacao</strong></dd>
-    </dl>
-
     #if($mensagem)
     <p><mark>$mensagem</mark></p>
-    #end
-
-    #if($pacientes)
-    <section>
-        <h3>Pacientes da Sessão</h3>
-        <table class="table">
-            <thead><tr><th>Paciente</th><th>Conduta</th><th>Registro</th></tr></thead>
-            <tbody>
-            #foreach($registro in $pacientes)
-                <tr>
-                    <td><a href="$context/sessao-prontuario-edit.htm?id=$!sessaoId&paciente=$!{registro.clienteId}">$!{registro.clienteNome}</a></td>
-                    <td>#if($!{registro.condutaProcedimento}) OK #else <strong>pendente</strong> #end</td>
-                    <td>$!{registro.dataRegistro}</td>
-                </tr>
-            #end
-            </tbody>
-        </table>
-    </section>
     #end
 
     $form

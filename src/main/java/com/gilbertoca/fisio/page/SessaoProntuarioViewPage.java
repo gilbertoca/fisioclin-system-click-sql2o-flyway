@@ -1,7 +1,7 @@
 package com.gilbertoca.fisio.page;
 
 import com.gilbertoca.fisio.model.Sessao;
-import com.gilbertoca.fisio.service.SessaoProntuarioService;
+import com.gilbertoca.fisio.service.SessaoService;
 import java.util.List;
 import java.util.Map;
 import org.apache.click.control.AbstractLink;
@@ -42,11 +42,9 @@ public class SessaoProntuarioViewPage extends BorderPage {
     private final PageLink atenderLink = new PageLink("atender", "Atender", SessaoProntuarioEditPage.class);
     private final PageLink editLink = new PageLink("edit", "Edit", SessaoEditPage.class);
 
-    private final SessaoProntuarioService prontuarioService = new SessaoProntuarioService();
+    private final SessaoService sessaoService = new SessaoService();
 
     public SessaoProntuarioViewPage() {
-        addModel("title", "Atendimentos");
-
         formTable.setNoLayout(true);
         table.setShowBanner(true);
         table.setSortable(true);
@@ -60,7 +58,7 @@ public class SessaoProntuarioViewPage extends BorderPage {
         profissionalCol.setFilterBy("profissional.nome");
         table.addColumn(profissionalCol);
 
-        table.addColumn(new Column("pacientesResumo"));
+        table.addColumn(new Column("cliente.nome"));
         table.addColumn(new Column("modalidade.nome"));
         table.addColumn(new Column("sessaoTipo"));
         table.addColumn(new Column("situacao"));
@@ -74,7 +72,7 @@ public class SessaoProntuarioViewPage extends BorderPage {
             @Override
             public List<Sessao> getData() {
                 Map<String, String> filters = table.getFilters();
-                return prontuarioService.listarAtendimentos(filters.get("profissional.nome"));
+                return sessaoService.listarAgenda(filters.get("profissional.nome"));
             }
         });
 
@@ -85,7 +83,9 @@ public class SessaoProntuarioViewPage extends BorderPage {
         addControl(formTable);
     }
 
-    private Integer profissionalLogadoId() {
-        return (Integer) getContext().getSessionAttribute(SESSION_PROFISSIONAL_ID);
+    @Override
+    public void onInit() {
+        super.onInit();
+        addModel("title", "Atendimentos");
     }
 }

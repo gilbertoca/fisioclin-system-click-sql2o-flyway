@@ -30,8 +30,6 @@ public class ModalidadeViewPage extends BorderPage {
     private ActionLink deleteLink = new ActionLink("delete", "Delete", this, "onDelete");
 
     public ModalidadeViewPage() {
-        addModel("title", "Modalidade View");
-
         form.setNoLayout(true);
         table.setShowBanner(true);
         table.setSortable(true);

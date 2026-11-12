@@ -31,7 +31,7 @@ public class LoginPage extends BorderPage {
     @Override
     public void onInit() {
         super.onInit();
-        addModel("title", "Sign in · Click + Bulma Demo");
+        addModel("title", "Sign in · Click + Bahunya Demo");
     }
 
     public boolean onLogin() {

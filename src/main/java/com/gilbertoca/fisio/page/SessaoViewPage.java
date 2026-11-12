@@ -4,6 +4,7 @@ import com.gilbertoca.fisio.model.Sessao;
 import com.gilbertoca.fisio.service.SessaoService;
 import java.util.List;
 import java.util.Map;
+import org.apache.click.control.ActionLink;
 import org.apache.click.control.AbstractLink;
 import org.apache.click.control.Column;
 import org.apache.click.control.Form;
@@ -29,10 +30,10 @@ public class SessaoViewPage extends BorderPage {
     private Table table = new Table("table");
     private PageLink editLink = new PageLink("edit", "Edit", SessaoEditPage.class);
     private PageLink atenderLink = new PageLink("atender", "Atender", SessaoProntuarioEditPage.class);
+    /** Desfaz o agendamento (erro de entrada da recepção): só sessão AGENDADA. */
+    private ActionLink deleteLink = new ActionLink("delete", "Delete", this, "onDelete");
 
     public SessaoViewPage() {
-        addModel("title", "Sessão View");
-
         form.setNoLayout(true);
         table.setShowBanner(true);
         table.setSortable(true);
@@ -53,9 +54,14 @@ public class SessaoViewPage extends BorderPage {
         table.addColumn(new Column("situacao"));
 
         Column actionsCol = new Column("actions");
-        AbstractLink[] links = new AbstractLink[] { atenderLink, editLink };
+        AbstractLink[] links = new AbstractLink[] { atenderLink, editLink, deleteLink };
         actionsCol.setDecorator(new LinkDecorator(table, links, "id"));
         table.addColumn(actionsCol);
+
+        // The delete link opens the Bahunya modal. The href Click rendered
+        // is preserved on the link and copied to the modal's confirm
+        // anchor at click time.
+        deleteLink.setAttribute("onclick", "return onDeleteClick(this);");
 
         table.setDataProvider(new DataProvider<Sessao>() {
             @Override
@@ -68,6 +74,7 @@ public class SessaoViewPage extends BorderPage {
         form.add(table);
         addControl(editLink);
         addControl(atenderLink);
+        addControl(deleteLink);
         addControl(table);
         addControl(form);
     }
@@ -76,5 +83,22 @@ public class SessaoViewPage extends BorderPage {
     public void onInit() {
         super.onInit();
         addModel("title", "Agenda do Dia");
+    }
+
+    /** Invoked by the ActionLink after the user confirms the modal. */
+    public boolean onDelete() {
+        Integer id = deleteLink.getValueInteger();
+        if (id == null) {
+            return false;
+        }
+        try {
+            sessaoService.delete(id);
+            setRedirect(SessaoViewPage.class);
+        } catch (IllegalStateException ex) {
+            // Histórico (EM_ANDAMENTO/REALIZADA/FALTOU/CANCELADA) não é
+            // apagável: avisa a recepção em vez de estourar a error page.
+            addModel("mensagem", ex.getMessage());
+        }
+        return false;
     }
 }
