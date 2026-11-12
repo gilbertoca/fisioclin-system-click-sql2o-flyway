@@ -1,10 +1,10 @@
 package com.gilbertoca.fisio.page;
 
 import com.gilbertoca.fisio.model.Sessao;
-import com.gilbertoca.fisio.model.SessaoProntuario;
 import com.gilbertoca.fisio.model.enums.SessaoSituacao;
-import com.gilbertoca.fisio.service.SessaoProntuarioService;
 import com.gilbertoca.fisio.service.SessaoService;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.click.control.Form;
@@ -15,26 +15,35 @@ import org.apache.click.control.TextField;
 import org.apache.click.util.Bindable;
 
 /**
- * Sala de atendimento: registra as anotações clínicas do paciente da sessão.
+ * Sala de atendimento: registra o registro do atendimento do paciente da
+ * sessão.
  *
- * Tudo na tela pertence à mesma entidade {@link Sessao}: a definição inicial
+ * Tudo na tela pertence à MESMA entidade {@link Sessao}: a definição inicial
  * do agendamento (paciente, profissional, modalidade, tipo, horário, situação)
  * entra como campos readonly do Form — atribuída pela recepção, não editável
- * aqui — e o profissional preenche apenas as anotações do prontuário (1:1),
- * cujo paciente é o cliente_id do agendamento. Atendimento individualizado;
- * modalidades de grupo dividem o mesmo slot com N sessões individuais
- * (capacidade_simultanea), cada uma com linha própria na listagem.
+ * aqui — e o profissional preenche apenas os textos do registro do
+ * atendimento (registro_relato/avaliacao/conduta/orientacoes), colunas da
+ * própria sessão. Atendimento individualizado; modalidades de grupo dividem
+ * o mesmo slot com N sessões individuais (capacidade_simultanea), cada uma
+ * com linha própria na listagem.
  *
- * A tela segue a cadeia de transições da situação da sessão:
+ * A tela segue a cadeia de transições da situação da sessão. Estado é efeito
+ * de GRAVAÇÃO real, não de navegação: abrir o formulário não persiste nada.
  * <ul>
- * <li><b>AGENDADA</b>: botões Iniciar Atendimento + Cancelar; anotações
- * readonly (o atendimento sequer iniciou).</li>
+ * <li><b>AGENDADA / CONFIRMADA</b>: painel de conferência do agendamento
+ * (Iniciar Atendimento + Cancelar). Iniciar é NAVEGAÇÃO — recarrega a sala
+ * com o formulário de registro (?editar=true) sem tocar no banco.</li>
+ * <li><b>Primeira gravação do registro</b>: é o Salvar Anotações que inicia
+ * o atendimento — o service avança AGENDADA/CONFIRMADA → EM_ANDAMENTO e
+ * marca registro_dt_inicio na mesma transação. Se o profissional desistir
+ * (Cancelar), nada foi alterado — não há transição a desfazer.</li>
  * <li><b>EM_ANDAMENTO</b>: botão Salvar Anotações + Cancelar; anotações
- * editáveis. Finalizar Atendimento só aparece quando o registro clínico
- * 1:1 da sessão tem conduta registrada — mesmo critério do guard de
+ * editáveis. Finalizar Atendimento só aparece quando o registro da sessão
+ * tem conduta registrada — mesmo critério do guard de
  * SessaoService.finalizarAtendimento.</li>
  * <li><b>REALIZADA / FALTOU / CANCELADA</b>: histórico — sem botões de
- * transição, somente Cancelar; anotações readonly.</li>
+ * transição, somente Cancelar; anotações readonly (REALIZADA ainda permite
+ * consolidação do texto via service, a tela não oferece edição).</li>
  * </ul>
  *
  * Ciclo de vida Click canônico:
@@ -44,15 +53,31 @@ import org.apache.click.util.Bindable;
  * Cancelar). Nenhum acesso a banco.</li>
  * <li><b>onInit()</b>: prepara o Form e suas dependências (título) —
  * NÃO carrega o modelo a ser editado.</li>
- * <li><b>onGet()</b> (GET): carrega a Sessao e o prontuário persistido e
- * popula o Form (contexto readonly + form.copyFrom).</li>
+ * <li><b>onGet()</b> (GET): carrega a Sessao (query única: agenda + registro)
+ * e popula o Form.</li>
  * <li><b>onRender()</b>: aplica o estado de exibição comum a GET e POST —
- * carrega a Sessao quando o fluxo não passou pelo onGet (ciclo POST) e
- * remove/re-insere os botões conforme a situação. No POST o onRender roda
- * DEPOIS dos handlers do Form (performOnPostOrGet → performOnRender no
- * ClickServlet), então o re-render pós-ação reflete a situação atual (ex.:
- * Salvar com conduta faz o Finalizar aparecer na mesma tela).</li>
+ * carrega a Sessao quando o fluxo não passou pelo onGet (ciclo POST),
+ * publica o modelo de exibição ($sessao + $horario) e remove/re-insere os
+ * botões conforme a situação. No POST o onRender roda DEPOIS dos handlers
+ * do Form (performOnPostOrGet → performOnRender no ClickServlet), então o
+ * re-render pós-ação reflete a situação atual (ex.: Salvar com conduta faz
+ * o Finalizar aparecer na mesma tela).</li>
  * </ul>
+ *
+ * Transição visual no template (sessao-prontuario-edit.htm): na fila da sala
+ * (AGENDADA/CONFIRMADA) sem ?editar=true o template exibe o painel de
+ * conferência do agendamento (dados direto da $sessao + Iniciar/Cancelar
+ * entre form.startTag()/endTag()); nos demais casos exibe o Form completo.
+ * O Iniciar redireciona para a mesma sala com editar=true — o formulário
+ * entra e a primeira gravação efetiva EM_ANDAMENTO. O sinal editar chega ao
+ * template pelo próprio @Bindable (o ClickServlet publica campos bindables
+ * não-Control no modelo em createTemplateModel — nada de addModel manual).
+ *
+ * População manual (sem form.copyFrom): a Sessao é o modelo único, mas os
+ * campos de contexto têm nomes distintos das propriedades ("paciente" vs.
+ * getCliente()) e campos como "profissional" casariam com a propriedade
+ * objeto getProfissional() — o copyFrom gravaria o toString do objeto no
+ * TextField. Cada campo recebe explicitamente o texto da Sessao carregada.
  *
  * Retorno dos handlers: quem redireciona retorna false (interrompe o
  * processamento — Iniciar, Finalizar, Cancelar); quem re-renderiza a mesma
@@ -76,6 +101,15 @@ public class SessaoProntuarioEditPage extends BorderPage {
      */
     @Bindable protected Integer id;
 
+    /**
+     * Sinal de navegação do painel de conferência: ?editar=true abre o
+     * formulário do registro sem persistir nada — a transição para
+     * EM_ANDAMENTO só acontece na primeira gravação (salvarRegistro).
+     * O ClickServlet publica este campo no modelo do template
+     * (createTemplateModel), o que o torna acessível como $editar.
+     */
+    @Bindable protected Boolean editar;
+
     /** Carrega o id da sessão no POST (padrão Click para tela de edição). */
     private final HiddenField idField = new HiddenField("id", Integer.class);
     private final Form form = new Form("form");
@@ -88,22 +122,22 @@ public class SessaoProntuarioEditPage extends BorderPage {
     private final TextField horarioField = new TextField("horario", "Horário:");
     private final TextField situacaoField = new TextField("situacao", "Situação:");
 
-    private final TextArea queixaSubjetiva = new TextArea("queixaSubjetiva", "Queixa Subjetiva (relato do cliente):", false);
-    private final TextArea avaliacaoObjetiva = new TextArea("avaliacaoObjetiva", "Avaliação Objetiva (testes, palpação):", false);
-    private final TextArea condutaProcedimento = new TextArea("condutaProcedimento", "Conduta / Procedimento Realizado:", false);
-    private final TextArea planoOrientacoes = new TextArea("planoOrientacoes", "Plano e Orientações para Casa:", false);
+    // Registro do atendimento: colunas registro_* da própria Sessao
+    private final TextArea registroRelato = new TextArea("registroRelato", "Queixa Subjetiva (relato do cliente):", false);
+    private final TextArea registroAvaliacao = new TextArea("registroAvaliacao", "Avaliação Objetiva (testes, palpação):", false);
+    private final TextArea registroConduta = new TextArea("registroConduta", "Conduta / Procedimento Realizado:", false);
+    private final TextArea registroOrientacoes = new TextArea("registroOrientacoes", "Plano e Orientações para Casa:", false);
 
     // Botões de transição e o permanente: criados uma única vez no construtor;
-    // a situação da sessão define quais permanecem no Form (prepararEstadoDaTela)
+    // a situação da sessão define quais permanecem no Form (aplicarEstadoDaTela)
     private final Submit iniciarSubmit = new Submit("iniciar", "Iniciar Atendimento", this, "onIniciarClick");
     private final Submit salvarSubmit = new Submit("salvar", "Salvar Anotações", this, "onSalvarClick");
     private final Submit finalizarSubmit = new Submit("finalizar", "Finalizar Atendimento", this, "onFinalizarClick");
     private final Submit cancelarSubmit = new Submit("cancelar", "Cancelar", this, "onCancelClick");
 
     private final SessaoService sessaoService = new SessaoService();
-    private final SessaoProntuarioService prontuarioService = new SessaoProntuarioService();
 
-    /** Sessao carregada no onGet/onPost: base do estado da tela. */
+    /** Sessao carregada no onGet/onRender: base do estado da tela. */
     private Sessao sessao;
 
     public SessaoProntuarioEditPage() {
@@ -116,10 +150,10 @@ public class SessaoProntuarioEditPage extends BorderPage {
         form.add(tipoField);
         form.add(horarioField);
         form.add(situacaoField);
-        form.add(queixaSubjetiva);
-        form.add(avaliacaoObjetiva);
-        form.add(condutaProcedimento);
-        form.add(planoOrientacoes);
+        form.add(registroRelato);
+        form.add(registroAvaliacao);
+        form.add(registroConduta);
+        form.add(registroOrientacoes);
 
         // Contexto do agendamento: exibição fixa, valor vindo do servidor
         pacienteField.setReadonly(true);
@@ -129,17 +163,17 @@ public class SessaoProntuarioEditPage extends BorderPage {
         horarioField.setReadonly(true);
         situacaoField.setReadonly(true);
 
-        queixaSubjetiva.setCols(60);
-        queixaSubjetiva.setRows(4);
-        avaliacaoObjetiva.setCols(60);
-        avaliacaoObjetiva.setRows(4);
-        condutaProcedimento.setCols(60);
-        condutaProcedimento.setRows(5);
-        planoOrientacoes.setCols(60);
-        planoOrientacoes.setRows(3);
+        registroRelato.setCols(60);
+        registroRelato.setRows(4);
+        registroAvaliacao.setCols(60);
+        registroAvaliacao.setRows(4);
+        registroConduta.setCols(60);
+        registroConduta.setRows(5);
+        registroOrientacoes.setCols(60);
+        registroOrientacoes.setRows(3);
 
         // Todos os botões existem desde a montagem do Form; o estado da tela
-        // decide quais permanecem (remoção/re-inserção em prepararEstadoDaTela)
+        // decide quais permanecem (remoção/re-inserção em aplicarEstadoDaTela)
         form.add(iniciarSubmit);
         form.add(salvarSubmit);
         form.add(finalizarSubmit);
@@ -149,7 +183,7 @@ public class SessaoProntuarioEditPage extends BorderPage {
 
     /**
      * Preparação do Form e suas dependências — sem carga de modelo (a Sessao
-     * é carregada no onGet/onPost, fases de processamento do request).
+     * é carregada no onGet/onRender, fases de processamento do request).
      */
     @Override
     public void onInit() {
@@ -158,9 +192,9 @@ public class SessaoProntuarioEditPage extends BorderPage {
     }
 
     /**
-     * Abertura da sala (GET): carrega a Sessao e popula o Form — contexto
-     * readonly da definição do agendamento e prontuário persistido via
-     * form.copyFrom (padrão do javadoc de Form.copyFrom).
+     * Abertura da sala (GET): carrega a Sessao — query única com a agenda E
+     * o registro do atendimento — e popula o Form (contexto readonly +
+     * textos clínicos).
      */
     @Override
     public void onGet() {
@@ -177,14 +211,14 @@ public class SessaoProntuarioEditPage extends BorderPage {
             profissionalField.setValue(texto(sessao.getProfissional() != null ? sessao.getProfissional().getNome() : null));
             modalidadeField.setValue(texto(sessao.getModalidade() != null ? sessao.getModalidade().getNome() : null));
             tipoField.setValue(texto(sessao.getSessaoTipo()));
-            horarioField.setValue(texto(sessao.getDataHoraInicio() != null ? sessao.getDataHoraInicio().toString() : null));
+            horarioField.setValue(formatarHorario(sessao.getDataHoraInicio()));
             situacaoField.setValue(texto(sessao.getSituacao()));
 
-            // Registro clínico 1:1 da sessão (o paciente é o do agendamento)
-            SessaoProntuario prontuario = prontuarioService.getBySessao(id);
-            if (prontuario != null) {
-                form.copyFrom(prontuario);
-            }
+            // Registro do atendimento: colunas da própria sessão
+            registroRelato.setValue(sessao.getRegistroRelato());
+            registroAvaliacao.setValue(sessao.getRegistroAvaliacao());
+            registroConduta.setValue(sessao.getRegistroConduta());
+            registroOrientacoes.setValue(sessao.getRegistroOrientacoes());
         }
     }
 
@@ -203,6 +237,14 @@ public class SessaoProntuarioEditPage extends BorderPage {
 
         if (sessao == null) {
             carregarSessao();
+        }
+        // Modelos de exibição do template: o painel de conferência (AGENDADA)
+        // desenha os dados direto da Sessao, com o horário planejado já
+        // formatado pela página (formatação de dados, não lógica de negócio).
+        if (sessao != null) {
+            addModel("sessao", sessao);
+            addModel("horario", formatarHorario(sessao.getDataHoraInicio()));
+            addModel("horarioIso", formatarHorarioIso(sessao.getDataHoraInicio()));
         }
         aplicarEstadoDaTela();
     }
@@ -232,29 +274,44 @@ public class SessaoProntuarioEditPage extends BorderPage {
         form.remove(finalizarSubmit);
         form.remove(cancelarSubmit);
 
-        boolean emAndamento = atendimentoEmAndamento();
+        // Painel de conferência: sessão na fila e formulário ainda não aberto
+        boolean painel = naFilaDaSala() && !exibirFormulario();
+        // Anotações editáveis: formulário aberto com a sessão ativa
+        boolean editavel = !painel && registroEditavel();
 
-        // Anotações clínicas: editáveis somente com o atendimento em andamento
-        queixaSubjetiva.setReadonly(!emAndamento);
-        avaliacaoObjetiva.setReadonly(!emAndamento);
-        condutaProcedimento.setReadonly(!emAndamento);
-        planoOrientacoes.setReadonly(!emAndamento);
+        registroRelato.setReadonly(!editavel);
+        registroAvaliacao.setReadonly(!editavel);
+        registroConduta.setReadonly(!editavel);
+        registroOrientacoes.setReadonly(!editavel);
 
-        if (podeIniciar()) {
+        if (painel) {
             form.add(iniciarSubmit);
-        } else if (emAndamento) {
+        } else if (editavel) {
             form.add(salvarSubmit);
             if (podeFinalizar()) {
                 form.add(finalizarSubmit);
             }
         }
-        // REALIZADA / FALTOU / CANCELADA: histórico — sem transições
+        // Terminais (REALIZADA/FALTOU/CANCELADA): histórico — sem transições
         form.add(cancelarSubmit);
     }
 
-    /** A sala pode iniciar o atendimento? Só a partir de AGENDADA. */
-    private boolean podeIniciar() {
-        return sessao != null && sessao.getSituacao() == SessaoSituacao.AGENDADA;
+    /** Sessão na fila da sala, ainda não atendida: AGENDADA ou CONFIRMADA. */
+    private boolean naFilaDaSala() {
+        return sessao != null
+                && (sessao.getSituacao() == SessaoSituacao.AGENDADA
+                    || sessao.getSituacao() == SessaoSituacao.CONFIRMADA);
+    }
+
+    /** O formulário do registro foi aberto? Navegação (?editar=true): nada persiste. */
+    private boolean exibirFormulario() {
+        return Boolean.TRUE.equals(editar);
+    }
+
+    /** Registro do atendimento editável: sessão na fila com o formulário
+     * aberto, ou atendimento em andamento. */
+    private boolean registroEditavel() {
+        return naFilaDaSala() || atendimentoEmAndamento();
     }
 
     /** Anotações clínicas editáveis: atendimento em andamento. */
@@ -263,9 +320,8 @@ public class SessaoProntuarioEditPage extends BorderPage {
     }
 
     /**
-     * Finalizar exige o registro clínico 1:1 da sessão com conduta
-     * registrada — mesmo critério do guard do service
-     * (SessaoService.finalizarAtendimento).
+     * Finalizar exige o registro da sessão com conduta registrada — mesmo
+     * critério do guard do service (SessaoService.finalizarAtendimento).
      */
     private boolean podeFinalizar() {
         return atendimentoEmAndamento() && sessaoService.podeFinalizar(sessao.getId());
@@ -276,46 +332,78 @@ public class SessaoProntuarioEditPage extends BorderPage {
         return (valor != null) ? valor.toString() : "-";
     }
 
-    private SessaoProntuario montarProntuarioDaTela() {
-        SessaoProntuario prontuario = new SessaoProntuario();
-        form.copyTo(prontuario);
-        return prontuario;
+    /** Formato do horário planejado no painel de conferência do template. */
+    private static final DateTimeFormatter FORMATO_HORARIO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    /** Horário planejado formatado ("-" quando o dado não veio do banco). */
+    private String formatarHorario(LocalDateTime dataHora) {
+        return (dataHora != null) ? dataHora.format(FORMATO_HORARIO) : "-";
     }
 
+    /** Formato ISO-8601 do horário, para o atributo datetime do elemento time. */
+    private static final DateTimeFormatter FORMATO_HORARIO_ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+    /** Horário planejado em ISO-8601 (atributo datetime do time no template). */
+    private String formatarHorarioIso(LocalDateTime dataHora) {
+        return (dataHora != null) ? dataHora.format(FORMATO_HORARIO_ISO) : null;
+    }
+
+    /**
+     * Monta o delta do registro a partir da tela: somente as colunas
+     * registro_* preenchidas pelo profissional; a transição marca os
+     * registro_dt_* e o service preserva o restante da Sessao.
+     */
+    private Sessao montarRegistroDaTela() {
+        Sessao registro = new Sessao();
+        registro.setRegistroRelato(registroRelato.getValue());
+        registro.setRegistroAvaliacao(registroAvaliacao.getValue());
+        registro.setRegistroConduta(registroConduta.getValue());
+        registro.setRegistroOrientacoes(registroOrientacoes.getValue());
+        return registro;
+    }
+
+    /**
+     * Iniciar Atendimento é NAVEGAÇÃO, não transição: nada é persistido —
+     * abrir o formulário do registro não pode deixar resíduo se o
+     * profissional desistir (Cancelar volta sem nada a desfazer). Redireciona
+     * para a própria sala com editar=true; a transição para EM_ANDAMENTO
+     * acontece na primeira gravação (SessaoService.salvarRegistro).
+     */
     public boolean onIniciarClick() {
         if (id == null) {
             form.setError("Sessão não informada.");
             return true;
         }
-        try {
-            sessaoService.iniciarAtendimento(id);
-        } catch (RuntimeException ex) {
-            form.setError(ex.getMessage());
-            return true;
-        }
-        // Post Redirect: reabre a sala, que recarrega o contexto (situação nova)
+        // Post Redirect: reabre a sala com o formulário do registro (?editar=true)
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);
+        params.put("editar", Boolean.TRUE);
         setRedirect(SessaoProntuarioEditPage.class, params);
         return false;
     }
 
+    /**
+     * Salvar Anotações é a gravação real — e, na primeira gravação de uma
+     * sessão da fila, é ELA que inicia o atendimento (service avança para
+     * EM_ANDAMENTO e marca registro_dt_inicio). Re-render da mesma tela:
+     * retorna true para o servlet seguir para onRender — retornar false
+     * pularia o onRender e a tela sairia sem o estado aplicado (botões e
+     * readonly das anotações). A Sessao em memória é recarregada: o onRender
+     * aplica o estado da situação GRAVADA — com a conduta registrada, o
+     * Finalizar aparece na mesma tela.
+     */
     public boolean onSalvarClick() {
         if (id == null) {
             form.setError("Sessão não informada.");
             return true;
         }
         try {
-            prontuarioService.salvarAnotacoes(id, montarProntuarioDaTela());
+            sessao = sessaoService.salvarRegistro(id, montarRegistroDaTela());
             addModel("mensagem", "Anotações salvas.");
         } catch (RuntimeException ex) {
             form.setError(ex.getMessage());
             return true;
         }
-        // Re-render da mesma tela: retorna true para o servlet seguir para
-        // onPost/onRender — retornar false pularia o onRender e a tela sairia
-        // sem o estado aplicado (botões e readonly das anotações). O onRender
-        // reavalia podeFinalizar: com a conduta salva, o Finalizar aparece.
         return true;
     }
 

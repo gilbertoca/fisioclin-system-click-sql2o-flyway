@@ -193,6 +193,99 @@ public class SessaoServiceTest {
         }
     }
 
+    // =========================================================================
+    // Fluxo da sala: transições de situação + registro do atendimento (1:1)
+    // =========================================================================
+
+    /** Sessão crua no banco (evita depender do id gerado do create via modelo). */
+    private Integer novaSessaoDb(String situacao) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(
+                    "INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, dt_hora_inicio, dt_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) "
+                    + "VALUES (:cli, :prof, :mod, CURRENT_TIMESTAMP + INTERVAL '2' HOUR, CURRENT_TIMESTAMP + INTERVAL '3' HOUR, 'TRATAMENTO', 'PARTICULAR', :situacao)", true)
+                    .addParameter("cli", clienteId)
+                    .addParameter("prof", idProfissional)
+                    .addParameter("mod", idModalidade)
+                    .addParameter("situacao", situacao)
+                    .executeUpdate().getKey(Integer.class);
+        }
+    }
+
+    @Test
+    public void deveExecutarFluxoDeAtendimentoComRegistroNaPropriaSessao() {
+        sessaoService = new SessaoService();
+
+        Integer sessaoId = novaSessaoDb("AGENDADA");
+
+        // 1. Abrir o formulário é navegação: nada persistido, ainda AGENDADA
+        assertTrue(sessaoService.get(sessaoId).getPossuiProntuario() == null
+                || !sessaoService.get(sessaoId).getPossuiProntuario());
+
+        // 2. A PRIMEIRA GRAVAÇÃO inicia o atendimento: AGENDADA → EM_ANDAMENTO,
+        //    marcando o início real na mesma transação
+        Sessao rascunho = new Sessao();
+        rascunho.setRegistroRelato("Dor lombar 7/10 ao sentar.");
+        Sessao emAndamento = sessaoService.salvarRegistro(sessaoId, rascunho);
+        assertEquals(SessaoSituacao.EM_ANDAMENTO, emAndamento.getSituacao());
+        assertNotNull(emAndamento.getRegistroDtInicio());
+        assertNull(emAndamento.getRegistroConduta());
+        assertFalse(sessaoService.podeFinalizar(sessaoId));
+
+        // 3. Rascunho sem conduta: finalização bloqueada
+        try {
+            sessaoService.finalizarAtendimento(sessaoId);
+            fail("Deveria exigir a conduta registrada do paciente.");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("conduta"));
+        }
+        assertFalse(sessaoService.podeFinalizar(sessaoId));
+
+        // 4. Conduta registrada: a gravação seguinte NÃO re-marca o início real
+        LocalDateTime inicioReal = sessaoService.get(sessaoId).getRegistroDtInicio();
+        Sessao consolidado = new Sessao();
+        consolidado.setRegistroConduta("Alongamento passivo, estabilização segmentar.");
+        sessaoService.salvarRegistro(sessaoId, consolidado);
+        assertTrue(sessaoService.podeFinalizar(sessaoId));
+
+        Sessao realizada = sessaoService.finalizarAtendimento(sessaoId);
+        assertEquals(SessaoSituacao.REALIZADA, realizada.getSituacao());
+        assertNotNull(realizada.getRegistroDtFim());
+
+        // 5. O início real marcado na primeira gravação sobrevive ao ciclo
+        assertEquals(inicioReal, sessaoService.get(sessaoId).getRegistroDtInicio());
+    }
+
+    @Test
+    public void deveIniciarAtendimentoAoSalvarRegistroDeSessaoConfirmada() {
+        sessaoService = new SessaoService();
+
+        Integer sessaoId = novaSessaoDb("CONFIRMADA");
+
+        Sessao registro = new Sessao();
+        registro.setRegistroConduta("Técnica de liberação miofascial.");
+
+        Sessao emAndamento = sessaoService.salvarRegistro(sessaoId, registro);
+        assertEquals(SessaoSituacao.EM_ANDAMENTO, emAndamento.getSituacao());
+        assertNotNull(emAndamento.getRegistroDtInicio());
+    }
+
+    @Test
+    public void deveBloquearRegistroEmSessaoCancelada() {
+        sessaoService = new SessaoService();
+
+        Integer sessaoCanceladaId = novaSessaoDb("CANCELADA");
+
+        Sessao registro = new Sessao();
+        registro.setRegistroConduta("Tentativa em sessão terminal.");
+
+        try {
+            sessaoService.salvarRegistro(sessaoCanceladaId, registro);
+            fail("Deveria bloquear registro do atendimento em sessão CANCELADA.");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("Cancelada"));
+        }
+    }
+
     @Test
     public void devePermitirSessoesEmGrupoAteCapacidadeEBloquearExcedenteEOutraModalidade() {
         // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)

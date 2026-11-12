@@ -46,7 +46,7 @@ public class FaturamentoServiceTest {
             for (int i = 0; i < 2; i++) {
                 Sessao s = new Sessao();
                 Integer idSessao = conn.createQuery(
-                        "INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) " +
+                        "INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, dt_hora_inicio, dt_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) " +
                         "VALUES (:idCli, :idProf, :idMod, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '50' MINUTE, 'TRATAMENTO', 'PARTICULAR', 'REALIZADA')", true)
                         .addParameter("idCli", clienteIdTeste)
                         .addParameter("idProf", idProf)

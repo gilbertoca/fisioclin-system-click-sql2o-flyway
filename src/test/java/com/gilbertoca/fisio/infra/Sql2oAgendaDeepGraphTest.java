@@ -59,7 +59,7 @@ public class Sql2oAgendaDeepGraphTest {
                     .executeUpdate().getKey(Integer.class);
 
             // 5. Agendar Sessão para a data de hoje
-            conn.createQuery("INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, data_hora_inicio, data_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) " +
+            conn.createQuery("INSERT INTO fisio.sessao (cliente_id, profissional_id, modalidade_id, dt_hora_inicio, dt_hora_fim, sessao_tipo, pagamento_origem, sessao_situacao) " +
                             "VALUES (:idCli, :idProf, :idMod, :dataHoraInicio, :dataHoraFim, 'TRATAMENTO', 'CONVENIO', 'AGENDADA')")
                     .addParameter("idCli", idCli)
                     .addParameter("idProf", idProf)
