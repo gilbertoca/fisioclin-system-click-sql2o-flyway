@@ -125,6 +125,26 @@ public class SessaoService {
         }
     }
 
+    /** Cockpit da home (quadro agendamento): a fila da recepção — sessões
+     * ainda não atendidas, as recém-criadas primeiro. */
+    public List<Sessao> getUltimasNaFila(int limite) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("sessao.getUltimasNaFila"))
+                    .addParameter("limite", limite)
+                    .executeAndFetch(Sessao.class);
+        }
+    }
+
+    /** Cockpit da home (quadro atendimento): os últimos atendimentos com
+     * registro iniciado — EM_ANDAMENTO em curso e REALIZADAS recentes. */
+    public List<Sessao> getUltimosAtendimentos(int limite) {
+        try (Connection conn = DataSourceManager.getSql2o().open()) {
+            return conn.createQuery(QueryLoader.get("sessao.getUltimosAtendimentos"))
+                    .addParameter("limite", limite)
+                    .executeAndFetch(Sessao.class);
+        }
+    }
+
     /**
      * Agenda uma nova sessão. A verificação de conflito de horário e o INSERT
      * executam na mesma transação: se duas requisições concorrentes passarem

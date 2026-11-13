@@ -61,10 +61,10 @@ public class FaturamentoService {
         }
     }
 
-    public List<Faturamento> getAllLikeFaturamentoStatus(String faturamentoStatus) {
+    public List<Faturamento> getAllLikeSituacao(String situacao) {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
-            return conn.createQuery(QueryLoader.get("faturamento.getAllLikeFaturamentoStatus"))
-                    .addParameter("faturamentoStatus", "%" + faturamentoStatus + "%").executeAndFetch(Faturamento.class);
+            return conn.createQuery(QueryLoader.get("faturamento.getAllLikeSituacao"))
+                    .addParameter("situacao", "%" + situacao + "%").executeAndFetch(Faturamento.class);
         }
     }
     // ============================================================================
@@ -90,8 +90,8 @@ public class FaturamentoService {
             return java.util.Collections.emptyList();
         }
         String sql = "SELECT parcela_id AS id, faturamento_id AS idFaturamento, numero_parcela AS numeroParcela, "
-                + "valor_parcela AS valorParcela, data_vencimento AS dataVencimento, pagamento_status AS pagamentoStatus "
-                + "FROM recebimento_parcela WHERE faturamento_id = :id ORDER BY numero_parcela ASC";
+                + "valor_parcela AS valorParcela, data_vencimento AS dataVencimento, parcela_situacao AS situacao "
+                + "FROM fisio.recebimento_parcela WHERE faturamento_id = :id ORDER BY numero_parcela ASC";
         try (Connection conn = DataSourceManager.getSql2o().open()) {
             return conn.createQuery(sql).addParameter("id", faturamentoId).executeAndFetch(RecebimentoParcela.class);
         }

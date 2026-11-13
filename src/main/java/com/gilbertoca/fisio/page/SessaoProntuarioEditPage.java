@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.click.control.FieldSet;
 import org.apache.click.control.Form;
 import org.apache.click.control.HiddenField;
 import org.apache.click.control.Submit;
@@ -113,6 +114,8 @@ public class SessaoProntuarioEditPage extends BorderPage {
     /** Carrega o id da sessão no POST (padrão Click para tela de edição). */
     private final HiddenField idField = new HiddenField("id", Integer.class);
     private final Form form = new Form("form");
+    private final FieldSet agendamento = new FieldSet("Agendamento");
+    private final FieldSet prontuario = new FieldSet("Registro");
 
     // Definição inicial do agendamento: campos da mesma entidade Sessao
     private final TextField pacienteField = new TextField("paciente", "Paciente:");
@@ -143,17 +146,21 @@ public class SessaoProntuarioEditPage extends BorderPage {
     public SessaoProntuarioEditPage() {
         form.setNoLayout(true);
 
+        
         form.add(idField);
-        form.add(pacienteField);
-        form.add(profissionalField);
-        form.add(modalidadeField);
-        form.add(tipoField);
-        form.add(horarioField);
-        form.add(situacaoField);
-        form.add(registroRelato);
-        form.add(registroAvaliacao);
-        form.add(registroConduta);
-        form.add(registroOrientacoes);
+        form.add(agendamento);
+        form.add(prontuario);
+        
+        agendamento.add(pacienteField);
+        agendamento.add(profissionalField);
+        agendamento.add(modalidadeField);
+        agendamento.add(tipoField);
+        agendamento.add(horarioField);
+        agendamento.add(situacaoField);
+        prontuario.add(registroRelato);
+        prontuario.add(registroAvaliacao);
+        prontuario.add(registroConduta);
+        prontuario.add(registroOrientacoes);
 
         // Contexto do agendamento: exibição fixa, valor vindo do servidor
         pacienteField.setReadonly(true);

@@ -77,10 +77,21 @@ public class FaturamentoServiceTest {
         try (Connection conn = DataSourceManager.getSql2o().open()) {
 
             // 1. Verifica se o cabeçalho bate com o somatório correto
-            BigDecimal totalFaturadoNoBanco = conn.createQuery("SELECT valor_total_faturado FROM fisio.faturamento WHERE faturamento_id = :id")
+            // (2 sessões × 100, sem desconto: bruto = liquido = 200,00)
+            BigDecimal valorLiquidoNoBanco = conn.createQuery("SELECT valor_liquido FROM fisio.faturamento WHERE faturamento_id = :id")
                     .addParameter("id", idFaturamentoGerado)
                     .executeScalar(BigDecimal.class);
-            assertEquals(new BigDecimal("200.00"), totalFaturadoNoBanco);
+            assertEquals(new BigDecimal("200.00"), valorLiquidoNoBanco);
+
+            // 1b. Invariante do cabeçalho no DDL: bruto - desconto = liquido
+            BigDecimal valorBrutoNoBanco = conn.createQuery("SELECT valor_bruto FROM fisio.faturamento WHERE faturamento_id = :id")
+                    .addParameter("id", idFaturamentoGerado)
+                    .executeScalar(BigDecimal.class);
+            BigDecimal valorDescontoNoBanco = conn.createQuery("SELECT valor_desconto FROM fisio.faturamento WHERE faturamento_id = :id")
+                    .addParameter("id", idFaturamentoGerado)
+                    .executeScalar(BigDecimal.class);
+            assertEquals(new BigDecimal("200.00"), valorBrutoNoBanco);
+            assertEquals(new BigDecimal("0.00"), valorDescontoNoBanco);
 
             // 2. Verifica se os 2 itens de faturamento foram devidamente atrelados
             Long totalItensVinculados = conn.createQuery("SELECT COUNT(*) FROM fisio.faturamento_item WHERE faturamento_id = :id")

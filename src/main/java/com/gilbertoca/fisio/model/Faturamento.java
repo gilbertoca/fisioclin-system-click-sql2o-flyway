@@ -19,7 +19,12 @@ public class Faturamento implements Serializable {
     private Integer id;
     private Integer clienteId;
     private Integer convenioId;
-    private BigDecimal valorTotalFaturado;
+    /** Montante prestado (soma dos itens), antes de abatimentos. */
+    private BigDecimal valorBruto;
+    /** Abatimento sobre o bruto (DEFAULT 0.00 no DDL). */
+    private BigDecimal valorDesconto;
+    /** Recebível: valorBruto - valorDesconto; base das parcelas. */
+    private BigDecimal valorLiquido;
     private LocalDateTime dataEmissao;
     private PagamentoOrigem pagamentoOrigem;
     private FaturamentoSituacao situacao;
@@ -32,31 +37,43 @@ public class Faturamento implements Serializable {
     public Faturamento() {
         this.dataEmissao = LocalDateTime.now();
         this.situacao = FaturamentoSituacao.ABERTO;
-        this.valorTotalFaturado = BigDecimal.ZERO;
+        this.valorBruto = BigDecimal.ZERO;
+        this.valorDesconto = BigDecimal.ZERO;
+        this.valorLiquido = BigDecimal.ZERO;
+    }
+
+    /** Invariante do cabeçalho: liquido = bruto - desconto. */
+    private void recalcularLiquido() {
+        this.valorLiquido = valorBruto.subtract(valorDesconto);
     }
 
     /**
-     * Regra SOM: Adiciona uma parcela individual e atualiza o montante faturado.
+     * Regra SOM: Adiciona uma parcela individual e atualiza o montante.
+     * A parcela compõe o recebível: bruto e líquido crescem juntos
+     * (o desconto permanece inalterado, preservando a invariante).
      */
     public void adicionarParcela(RecebimentoParcela parcela) {
         if (parcela == null) return;
         parcela.setNumeroParcela(this.parcelas.size() + 1);
         this.parcelas.add(parcela);
-        this.valorTotalFaturado = this.valorTotalFaturado.add(parcela.getValorParcela());
+        this.valorBruto = this.valorBruto.add(parcela.getValorParcela());
+        this.valorLiquido = this.valorLiquido.add(parcela.getValorParcela());
     }
 
     /**
      * Regra SOM Complexa: O próprio objeto calcula, distribui os valores
-     * cuidando do arredondamento centesimal e popula sua lista interna de parcelas.
+     * cuidando do arredondamento centesimal e popula sua lista interna de
+     * parcelas. Sem desconto informado, o líquido iguala o bruto e a
+     * distribuição das parcelas soma o líquido.
      */
-    public void gerarParcelasParticionadas(BigDecimal valorTotal, int quantidadeParcelas) {
+    public void gerarParcelasParticionadas(BigDecimal valorBruto, int quantidadeParcelas) {
         if (quantidadeParcelas <= 0) {
             throw new IllegalArgumentException("A quantidade de parcelas deve ser maior que zero.");
         }
 
-        this.valorTotalFaturado = valorTotal;
-        BigDecimal valorBaseParcela = valorTotal.divide(BigDecimal.valueOf(quantidadeParcelas), 2, RoundingMode.HALF_UP);
-        BigDecimal diferencaArredondamento = valorTotal.subtract(valorBaseParcela.multiply(BigDecimal.valueOf(quantidadeParcelas)));
+        setValorBruto(valorBruto);
+        BigDecimal valorBaseParcela = this.valorLiquido.divide(BigDecimal.valueOf(quantidadeParcelas), 2, RoundingMode.HALF_UP);
+        BigDecimal diferencaArredondamento = this.valorLiquido.subtract(valorBaseParcela.multiply(BigDecimal.valueOf(quantidadeParcelas)));
 
         for (int i = 1; i <= quantidadeParcelas; i++) {
             RecebimentoParcela p = new RecebimentoParcela();
@@ -83,8 +100,22 @@ public class Faturamento implements Serializable {
     public void setclienteId(Integer clienteId) { this.clienteId = clienteId; }
     public Integer getConvenioId() { return convenioId; }
     public void setconvenioId(Integer convenioId) { this.convenioId = convenioId; }
-    public BigDecimal getValorTotalFaturado() { return valorTotalFaturado; }
-    public void setValorTotalFaturado(BigDecimal valorTotalFaturado) { this.valorTotalFaturado = valorTotalFaturado; }
+    public BigDecimal getValorBruto() { return valorBruto; }
+    public void setValorBruto(BigDecimal valorBruto) {
+        this.valorBruto = (valorBruto != null) ? valorBruto : BigDecimal.ZERO;
+        recalcularLiquido();
+    }
+    public BigDecimal getValorDesconto() { return valorDesconto; }
+    public void setValorDesconto(BigDecimal valorDesconto) {
+        this.valorDesconto = (valorDesconto != null) ? valorDesconto : BigDecimal.ZERO;
+        recalcularLiquido();
+    }
+    public BigDecimal getValorLiquido() { return valorLiquido; }
+    public void setValorLiquido(BigDecimal valorLiquido) {
+        // Atribuição direta (mapeamento SELECT); os setters de bruto/desconto
+        // recalculam a invariante
+        this.valorLiquido = (valorLiquido != null) ? valorLiquido : BigDecimal.ZERO;
+    }
     public LocalDateTime getDataEmissao() { return dataEmissao; }
     public void setDataEmissao(LocalDateTime dataEmissao) { this.dataEmissao = dataEmissao; }
     public PagamentoOrigem getPagamentoOrigem() { return pagamentoOrigem; }
@@ -141,9 +172,11 @@ public class Faturamento implements Serializable {
         sb.append("id=").append(id);
         sb.append(", clienteId=").append(clienteId);
         sb.append(", convenioId=").append(convenioId);
-        sb.append(", valorTotalFaturado=").append(valorTotalFaturado);
+        sb.append(", valorBruto=").append(valorBruto);
+        sb.append(", valorDesconto=").append(valorDesconto);
+        sb.append(", valorLiquido=").append(valorLiquido);
         sb.append(", dataEmissao=").append(dataEmissao);
-        sb.append(", faturamentosituacao=").append(situacao);
+        sb.append(", situacao=").append(situacao);
         sb.append(", observacoes=").append(observacoes);
         sb.append(", parcelas=").append(parcelas);
         sb.append('}');

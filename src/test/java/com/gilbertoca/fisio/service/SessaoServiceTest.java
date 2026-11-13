@@ -287,6 +287,49 @@ public class SessaoServiceTest {
     }
 
     @Test
+    public void deveListarUltimosRegistrosParaOCockpitDaHome() {
+        sessaoService = new SessaoService();
+
+        // Fila: uma AGENDADA e uma CONFIRMADA (recém-criada) + uma CANCELADA
+        Integer agendadaId = novaSessaoDb("AGENDADA");
+        Integer confirmadaId = novaSessaoDb("CONFIRMADA");
+        Integer canceladaId = novaSessaoDb("CANCELADA");
+
+        List<Sessao> fila = sessaoService.getUltimasNaFila(5);
+        boolean agendadaNaFila = false;
+        boolean confirmadaPrimeira = !fila.isEmpty() && fila.get(0).getId().equals(confirmadaId);
+        boolean canceladaFora = true;
+        for (Sessao linha : fila) {
+            if (linha.getId().equals(agendadaId)) {
+                agendadaNaFila = true;
+            }
+            if (linha.getId().equals(canceladaId)) {
+                canceladaFora = false;
+            }
+        }
+        assertTrue("AGENDADA deveria estar na fila do cockpit.", agendadaNaFila);
+        assertTrue("A recém-criada deveria vir primeiro (ORDER BY sessao_id DESC).", confirmadaPrimeira);
+        assertTrue("CANCELADA não deveria estar na fila do cockpit.", canceladaFora);
+
+        // Atendimentos: só sessões com registro iniciado (transição marca
+        // registro_dt_inicio). O banco é compartilhado entre os testes, então
+        // outros atendimentos com registro aparecem — o critério é que TODAS
+        // as linhas têm o registro e a nossa está presente.
+        Integer emAndamentoId = novaSessaoDb("AGENDADA");
+        sessaoService.salvarRegistro(emAndamentoId, new Sessao());
+
+        List<Sessao> atendimentos = sessaoService.getUltimosAtendimentos(5);
+        boolean soComRegistro = !atendimentos.isEmpty();
+        boolean nossoAtendimentoPresente = false;
+        for (Sessao linha : atendimentos) {
+            soComRegistro &= Boolean.TRUE.equals(linha.getPossuiProntuario());
+            nossoAtendimentoPresente |= linha.getId().equals(emAndamentoId);
+        }
+        assertTrue("Cockpit da sala deveria listar apenas atendimentos com registro iniciado.", soComRegistro);
+        assertTrue("O atendimento recém-iniciado deveria estar no quadro da sala.", nossoAtendimentoPresente);
+    }
+
+    @Test
     public void devePermitirSessoesEmGrupoAteCapacidadeEBloquearExcedenteEOutraModalidade() {
         // Instancia o Serviço passando diretamente o Sql2o (Sem a camada Repository)
         sessaoService = new SessaoService();
