@@ -15,12 +15,13 @@
         <jetty.version>12.0.16</jetty.version>
         <junit.version>[4.,)</junit.version>
         <h2.version>2.1.214</h2.version>        
+        <flyway.version>10.10.0</flyway.version>        
 
         <server.port>8080</server.port>
         <db.user>sa</db.user>
         <db.password>sa</db.password>
         <db.driver>org.h2.Driver</db.driver>        
-        <db.url>jdbc:h2:file:./data/fisio;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE;</db.url>
+        <db.url>jdbc:h2:file:./data/fisio;MODE=PostgreSQL;INIT=CREATE SCHEMA IF NOT EXISTS FISIO;DATABASE_TO_LOWER=TRUE;</db.url>
     </properties>
     <dependencies>
         <dependency>
@@ -76,7 +77,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>10.10.0</version>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -117,9 +118,10 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>8.5.4</version>
+                <version>${flyway.version}</version>
                 <configuration>
                     <url>${db.url}</url>
+                    <driver>${db.driver}</driver>
                     <schemas>
                         <schema>fisio</schema>
                     </schemas>
