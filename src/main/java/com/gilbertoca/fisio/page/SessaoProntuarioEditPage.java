@@ -1,18 +1,28 @@
 package com.gilbertoca.fisio.page;
 
+import com.gilbertoca.fisio.model.Procedimento;
 import com.gilbertoca.fisio.model.Sessao;
+import com.gilbertoca.fisio.model.SessaoProcedimento;
+import com.gilbertoca.fisio.model.enums.ProcedimentoSituacao;
 import com.gilbertoca.fisio.model.enums.SessaoSituacao;
+import com.gilbertoca.fisio.service.ProcedimentoService;
 import com.gilbertoca.fisio.service.SessaoService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.click.control.FieldSet;
 import org.apache.click.control.Form;
 import org.apache.click.control.HiddenField;
+import org.apache.click.control.Option;
 import org.apache.click.control.Submit;
 import org.apache.click.control.TextArea;
-import org.apache.click.control.TextField;
+import org.apache.click.dataprovider.DataProvider;
+import org.apache.click.extras.control.PickList;
 import org.apache.click.util.Bindable;
 
 /**
@@ -21,10 +31,16 @@ import org.apache.click.util.Bindable;
  *
  * Tudo na tela pertence à MESMA entidade {@link Sessao}: a definição inicial
  * do agendamento (paciente, profissional, modalidade, tipo, horário, situação)
- * entra como campos readonly do Form — atribuída pela recepção, não editável
- * aqui — e o profissional preenche apenas os textos do registro do
- * atendimento (registro_relato/avaliacao/conduta/orientacoes), colunas da
- * própria sessão. Atendimento individualizado; modalidades de grupo dividem
+ * entra como QUADRO somente leitura no topo, desenhado no template (table
+ * semântica direto da $sessao publicada em onRender) — atribuída pela
+ * recepção, não editável aqui — e o profissional preenche apenas o registro
+ * do atendimento: os
+ * textos clínicos (registro_relato/avaliacao/conduta/orientacoes) e o
+ * PICKLIST de condutas (roteiro da sessão, sessao_procedimento) — colunas e
+ * itens da própria sessão. O picklist é um <select multiple> nativo do Click
+ * com size fixado — ZERO JavaScript. Sugestões vêm do
+ * catálogo ATIVO da modalidade (+ uso geral).
+ * Atendimento individualizado; modalidades de grupo dividem
  * o mesmo slot com N sessões individuais (capacidade_simultanea), cada uma
  * com linha própria na listagem.
  *
@@ -49,13 +65,13 @@ import org.apache.click.util.Bindable;
  *
  * Ciclo de vida Click canônico:
  * <ul>
- * <li><b>Construtor</b>: monta o Form completo — contexto readonly,
- * anotações e os 4 botões como campos final (Iniciar, Salvar, Finalizar,
+ * <li><b>Construtor</b>: monta o Form completo — anotações, picklist de
+ * condutas e os 4 botões como campos final (Iniciar, Salvar, Finalizar,
  * Cancelar). Nenhum acesso a banco.</li>
  * <li><b>onInit()</b>: prepara o Form e suas dependências (título) —
  * NÃO carrega o modelo a ser editado.</li>
  * <li><b>onGet()</b> (GET): carrega a Sessao (query única: agenda + registro)
- * e popula o Form.</li>
+ * e popula o Form (HiddenField do id + textos clínicos).</li>
  * <li><b>onRender()</b>: aplica o estado de exibição comum a GET e POST —
  * carrega a Sessao quando o fluxo não passou pelo onGet (ciclo POST),
  * publica o modelo de exibição ($sessao + $horario) e remove/re-insere os
@@ -68,17 +84,17 @@ import org.apache.click.util.Bindable;
  * Transição visual no template (sessao-prontuario-edit.htm): na fila da sala
  * (AGENDADA/CONFIRMADA) sem ?editar=true o template exibe o painel de
  * conferência do agendamento (dados direto da $sessao + Iniciar/Cancelar
- * entre form.startTag()/endTag()); nos demais casos exibe o Form completo.
+ * entre form.startTag()/endTag()); nos demais casos exibe o quadro de
+ * contexto (table compacta, somente leitura) + o Form completo.
  * O Iniciar redireciona para a mesma sala com editar=true — o formulário
  * entra e a primeira gravação efetiva EM_ANDAMENTO. O sinal editar chega ao
  * template pelo próprio @Bindable (o ClickServlet publica campos bindables
  * não-Control no modelo em createTemplateModel — nada de addModel manual).
  *
- * População manual (sem form.copyFrom): a Sessao é o modelo único, mas os
- * campos de contexto têm nomes distintos das propriedades ("paciente" vs.
- * getCliente()) e campos como "profissional" casariam com a propriedade
- * objeto getProfissional() — o copyFrom gravaria o toString do objeto no
- * TextField. Cada campo recebe explicitamente o texto da Sessao carregada.
+ * População manual (sem form.copyFrom): campos como o HiddenField do id e as
+ * textareas do registro recebem o valor explicitamente da Sessao carregada;
+ * o contexto do agendamento nem é Form — é conteúdo do template, direto da
+ * $sessao publicada em onRender.
  *
  * Retorno dos handlers: quem redireciona retorna false (interrompe o
  * processamento — Iniciar, Finalizar, Cancelar); quem re-renderiza a mesma
@@ -114,22 +130,23 @@ public class SessaoProntuarioEditPage extends BorderPage {
     /** Carrega o id da sessão no POST (padrão Click para tela de edição). */
     private final HiddenField idField = new HiddenField("id", Integer.class);
     private final Form form = new Form("form");
-    private final FieldSet agendamento = new FieldSet("Agendamento");
     private final FieldSet prontuario = new FieldSet("Registro");
-
-    // Definição inicial do agendamento: campos da mesma entidade Sessao
-    private final TextField pacienteField = new TextField("paciente", "Paciente:");
-    private final TextField profissionalField = new TextField("profissional", "Profissional:");
-    private final TextField modalidadeField = new TextField("modalidade", "Modalidade:");
-    private final TextField tipoField = new TextField("tipo", "Tipo:");
-    private final TextField horarioField = new TextField("horario", "Horário:");
-    private final TextField situacaoField = new TextField("situacao", "Situação:");
 
     // Registro do atendimento: colunas registro_* da própria Sessao
     private final TextArea registroRelato = new TextArea("registroRelato", "Queixa Subjetiva (relato do cliente):", false);
     private final TextArea registroAvaliacao = new TextArea("registroAvaliacao", "Avaliação Objetiva (testes, palpação):", false);
     private final TextArea registroConduta = new TextArea("registroConduta", "Conduta / Procedimento Realizado:", false);
     private final TextArea registroOrientacoes = new TextArea("registroOrientacoes", "Plano e Orientações para Casa:", false);
+
+    /**
+     * Picklist de condutas (roteiro da sessão): PickList do click-extras —
+     * duas listbox lado a lado (disponíveis / no roteiro) com botões de
+     * transferência do próprio framework (extras-control.js). Opções =
+     * sugestões ATIVO da modalidade da sessão (mais os de uso geral) e os
+     * itens já no roteiro; seleção (lado direito) = roteiro gravado,
+     * sincronizado a cada Salvar Anotações.
+     */
+    private final PickList pickCondutas = new PickList("condutas", "Condutas (roteiro da sessão):");
 
     // Botões de transição e o permanente: criados uma única vez no construtor;
     // a situação da sessão define quais permanecem no Form (aplicarEstadoDaTela)
@@ -139,6 +156,7 @@ public class SessaoProntuarioEditPage extends BorderPage {
     private final Submit cancelarSubmit = new Submit("cancelar", "Cancelar", this, "onCancelClick");
 
     private final SessaoService sessaoService = new SessaoService();
+    private final ProcedimentoService procedimentoService = new ProcedimentoService();
 
     /** Sessao carregada no onGet/onRender: base do estado da tela. */
     private Sessao sessao;
@@ -148,28 +166,15 @@ public class SessaoProntuarioEditPage extends BorderPage {
 
         
         form.add(idField);
-        form.add(agendamento);
         form.add(prontuario);
         
-        agendamento.add(pacienteField);
-        agendamento.add(profissionalField);
-        agendamento.add(modalidadeField);
-        agendamento.add(tipoField);
-        agendamento.add(horarioField);
-        agendamento.add(situacaoField);
         prontuario.add(registroRelato);
         prontuario.add(registroAvaliacao);
         prontuario.add(registroConduta);
+        prontuario.add(pickCondutas);
         prontuario.add(registroOrientacoes);
 
         // Contexto do agendamento: exibição fixa, valor vindo do servidor
-        pacienteField.setReadonly(true);
-        profissionalField.setReadonly(true);
-        modalidadeField.setReadonly(true);
-        tipoField.setReadonly(true);
-        horarioField.setReadonly(true);
-        situacaoField.setReadonly(true);
-
         registroRelato.setCols(60);
         registroRelato.setRows(4);
         registroAvaliacao.setCols(60);
@@ -178,6 +183,19 @@ public class SessaoProntuarioEditPage extends BorderPage {
         registroConduta.setRows(5);
         registroOrientacoes.setCols(60);
         registroOrientacoes.setRows(3);
+
+        // Picklist de condutas: cabeçalhos das duas listas em português
+        // (esquerda = catálogo sugerido, direita = roteiro da sessão).
+        pickCondutas.setHeaderLabel("Disponíveis:", "No roteiro:");
+
+        // Opções via DataProvider: o PickList as busca quando as precisa
+        // (bind do POST acontece ANTES do onRender; o render também).
+        pickCondutas.setDataProvider(new DataProvider<Option>() {
+            @Override
+            public List<Option> getData() {
+                return montarOpcoesDeCondutas();
+            }
+        });
 
         // Todos os botões existem desde a montagem do Form; o estado da tela
         // decide quais permanecem (remoção/re-inserção em aplicarEstadoDaTela)
@@ -200,8 +218,9 @@ public class SessaoProntuarioEditPage extends BorderPage {
 
     /**
      * Abertura da sala (GET): carrega a Sessao — query única com a agenda E
-     * o registro do atendimento — e popula o Form (contexto readonly +
-     * textos clínicos).
+     * o registro do atendimento — e popula o Form (HiddenField do id + textos
+     * clínicos). O contexto do agendamento é exibido no quadro do template,
+     * direto da $sessao publicada em onRender.
      */
     @Override
     public void onGet() {
@@ -211,15 +230,6 @@ public class SessaoProntuarioEditPage extends BorderPage {
             // Round-trip do id no POST: o Form só processa os filhos na
             // submissão, então o HiddenField precisa receber o valor aqui no GET.
             idField.setValueObject(sessao.getId());
-
-            // Definição inicial do agendamento: contexto fixo, não editável
-            // (texto(Object) usa toString: os enums exibem o rótulo legível)
-            pacienteField.setValue(texto(sessao.getCliente() != null ? sessao.getCliente().getNome() : null));
-            profissionalField.setValue(texto(sessao.getProfissional() != null ? sessao.getProfissional().getNome() : null));
-            modalidadeField.setValue(texto(sessao.getModalidade() != null ? sessao.getModalidade().getNome() : null));
-            tipoField.setValue(texto(sessao.getSessaoTipo()));
-            horarioField.setValue(formatarHorario(sessao.getDataHoraInicio()));
-            situacaoField.setValue(texto(sessao.getSituacao()));
 
             // Registro do atendimento: colunas da própria sessão
             registroRelato.setValue(sessao.getRegistroRelato());
@@ -253,6 +263,7 @@ public class SessaoProntuarioEditPage extends BorderPage {
             addModel("horario", formatarHorario(sessao.getDataHoraInicio()));
             addModel("horarioIso", formatarHorarioIso(sessao.getDataHoraInicio()));
         }
+        popularCondutas();
         aplicarEstadoDaTela();
     }
 
@@ -290,6 +301,7 @@ public class SessaoProntuarioEditPage extends BorderPage {
         registroAvaliacao.setReadonly(!editavel);
         registroConduta.setReadonly(!editavel);
         registroOrientacoes.setReadonly(!editavel);
+        pickCondutas.setReadonly(!editavel);
 
         if (painel) {
             form.add(iniciarSubmit);
@@ -334,11 +346,6 @@ public class SessaoProntuarioEditPage extends BorderPage {
         return atendimentoEmAndamento() && sessaoService.podeFinalizar(sessao.getId());
     }
 
-    /** Value textual padrão: "-" quando o dado não veio do banco. */
-    private String texto(Object valor) {
-        return (valor != null) ? valor.toString() : "-";
-    }
-
     /** Formato do horário planejado no painel de conferência do template. */
     private static final DateTimeFormatter FORMATO_HORARIO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -370,6 +377,81 @@ public class SessaoProntuarioEditPage extends BorderPage {
     }
 
     /**
+     * Seleção do picklist (estado de exibição, onRender): o roteiro
+     * gravado. As OPÇÕES não são manipuladas aqui — o PickList as busca via
+     * DataProvider (montarOpcoesDeCondutas) no momento em que as requer
+     * (bind no POST, render). No ciclo POST o bind já aconteceu e o Salvar
+     * sincronizou o roteiro: a tela volta a exibir o estado GRAVADO, não o
+     * POSTado.
+     */
+    private void popularCondutas() {
+        List<String> noRoteiro = new ArrayList<>();
+        if (sessao != null) {
+            for (SessaoProcedimento item : procedimentoService.getRoteiroDaSessao(sessao.getId())) {
+                noRoteiro.add(item.getProcedimentoId().toString());
+            }
+        }
+        pickCondutas.setSelectedValues(noRoteiro);
+    }
+
+    /**
+     * Opções do picklist, buscadas pelo DataProvider do PickList no momento do
+     * uso — bind do POST acontece ANTES do onRender e o render também precisa
+     * delas, então não podem viver apenas no estado de exibição. São elas:
+     * sugestões ATIVO da modalidade da sessão (mais as de uso geral) e os
+     * itens já no roteiro que não estão nas sugestões — inclusive
+     * procedimento INATIVO, que sai do catálogo ativo mas permanece no
+     * roteiro gravado.
+     */
+    private List<Option> montarOpcoesDeCondutas() {
+        List<Option> opcoes = new ArrayList<>();
+        if (id == null) {
+            return opcoes;
+        }
+        // O provider roda durante o processamento (bind/render) — fases em
+        // que a carga da Sessao é sancionada. Em onGet ela já veio; aqui só
+        // entra se o ciclo ainda não a carregou (ciclo POST).
+        if (sessao == null) {
+            carregarSessao();
+        }
+        if (sessao == null) {
+            return opcoes; // erro de carga: nada a sugerir
+        }
+
+        Set<Integer> incluidos = new HashSet<>();
+        Integer modalidadeId = (sessao.getModalidade() != null) ? sessao.getModalidade().getId() : null;
+        for (Procedimento sugestao : procedimentoService.getSugestoesPorModalidade(modalidadeId)) {
+            opcoes.add(new Option(sugestao.getId().toString(), sugestao.getNome()));
+            incluidos.add(sugestao.getId());
+        }
+
+        // Itens do roteiro fora das sugestões: histórico do catálogo — entram
+        // nas opções para não serem descartados pelo sync do Salvar.
+        for (SessaoProcedimento item : procedimentoService.getRoteiroDaSessao(sessao.getId())) {
+            if (!incluidos.contains(item.getProcedimentoId())) {
+                boolean inativo = item.getProcedimento() != null
+                        && item.getProcedimento().getSituacao() == ProcedimentoSituacao.INATIVO;
+                opcoes.add(new Option(item.getProcedimentoId().toString(),
+                        item.getProcedimento().getNome() + (inativo ? " (inativo)" : "")));
+            }
+        }
+        return opcoes;
+    }
+
+    /** Condutas marcadas no picklist, como ids para o sync do service. */
+    private List<Integer> condutasEscolhidas() {
+        List<Integer> escolhidos = new ArrayList<>();
+        for (String valor : pickCondutas.getSelectedValues()) {
+            try {
+                escolhidos.add(Integer.valueOf(valor));
+            } catch (NumberFormatException ex) {
+                // valor não numérico no request: não entra no roteiro
+            }
+        }
+        return escolhidos;
+    }
+
+    /**
      * Iniciar Atendimento é NAVEGAÇÃO, não transição: nada é persistido —
      * abrir o formulário do registro não pode deixar resíduo se o
      * profissional desistir (Cancelar volta sem nada a desfazer). Redireciona
@@ -392,7 +474,9 @@ public class SessaoProntuarioEditPage extends BorderPage {
     /**
      * Salvar Anotações é a gravação real — e, na primeira gravação de uma
      * sessão da fila, é ELA que inicia o atendimento (service avança para
-     * EM_ANDAMENTO e marca registro_dt_inicio). Re-render da mesma tela:
+     * EM_ANDAMENTO e marca registro_dt_inicio). Grava também o roteiro: a
+     * seleção do picklist de condutas vira sessao_procedimento (sync do
+     * service). Re-render da mesma tela:
      * retorna true para o servlet seguir para onRender — retornar false
      * pularia o onRender e a tela sairia sem o estado aplicado (botões e
      * readonly das anotações). A Sessao em memória é recarregada: o onRender
@@ -406,6 +490,9 @@ public class SessaoProntuarioEditPage extends BorderPage {
         }
         try {
             sessao = sessaoService.salvarRegistro(id, montarRegistroDaTela());
+            // Roteiro (condutas) sincronizado com a seleção do picklist: o
+            // que está marcado é o que ficou gravado.
+            procedimentoService.sincronizarRoteiroDaSessao(id, condutasEscolhidas());
             addModel("mensagem", "Anotações salvas.");
         } catch (RuntimeException ex) {
             form.setError(ex.getMessage());

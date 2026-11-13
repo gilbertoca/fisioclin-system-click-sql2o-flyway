@@ -7,6 +7,7 @@
     <menu name="profissionais" label="Profissionais" path="profissional-view.htm"/>
     <menu name="convenios" label="Convênios" path="convenio-view.htm"/>
     <menu name="modalidades" label="Modalidades" path="modalidade-view.htm"/>
+    <menu name="procedimentos" label="Procedimentos" path="procedimento-view.htm"/>
     <menu name="config" label="⚙ Configurações">
         <menu name="usuarios" label="Usuários" path="/usuarios.htm"/>
         <menu name="permissoes" label="Permissões" path="/permissoes.htm"/>

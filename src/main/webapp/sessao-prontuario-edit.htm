@@ -9,33 +9,61 @@
 
     #if ($sessao && $sessao.situacao && !$editar && ($sessao.situacao.name() == "AGENDADA" || $sessao.situacao.name() == "CONFIRMADA"))
     ## Sessão na fila da sala e formulário ainda não aberto: painel de
-    ## conferência em HTML semântico (Bahunya estiliza fieldset/legend/table/
-    ## mark — e não estiliza dl/dt/dd). Iniciar apenas NAVEGA para
-    ## ?editar=true — a transição acontece na primeira gravação do registro.
+    ## conferência — MESMO quadro compacto 3x2 do ramo de edição (dados direto
+    ## da $sessao). Iniciar apenas NAVEGA para ?editar=true — a transição
+    ## acontece na primeira gravação do registro. Os botões ficam entre
+    ## form.startTag()/endTag() (o startTag renderiza o HiddenField do id).
     #if($form.error)
     <p><mark>$form.error</mark></p>
     #end
 
+    <table>
+        <tbody>
+            <tr>
+                <th scope="row">Paciente</th><td><strong>$!sessao.cliente.nome</strong></td>
+                <th scope="row">Modalidade</th><td>$!sessao.modalidade.nome</td>
+            </tr>
+            <tr>
+                <th scope="row">Profissional</th><td>$!sessao.profissional.nome</td>
+                <th scope="row">Tipo</th><td>$!sessao.sessaoTipo</td>
+            </tr>
+            <tr>
+                <th scope="row">Horário planejado</th><td><time datetime="$!horarioIso">$!horario</time></td>
+                <th scope="row">Situação</th><td><mark>$!sessao.situacao</mark></td>
+            </tr>
+        </tbody>
+    </table>
+    <p><small>Confirme os dados antes de iniciar o atendimento.</small></p>
+
     $form.startTag()
-    <fieldset>
-        <legend>Conferência do agendamento</legend>
-        <table>
-            <caption>Confirme os dados antes de iniciar o atendimento.</caption>
-            <tbody>
-                <tr><th scope="row">Paciente</th><td><strong>$!sessao.cliente.nome</strong></td></tr>
-                <tr><th scope="row">Profissional</th><td>$!sessao.profissional.nome</td></tr>
-                <tr><th scope="row">Modalidade</th><td>$!sessao.modalidade.nome</td></tr>
-                <tr><th scope="row">Tipo</th><td>$!sessao.sessaoTipo</td></tr>
-                <tr><th scope="row">Horário planejado</th><td><time datetime="$!horarioIso">$!horario</time></td></tr>
-                <tr><th scope="row">Situação</th><td><mark>$!sessao.situacao</mark></td></tr>
-            </tbody>
-        </table>
-        $form.getField("iniciar")
-        $form.getField("cancelar")
-    </fieldset>
+    $form.getField("iniciar")
+    $form.getField("cancelar")
     $form.endTag()
 
     #else
+    ## Quadro de contexto do agendamento: somente leitura, desenhado direto
+    ## da $sessao publicada em onRender (recarregada após cada POST) — não é
+    ## formulário, é conteúdo. Tabela compacta 3x2 (Bahunya estiliza table/th/
+    ## mark/time; e não estiliza dl/dt/dd).
+    #if($sessao)
+    <table>
+        <tbody>
+            <tr>
+                <th scope="row">Paciente</th><td><strong>$!sessao.cliente.nome</strong></td>
+                <th scope="row">Modalidade</th><td>$!sessao.modalidade.nome</td>
+            </tr>
+            <tr>
+                <th scope="row">Profissional</th><td>$!sessao.profissional.nome</td>
+                <th scope="row">Tipo</th><td>$!sessao.sessaoTipo</td>
+            </tr>
+            <tr>
+                <th scope="row">Horário planejado</th><td><time datetime="$!horarioIso">$!horario</time></td>
+                <th scope="row">Situação</th><td><mark>$!sessao.situacao</mark></td>
+            </tr>
+        </tbody>
+    </table>
+    #end
+
     ## EM_ANDAMENTO (formulário editável), terminal (histórico readonly) ou
     ## erro de carga: o Form completo, com o estado aplicado em onRender.
     $form

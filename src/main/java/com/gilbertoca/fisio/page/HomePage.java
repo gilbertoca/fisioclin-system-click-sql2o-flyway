@@ -8,14 +8,15 @@ import org.apache.click.control.Table;
 import org.apache.click.dataprovider.DataProvider;
 
 /**
- * Cockpit da home: dois quadros com os últimos registros de cada fluxo e o
- * link para a listagem completa do respectivo papel:
+ * Cockpit da home: dois quadros com os últimos registros de cada fluxo.
+ * A navegação fica na barra de menu (que aponta para as listagens de ambos
+ * os papéis) — a home não duplica links:
  * <ul>
  * <li><b>Agendamento</b> (recepção): fila de sessões ainda não atendidas
- * (AGENDADA/CONFIRMADA), as recém-criadas primeiro → SessaoViewPage.</li>
+ * (AGENDADA/CONFIRMADA), as recém-criadas primeiro → Agenda (SessaoViewPage).</li>
  * <li><b>Atendimento</b> (profissional): últimos atendimentos com registro
- * iniciado — EM_ANDAMENTO em curso e REALIZADAS recentes →
- * SessaoProntuarioViewPage.</li>
+ * iniciado — EM_ANDAMENTO em curso e REALIZADAS recentes → Meus Atendimentos
+ * (SessaoProntuarioViewPage).</li>
  * </ul>
  *
  * Tables enxutas: sem filtro e sem ordenação (nada a encaminhar ao service);
